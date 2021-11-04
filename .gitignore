@@ -1,3 +1,17 @@
+# Visual code classpath
+**/.classpath
+**/.factorypath
+
+# Intellij files
+**/.idea
+*.iml
+
+# Eclipse files
+.settings
+
+# VisualCode files
+.project
+
 # Compiled class file
 *.class
 
@@ -21,3 +35,13 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+
+# maven
+**/target
+**/*.versionsBackup
+
+# Generated data/ folder
+**/data/
+
+# Generated public/ folder
+**/public/

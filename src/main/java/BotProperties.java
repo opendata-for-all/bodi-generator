@@ -1,0 +1,441 @@
+import com.xatkit.bot.metamodel.AutomaticTransition;
+import com.xatkit.bot.metamodel.Composite;
+import com.xatkit.bot.metamodel.CompositeEntry;
+import com.xatkit.bot.metamodel.CoreIntentParameterType;
+import com.xatkit.bot.metamodel.CustomBody;
+import com.xatkit.bot.metamodel.GuardedTransition;
+import com.xatkit.bot.metamodel.Intent;
+import com.xatkit.bot.metamodel.IntentParameter;
+import com.xatkit.bot.metamodel.IntentParameterType;
+import com.xatkit.bot.metamodel.Mapping;
+import com.xatkit.bot.metamodel.MappingEntry;
+import com.xatkit.bot.metamodel.State;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class BotProperties {
+
+    private String botName;
+    private String csvFileName;
+    // TODO: Store in Map instead of List? (to avoid dependencies)
+    private List<IntentParameterType> types = new ArrayList<>();
+    private List<Intent> intents = new ArrayList<>();
+    private List<State> states = new ArrayList<>();
+
+    BotProperties() {
+
+    }
+
+    public void createBotStructure(List<String> numericFields, List<String> textualFields) {
+
+        /*
+         Creates NumericField and NumericOperator entities if there is some numeric field
+         */
+
+        Mapping numericFieldEntity = new Mapping("NumericField", "numericFieldEntity");
+        for (String numericField : numericFields) {
+            MappingEntry entry = new MappingEntry(numericField); // Here you can add synonyms
+            numericFieldEntity.addMappingEntry(entry);
+        }
+        types.add(numericFieldEntity);
+        Mapping numericOperatorEntity = new Mapping("NumericOperator", "numericOperatorEntity");
+        numericOperatorEntity.addMappingEntry(new MappingEntry("="));
+        numericOperatorEntity.addMappingEntry(new MappingEntry("<", Arrays.asList("less than", "lower than")));
+        numericOperatorEntity.addMappingEntry(new MappingEntry("<=", Arrays.asList("less than or equals", "lower than or equals")));
+        numericOperatorEntity.addMappingEntry(new MappingEntry(">", Arrays.asList("greater than", "higher than")));
+        numericOperatorEntity.addMappingEntry(new MappingEntry(">=", Arrays.asList("greater than or equals", "higher than or equals")));
+        numericOperatorEntity.addMappingEntry(new MappingEntry("!=", Arrays.asList("not equals", "different")));
+        types.add(numericOperatorEntity);
+
+        /*
+         Creates TextualField and TextualOperator entities if there is some textual field
+         */
+
+        Mapping textualFieldEntity = new Mapping("TextualField", "textualFieldEntity");
+        for (String textualField : textualFields) {
+            MappingEntry entry = new MappingEntry(textualField); // Here you can add synonyms
+            textualFieldEntity.addMappingEntry(entry);
+        }
+        types.add(textualFieldEntity);
+        Mapping textualOperatorEntity = new Mapping("TextualOperator", "textualOperatorEntity");
+        textualOperatorEntity.addMappingEntry(new MappingEntry("equals"));
+        textualOperatorEntity.addMappingEntry(new MappingEntry("different"));
+        textualOperatorEntity.addMappingEntry(new MappingEntry("contains"));
+        textualOperatorEntity.addMappingEntry(new MappingEntry("starts with"));
+        textualOperatorEntity.addMappingEntry(new MappingEntry("ends with"));
+        types.add(textualOperatorEntity);
+
+        /*
+         Creates composite entities for FieldEntity and OperatorEntity, combining textual and numeric entities
+         */
+
+        Composite fieldEntity = new Composite("Field", "fieldEntity");
+        fieldEntity.addCompositeEntry(new CompositeEntry(Arrays.asList(numericFieldEntity)));
+        fieldEntity.addCompositeEntry(new CompositeEntry(Arrays.asList(textualFieldEntity)));
+        types.add(fieldEntity);
+
+        Composite operatorEntity = new Composite("Operator", "operatorEntity");
+        operatorEntity.addCompositeEntry(new CompositeEntry(Arrays.asList(numericOperatorEntity)));
+        operatorEntity.addCompositeEntry(new CompositeEntry(Arrays.asList(textualOperatorEntity)));
+        types.add(operatorEntity);
+
+        /*
+         Create intents
+         */
+
+        Intent restartIntent = new Intent("Restart", "restartIntent");
+        restartIntent.addTrainingSentence("restart");
+        intents.add(restartIntent);
+
+        Intent showDataIntent = new Intent("ShowData", "showDataIntent");
+        showDataIntent.addTrainingSentence("show data");
+        intents.add(showDataIntent);
+
+        Intent showNextPageIntent = new Intent("ShowNextPage", "showNextPageIntent");
+        showNextPageIntent.addTrainingSentence("next page");
+        intents.add(showNextPageIntent);
+
+        Intent stopViewIntent = new Intent("StopView", "stopViewIntent");
+        stopViewIntent.addTrainingSentence("stop view");
+        intents.add(stopViewIntent);
+
+        Intent addFilterIntent = new Intent("AddFilter", "addFilterIntent");
+        addFilterIntent.addTrainingSentence("add filter");
+        intents.add(addFilterIntent);
+
+        Intent addFieldToViewIntent = new Intent("AddFieldToView", "addFieldToViewIntent");
+        addFieldToViewIntent.addTrainingSentence("add field to view");
+        intents.add(addFieldToViewIntent);
+
+        Intent fieldNameIntent = new Intent("FieldName", "fieldNameIntent");
+        fieldNameIntent.addTrainingSentence("VALUE");
+        fieldNameIntent.addParameter(new IntentParameter("fieldName", "VALUE", fieldEntity));
+        intents.add(fieldNameIntent);
+
+        Intent operatorNameIntent = new Intent("OperatorName", "operatorNameIntent");
+        operatorNameIntent.addTrainingSentence("VALUE");
+        operatorNameIntent.addParameter(new IntentParameter("operatorName", "VALUE", operatorEntity));
+        intents.add(operatorNameIntent);
+
+        Intent operatorValueIntent = new Intent("OperatorValue", "operatorValueIntent");
+        operatorValueIntent.addTrainingSentence("VALUE");
+        operatorValueIntent.addParameter(new IntentParameter("operatorValue", "VALUE", new CoreIntentParameterType("any")));
+        intents.add(operatorValueIntent); // TODO: SEPARATE NUMERIC AND TEXTUAL ("any") VALUES
+
+        /*
+         Create states
+         */
+
+        State awaitingInput = new State();
+        State startState = new State();
+        State showDataState = new State();
+        State selectViewFieldState = new State();
+        State saveViewFieldState = new State();
+        State selectFilterFieldState = new State();
+        State selectOperatorNameState = new State();
+        State selectOperatorValueState = new State();
+        State saveFilterState = new State();
+
+        awaitingInput.setName("AwaitingInput");
+        awaitingInput.setVarName("awaitingInput");
+        String awaitingInputBody = """
+                context -> {
+                    List<String> filterFieldOptions = new ArrayList<>(Arrays.asList("""
+                        + numericFieldEntity.getEntries().stream().map(e -> "\"" + e.getValue() + "\"").collect(Collectors.joining(", "))
+                        + ", "
+                        + textualFieldEntity.getEntries().stream().map(e -> "\"" + e.getValue() + "\"").collect(Collectors.joining(", "))
+
+                + """
+                ));
+                    context.getSession().put("filterFieldOptions", filterFieldOptions);
+                    List<String> viewFieldOptions = new ArrayList<>(Arrays.asList("""
+                        + numericFieldEntity.getEntries().stream().map(e -> "\"" + e.getValue() + "\"").collect(Collectors.joining(", "))
+                        + ", "
+                        + textualFieldEntity.getEntries().stream().map(e -> "\"" + e.getValue() + "\"").collect(Collectors.joining(", "))
+                + """
+                ));
+                    context.getSession().put("viewFieldOptions", viewFieldOptions);
+                    context.getSession().put("filtersApplied", new ArrayList<ImmutableTriple<String, String, String>>());
+                    context.getSession().put("viewFieldSelections", new ArrayList<>());
+                    reactPlatform.reply(context, "Data Structures initialized");
+                }
+                """;
+        awaitingInput.setBody(new CustomBody(awaitingInputBody));
+        awaitingInput.addOutTransition(new AutomaticTransition(awaitingInput, startState));
+
+        startState.setName("StartState");
+        startState.setVarName("startState");
+        String startStateBody = """
+                context -> {
+                    reactPlatform.reply(context, "Select an operation", Arrays.asList("""
+                        + "\"" + addFilterIntent.getTrainingSentences().get(0)  + "\", "
+                        + "\"" + addFieldToViewIntent.getTrainingSentences().get(0)  + "\", "
+                        + "\"" + showDataIntent.getTrainingSentences().get(0)  + "\", "
+                        + "\"" + restartIntent.getTrainingSentences().get(0)  + "\""
+                + """
+                ));
+                }
+                """;
+        startState.setBody(new CustomBody(startStateBody));
+        startState.addOutTransition(new GuardedTransition(startState, selectFilterFieldState, addFilterIntent));
+        startState.addOutTransition(new GuardedTransition(startState, selectViewFieldState, addFieldToViewIntent));
+        startState.addOutTransition(new GuardedTransition(startState, showDataState, showDataIntent));
+        startState.addOutTransition(new GuardedTransition(startState, awaitingInput, restartIntent));
+
+        showDataState.setName("ShowData");
+        showDataState.setVarName("showDataState");
+        String showDataStateBody = """
+                context -> {
+                    List<ImmutableTriple<String, String, String>> filtersApplied = (List<ImmutableTriple<String, String, String>>) context.getSession().get("filtersApplied");
+                    List<String> viewFieldSelections = (List<String>) context.getSession().get("viewFieldSelections");
+                    if (viewFieldSelections.isEmpty()) {
+                        // add all fields if none was selected
+                        viewFieldSelections = (List<String>) context.getSession().get("viewFieldOptions");
+                    }
+                    String csvPath = """ + botName + ".class.getClassLoader().getResource(\""+ csvFileName + "\""
+                + """
+                ).getPath();
+                    List<String[]> rawCsv = null;
+                    List<List<String>> csv = new ArrayList<>();
+                    try (CSVReader reader = new CSVReader(new FileReader(csvPath))) {
+                        rawCsv = reader.readAll();
+                    } catch (IOException | CsvException e) {
+                        e.printStackTrace();
+                    }
+                    assert rawCsv != null;
+                    List<String> originalHeader = Arrays.asList(rawCsv.get(0));
+                    rawCsv.remove(0);
+                    rawCsv.forEach(row -> csv.add(new ArrayList<>(Arrays.asList(row))));
+                    // Filtering rows
+                    for (ImmutableTriple<String, String, String> t : filtersApplied) {
+                        switch(t.middle) {
+                            case "=":
+                                csv.removeIf(row -> !(Float.parseFloat(row.get(originalHeader.indexOf(t.left))) == Float.parseFloat(t.right)));
+                                break;
+                            case "<":
+                                csv.removeIf(row -> !(Float.parseFloat(row.get(originalHeader.indexOf(t.left))) < Float.parseFloat(t.right)));
+                                break;
+                            case "<=":
+                                csv.removeIf(row -> !(Float.parseFloat(row.get(originalHeader.indexOf(t.left))) <= Float.parseFloat(t.right)));
+                                break;
+                            case ">":
+                                csv.removeIf(row -> !(Float.parseFloat(row.get(originalHeader.indexOf(t.left))) > Float.parseFloat(t.right)));
+                                break;
+                            case ">=":
+                                csv.removeIf(row -> !(Float.parseFloat(row.get(originalHeader.indexOf(t.left))) >= Float.parseFloat(t.right)));
+                                break;
+                            case "!=":
+                                csv.removeIf(row -> !(Float.parseFloat(row.get(originalHeader.indexOf(t.left))) != Float.parseFloat(t.right)));
+                                break;
+                            case "equals":
+                                csv.removeIf(row -> !(row.get(originalHeader.indexOf(t.left)).equals(t.right)));
+                                break;
+                            case "different":
+                                csv.removeIf(row -> row.get(originalHeader.indexOf(t.left)).equals(t.right));
+                                break;
+                            case "contains":
+                                csv.removeIf(row -> !(row.get(originalHeader.indexOf(t.left)).contains(t.right)));
+                                break;
+                            case "starts with":
+                                csv.removeIf(row -> !(row.get(originalHeader.indexOf(t.left)).startsWith(t.right)));
+                                break;
+                            case "ends with":
+                                csv.removeIf(row -> !(row.get(originalHeader.indexOf(t.left)).endsWith(t.right)));
+                                break;
+                        }
+                    }
+                    // Deleting fields
+                    List<String> viewHeader = new ArrayList<>(originalHeader);
+                    List<String> viewFieldDeletions = new ArrayList<>(originalHeader);
+                    viewFieldDeletions.removeAll(viewFieldSelections);
+                    for (String field : viewFieldDeletions) {
+                        csv.forEach(row -> row.remove(viewHeader.indexOf(field)));
+                        viewHeader.remove(field);
+                    }
+                        
+                    int pageLimit = 10;
+                    int pageCount = 1;
+                    if (context.getIntent().getMatchedInput().equals("next page")) {
+                        pageCount = (int) context.getSession().get("pageCount") + 1;
+                    }
+                    int totalEntries = csv.size(); // Total rows after filtering
+                    int totalPages = totalEntries / pageLimit;
+                    if (totalEntries % pageLimit != 0) {
+                        totalPages += 1;
+                    }
+                    if (pageCount > totalPages) {
+                        // page overflow
+                        pageCount = 1;
+                    }
+                    int offset = (pageCount - 1) * pageLimit;
+                    context.getSession().put("pageCount", pageCount);
+                        
+                    if (totalEntries > 0) {
+                        // print table
+                        String header =
+                                "|" + String.join("|", viewHeader) + "|" + "\\n" +
+                                        "|" + String.join("|", viewHeader.stream().map(e ->"---").collect(Collectors.joining("|"))) + "|" + "\\n";
+                        String data = "";
+                        for (int i = offset; i < totalEntries && i < offset + pageLimit; i++) {
+                            data += "|" + String.join("|", csv.get(i)) + "|" + "\\n";
+                        }
+                        int selectedEntries = (offset + pageLimit > totalEntries ? totalEntries - offset : pageLimit);
+                        reactPlatform.reply(context, "Showing " + selectedEntries + " records of a total of " + totalEntries);
+                        reactPlatform.reply(context, "Page " + pageCount + "/" + totalPages);
+                        reactPlatform.reply(context, header + data, Arrays.asList("next page", "stop view"));
+                    } else {
+                        reactPlatform.reply(context, "Nothing found.", Arrays.asList("stop view"));
+                    }
+                }
+                """;
+        showDataState.setBody(new CustomBody(showDataStateBody));
+        showDataState.addOutTransition(new GuardedTransition(showDataState, showDataState, showNextPageIntent));
+        showDataState.addOutTransition(new GuardedTransition(showDataState, startState, stopViewIntent));
+
+        selectViewFieldState.setName("SelectViewField");
+        selectViewFieldState.setVarName("selectViewFieldState");
+        String selectViewFieldStateBody = """
+                context -> {
+                    reactPlatform.reply(context, "Select a field", (List<String>) context.getSession().get("viewFieldOptions"));
+                }
+                """;
+        selectViewFieldState.setBody(new CustomBody(selectViewFieldStateBody));
+        selectViewFieldState.addOutTransition(new GuardedTransition(selectViewFieldState, saveViewFieldState, fieldNameIntent));
+
+        saveViewFieldState.setName("SaveViewField");
+        saveViewFieldState.setVarName("saveViewFieldState");
+        String saveViewFieldStateBody = """
+                context -> {
+                    Map<String, String> selectedField = (Map<String, String>) context.getIntent().getValue("fieldName");
+                    List<String> viewFieldOptions = (List<String>) context.getSession().get("viewFieldOptions");
+                    List<String> viewFieldSelections = (List<String>) context.getSession().get("viewFieldSelections");
+                    String fieldName = null;
+                    if (selectedField.containsKey("NumericField")) {
+                        fieldName = selectedField.get("NumericField");
+                    } else if (selectedField.containsKey("TextualField")) {
+                        fieldName = selectedField.get("TextualField");
+                    }
+                    viewFieldOptions.remove(fieldName);
+                    viewFieldSelections.add(fieldName);
+                    reactPlatform.reply(context, fieldName + " added to the view");
+                }
+                """;
+        saveViewFieldState.setBody(new CustomBody(saveViewFieldStateBody));
+        saveViewFieldState.addOutTransition(new AutomaticTransition(saveViewFieldState, startState));
+
+        selectFilterFieldState.setName("SelectFilterField");
+        selectFilterFieldState.setVarName("selectFilterFieldState");
+        String selectFilterFieldStateBody = """
+                context -> {
+                    reactPlatform.reply(context, "Select a field", (List<String>) context.getSession().get("filterFieldOptions"));
+                }
+                """;
+        selectFilterFieldState.setBody(new CustomBody(selectFilterFieldStateBody));
+        selectFilterFieldState.addOutTransition(new GuardedTransition(selectFilterFieldState, selectOperatorNameState, fieldNameIntent));
+
+        selectOperatorNameState.setName("SelectOperatorName");
+        selectOperatorNameState.setVarName("selectOperatorNameState");
+        String selectOperatorNameStateBody = """
+                context -> {
+                    Map<String, String> selectedField = (Map<String, String>) context.getIntent().getValue("fieldName");
+                    String fieldName = null;
+                    if (selectedField.containsKey("NumericField")) {
+                        fieldName = selectedField.get("NumericField");
+                        reactPlatform.reply(context, "Select an operator", Arrays.asList("""
+                            + numericOperatorEntity.getEntries().stream().map(e -> "\"" + e.getValue() + "\"").collect(Collectors.joining(", "))
+                + """
+                ));
+                    } else if (selectedField.containsKey("TextualField")) {
+                        fieldName = selectedField.get("TextualField");
+                        reactPlatform.reply(context, "Select an operator", Arrays.asList("""
+                            + textualOperatorEntity.getEntries().stream().map(e -> "\"" + e.getValue() + "\"").collect(Collectors.joining(", "))
+                + """
+                ));
+                    }
+                    context.getSession().put("lastFieldName", fieldName);
+                }
+                """;
+        selectOperatorNameState.setBody(new CustomBody(selectOperatorNameStateBody));
+        selectOperatorNameState.addOutTransition(new GuardedTransition(selectOperatorNameState, selectOperatorValueState, operatorNameIntent));
+
+        selectOperatorValueState.setName("SelectOperatorValue");
+        selectOperatorValueState.setVarName("selectOperatorValueState");
+        String selectOperatorValueStateBody = """
+                context -> {
+                    Map<String, String> selectedOperatorName = (Map<String, String>) context.getIntent().getValue("operatorName");
+                    String operatorName = null;
+                    if (selectedOperatorName.containsKey("NumericOperator")) {
+                        operatorName = selectedOperatorName.get("NumericOperator");
+                    } else if (selectedOperatorName.containsKey("TextualOperator")) {
+                        operatorName = selectedOperatorName.get("TextualOperator");
+                    }
+                    context.getSession().put("lastOperatorName", operatorName);
+                    reactPlatform.reply(context, "Write a value");
+                }
+                """;
+        selectOperatorValueState.setBody(new CustomBody(selectOperatorValueStateBody));
+        selectOperatorValueState.addOutTransition(new GuardedTransition(selectOperatorValueState, saveFilterState, operatorValueIntent));
+
+        saveFilterState.setName("SaveFilterState");
+        saveFilterState.setVarName("saveFilterState");
+        String saveFilterStateBody = """
+                context -> {
+                    String fieldName = (String) context.getSession().get("lastFieldName");
+                    String operatorName = (String) context.getSession().get("lastOperatorName");
+                    String operatorValue = (String) context.getIntent().getValue("operatorValue");
+                    ArrayList<ImmutableTriple<String, String, String>> filtersApplied =
+                        (ArrayList<ImmutableTriple<String, String, String>>)
+                            context.getSession().get("filtersApplied");
+                    filtersApplied.add(new ImmutableTriple<>(fieldName, operatorName, operatorValue));
+                    // List<String> filterFieldOptions =
+                    //     (List<String>) context.getSession().get("filterFieldOptions");
+                    // filterFieldOptions.remove(fieldName);
+                    reactPlatform.reply(context,
+                        "'" + fieldName + " " + operatorName + " " + operatorValue + "' added");
+                }
+                """;
+        saveFilterState.setBody(new CustomBody(saveFilterStateBody));
+        saveFilterState.addOutTransition(new AutomaticTransition(saveFilterState, startState));
+
+        states.add(awaitingInput);
+        states.add(startState);
+        states.add(showDataState);
+        states.add(selectViewFieldState);
+        states.add(saveViewFieldState);
+        states.add(selectFilterFieldState);
+        states.add(selectOperatorNameState);
+        states.add(selectOperatorValueState);
+        states.add(saveFilterState);
+    }
+
+    public String getBotName() {
+        return botName;
+    }
+
+    public void setBotName(String botName) {
+        this.botName = botName;
+    }
+
+    public String getCsvFileName() {
+        return csvFileName;
+    }
+
+    public void setCsvFileName(String csvFileName) {
+        this.csvFileName = csvFileName;
+    }
+
+    public List<IntentParameterType> getTypes() {
+        return types;
+    }
+
+    public List<Intent> getIntents() {
+        return intents;
+    }
+
+    public List<State> getStates() {
+        return states;
+    }
+}
