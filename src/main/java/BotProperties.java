@@ -69,20 +69,6 @@ public class BotProperties {
         types.add(textualOperatorEntity);
 
         /*
-         Creates composite entities for FieldEntity and OperatorEntity, combining textual and numeric entities
-         */
-
-        Composite fieldEntity = new Composite("Field", "fieldEntity");
-        fieldEntity.addCompositeEntry(new CompositeEntry(Arrays.asList(numericFieldEntity)));
-        fieldEntity.addCompositeEntry(new CompositeEntry(Arrays.asList(textualFieldEntity)));
-        types.add(fieldEntity);
-
-        Composite operatorEntity = new Composite("Operator", "operatorEntity");
-        operatorEntity.addCompositeEntry(new CompositeEntry(Arrays.asList(numericOperatorEntity)));
-        operatorEntity.addCompositeEntry(new CompositeEntry(Arrays.asList(textualOperatorEntity)));
-        types.add(operatorEntity);
-
-        /*
          Create intents
          */
 
@@ -111,13 +97,17 @@ public class BotProperties {
         intents.add(addFieldToViewIntent);
 
         Intent fieldNameIntent = new Intent("FieldName", "fieldNameIntent");
-        fieldNameIntent.addTrainingSentence("VALUE");
-        fieldNameIntent.addParameter(new IntentParameter("fieldName", "VALUE", fieldEntity));
+        fieldNameIntent.addTrainingSentence("NUMERICFIELD");
+        fieldNameIntent.addTrainingSentence("TEXTUALFIELD");
+        fieldNameIntent.addParameter(new IntentParameter("numericFieldName", "NUMERICFIELD", numericFieldEntity));
+        fieldNameIntent.addParameter(new IntentParameter("textualFieldName", "TEXTUALFIELD", textualFieldEntity));
         intents.add(fieldNameIntent);
 
         Intent operatorNameIntent = new Intent("OperatorName", "operatorNameIntent");
-        operatorNameIntent.addTrainingSentence("VALUE");
-        operatorNameIntent.addParameter(new IntentParameter("operatorName", "VALUE", operatorEntity));
+        operatorNameIntent.addTrainingSentence("NUMERICOPERATOR");
+        operatorNameIntent.addTrainingSentence("TEXTUALOPERATOR");
+        operatorNameIntent.addParameter(new IntentParameter("numericOperatorName", "NUMERICOPERATOR", numericOperatorEntity));
+        operatorNameIntent.addParameter(new IntentParameter("textualOperatorName", "TEXTUALOPERATOR", textualOperatorEntity));
         intents.add(operatorNameIntent);
 
         Intent operatorValueIntent = new Intent("OperatorValue", "operatorValueIntent");
@@ -309,15 +299,11 @@ public class BotProperties {
         saveViewFieldState.setVarName("saveViewFieldState");
         String saveViewFieldStateBody = """
                 context -> {
-                    Map<String, String> selectedField = (Map<String, String>) context.getIntent().getValue("fieldName");
+                    String textualFieldName = (String) context.getIntent().getValue("textualFieldName");
+                    String numericFieldName = (String) context.getIntent().getValue("numericFieldName");
+                    String fieldName = (isNull(textualFieldName) || textualFieldName.isEmpty() ? numericFieldName : textualFieldName);
                     List<String> viewFieldOptions = (List<String>) context.getSession().get("viewFieldOptions");
                     List<String> viewFieldSelections = (List<String>) context.getSession().get("viewFieldSelections");
-                    String fieldName = null;
-                    if (selectedField.containsKey("NumericField")) {
-                        fieldName = selectedField.get("NumericField");
-                    } else if (selectedField.containsKey("TextualField")) {
-                        fieldName = selectedField.get("TextualField");
-                    }
                     viewFieldOptions.remove(fieldName);
                     viewFieldSelections.add(fieldName);
                     reactPlatform.reply(context, fieldName + " added to the view");
@@ -340,22 +326,21 @@ public class BotProperties {
         selectOperatorNameState.setVarName("selectOperatorNameState");
         String selectOperatorNameStateBody = """
                 context -> {
-                    Map<String, String> selectedField = (Map<String, String>) context.getIntent().getValue("fieldName");
-                    String fieldName = null;
-                    if (selectedField.containsKey("NumericField")) {
-                        fieldName = selectedField.get("NumericField");
+                    String textualFieldName = (String) context.getIntent().getValue("textualFieldName");
+                    String numericFieldName = (String) context.getIntent().getValue("numericFieldName");
+                    if (isNull(textualFieldName) || textualFieldName.isEmpty()) {
+                        context.getSession().put("lastFieldName", numericFieldName);
                         reactPlatform.reply(context, "Select an operator", Arrays.asList("""
                             + numericOperatorEntity.getEntries().stream().map(e -> "\"" + e.getValue() + "\"").collect(Collectors.joining(", "))
                 + """
                 ));
-                    } else if (selectedField.containsKey("TextualField")) {
-                        fieldName = selectedField.get("TextualField");
+                    } else if (isNull(numericFieldName) || numericFieldName.isEmpty()) {
+                        context.getSession().put("lastFieldName", textualFieldName);
                         reactPlatform.reply(context, "Select an operator", Arrays.asList("""
                             + textualOperatorEntity.getEntries().stream().map(e -> "\"" + e.getValue() + "\"").collect(Collectors.joining(", "))
                 + """
                 ));
                     }
-                    context.getSession().put("lastFieldName", fieldName);
                 }
                 """;
         selectOperatorNameState.setBody(new CustomBody(selectOperatorNameStateBody));
@@ -365,14 +350,13 @@ public class BotProperties {
         selectOperatorValueState.setVarName("selectOperatorValueState");
         String selectOperatorValueStateBody = """
                 context -> {
-                    Map<String, String> selectedOperatorName = (Map<String, String>) context.getIntent().getValue("operatorName");
-                    String operatorName = null;
-                    if (selectedOperatorName.containsKey("NumericOperator")) {
-                        operatorName = selectedOperatorName.get("NumericOperator");
-                    } else if (selectedOperatorName.containsKey("TextualOperator")) {
-                        operatorName = selectedOperatorName.get("TextualOperator");
+                    String textualOperatorName = (String) context.getIntent().getValue("textualOperatorName");
+                    String numericOperatorName = (String) context.getIntent().getValue("numericOperatorName");
+                    if (isNull(textualOperatorName) || textualOperatorName.isEmpty()) {
+                        context.getSession().put("lastOperatorName", numericOperatorName);
+                    } else if (isNull(numericOperatorName) || numericOperatorName.isEmpty()) {
+                        context.getSession().put("lastOperatorName", textualOperatorName);
                     }
-                    context.getSession().put("lastOperatorName", operatorName);
                     reactPlatform.reply(context, "Write a value");
                 }
                 """;
@@ -390,9 +374,6 @@ public class BotProperties {
                         (ArrayList<ImmutableTriple<String, String, String>>)
                             context.getSession().get("filtersApplied");
                     filtersApplied.add(new ImmutableTriple<>(fieldName, operatorName, operatorValue));
-                    // List<String> filterFieldOptions =
-                    //     (List<String>) context.getSession().get("filterFieldOptions");
-                    // filterFieldOptions.remove(fieldName);
                     reactPlatform.reply(context,
                         "'" + fieldName + " " + operatorName + " " + operatorValue + "' added");
                 }
