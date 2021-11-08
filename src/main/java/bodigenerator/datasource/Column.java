@@ -1,3 +1,5 @@
+package bodigenerator.datasource;
+
 import java.util.List;
 
 public class Column {

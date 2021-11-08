@@ -1,3 +1,6 @@
+import bodigenerator.dataschema.BotProperties;
+import bodigenerator.dataschema.DataSchema;
+import bodigenerator.datasource.TabularDataSource;
 import com.xatkit.bot.metamodel.Bot;
 import com.xatkit.bot.metamodel.generator.BotToCode;
 import com.xatkit.bot.metamodel.generator.BotToCodeConfProperties;
@@ -11,13 +14,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
 
-public class Main {
+public class BodiGenerator {
     public static void main(String[] args) {
         // Load bot properties
         Configurations configurations = new Configurations();
         Configuration botConfiguration = new BaseConfiguration();
         try {
-            botConfiguration = configurations.properties(Main.class.getClassLoader().getResource("botconfiguration.properties"));
+            botConfiguration = configurations.properties(BodiGenerator.class.getClassLoader().getResource("botconfiguration.properties"));
         } catch (ConfigurationException e) {
             e.printStackTrace();
             System.out.println("'botconfiguration.properties' file not found");
@@ -27,14 +30,14 @@ public class Main {
         // Create bot model
         TabularDataSource tds = null;
         try {
-            tds = new TabularDataSource(Objects.requireNonNull(Main.class.getClassLoader().getResource(
+            tds = new TabularDataSource(Objects.requireNonNull(BodiGenerator.class.getClassLoader().getResource(
                     conf.getInputDocName())).getPath());
         } catch (NullPointerException e) {
             e.printStackTrace();
             System.out.println("'" + conf.getInputDocName() + "' file not found");
             System.exit(1);
         }
-        DataModel dm = new DataModel();
+        DataSchema dm = new DataSchema();
         dm.addNumericFields(tds);
         dm.addTextualFields(tds);
         BotProperties bp = new BotProperties();
@@ -48,13 +51,22 @@ public class Main {
 
         // Copy the csv to the bot directory
         try {
-            File source = new File(Objects.requireNonNull(Main.class.getClassLoader().getResource(
+            File source = new File(Objects.requireNonNull(BodiGenerator.class.getClassLoader().getResource(
                     conf.getInputDocName())).getPath());
             File dest = new File(conf.getOutputFolder() + "src/main/resources/" + conf.getInputDocName());
             FileUtils.copyFile(source, dest);
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("The csv file was not copied to the Bot folder");
+        }
+        // Copy the datasource code to the bot directory
+        try {
+            File dsSource = new File("src/main/java/bodigenerator/datasource/");
+            File dsDest = new File(conf.getOutputFolder() + "src/main/java/bodigenerator/datasource/");
+            FileUtils.copyDirectory(dsSource, dsDest);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("The datasource folder was not copied to the Bot folder");
         }
     }
 }

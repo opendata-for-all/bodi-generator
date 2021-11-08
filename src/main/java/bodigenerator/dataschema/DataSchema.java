@@ -1,12 +1,15 @@
+package bodigenerator.dataschema;
+
+import bodigenerator.datasource.TabularDataSource;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DataModel {
+public class DataSchema {
 
     private List<String> numericFields = new ArrayList<>();
     private List<String> textualFields = new ArrayList<>();
 
-    public DataModel() {
+    public DataSchema() {
 
     }
 

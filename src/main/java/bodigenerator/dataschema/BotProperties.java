@@ -1,6 +1,6 @@
+package bodigenerator.dataschema;
+
 import com.xatkit.bot.metamodel.AutomaticTransition;
-import com.xatkit.bot.metamodel.Composite;
-import com.xatkit.bot.metamodel.CompositeEntry;
 import com.xatkit.bot.metamodel.CoreIntentParameterType;
 import com.xatkit.bot.metamodel.CustomBody;
 import com.xatkit.bot.metamodel.GuardedTransition;
@@ -25,7 +25,7 @@ public class BotProperties {
     private List<Intent> intents = new ArrayList<>();
     private List<State> states = new ArrayList<>();
 
-    BotProperties() {
+    public BotProperties() {
 
     }
 
@@ -133,6 +133,15 @@ public class BotProperties {
         awaitingInput.setVarName("awaitingInput");
         String awaitingInputBody = """
                 context -> {
+                        if (context.getSession().containsKey("tabularDataSource")) {
+                            ((TabularDataSource) context.getSession().get("tabularDataSource"))
+                                .makeAllColumnsVisible()
+                                .restartFilters();
+                        } else {
+                            context.getSession().put("tabularDataSource", new TabularDataSource(Objects.requireNonNull(""" + botName + ".class.getClassLoader().getResource(\""+ csvFileName + "\""
+                + """
+                )).getPath()));
+                        }
                     List<String> filterFieldOptions = new ArrayList<>(Arrays.asList("""
                         + numericFieldEntity.getEntries().stream().map(e -> "\"" + e.getValue() + "\"").collect(Collectors.joining(", "))
                         + ", "
@@ -149,7 +158,6 @@ public class BotProperties {
                 ));
                     context.getSession().put("viewFieldOptions", viewFieldOptions);
                     context.getSession().put("filtersApplied", new ArrayList<ImmutableTriple<String, String, String>>());
-                    context.getSession().put("viewFieldSelections", new ArrayList<>());
                     reactPlatform.reply(context, "Data Structures initialized");
                 }
                 """;
@@ -179,98 +187,32 @@ public class BotProperties {
         showDataState.setVarName("showDataState");
         String showDataStateBody = """
                 context -> {
-                    List<ImmutableTriple<String, String, String>> filtersApplied = (List<ImmutableTriple<String, String, String>>) context.getSession().get("filtersApplied");
-                    List<String> viewFieldSelections = (List<String>) context.getSession().get("viewFieldSelections");
-                    if (viewFieldSelections.isEmpty()) {
-                        // add all fields if none was selected
-                        viewFieldSelections = (List<String>) context.getSession().get("viewFieldOptions");
-                    }
-                    String csvPath = """ + botName + ".class.getClassLoader().getResource(\""+ csvFileName + "\""
-                + """
-                ).getPath();
-                    List<String[]> rawCsv = null;
-                    List<List<String>> csv = new ArrayList<>();
-                    try (CSVReader reader = new CSVReader(new FileReader(csvPath))) {
-                        rawCsv = reader.readAll();
-                    } catch (IOException | CsvException e) {
-                        e.printStackTrace();
-                    }
-                    assert rawCsv != null;
-                    List<String> originalHeader = Arrays.asList(rawCsv.get(0));
-                    rawCsv.remove(0);
-                    rawCsv.forEach(row -> csv.add(new ArrayList<>(Arrays.asList(row))));
-                    // Filtering rows
-                    for (ImmutableTriple<String, String, String> t : filtersApplied) {
-                        switch(t.middle) {
-                            case "=":
-                                csv.removeIf(row -> !(Float.parseFloat(row.get(originalHeader.indexOf(t.left))) == Float.parseFloat(t.right)));
-                                break;
-                            case "<":
-                                csv.removeIf(row -> !(Float.parseFloat(row.get(originalHeader.indexOf(t.left))) < Float.parseFloat(t.right)));
-                                break;
-                            case "<=":
-                                csv.removeIf(row -> !(Float.parseFloat(row.get(originalHeader.indexOf(t.left))) <= Float.parseFloat(t.right)));
-                                break;
-                            case ">":
-                                csv.removeIf(row -> !(Float.parseFloat(row.get(originalHeader.indexOf(t.left))) > Float.parseFloat(t.right)));
-                                break;
-                            case ">=":
-                                csv.removeIf(row -> !(Float.parseFloat(row.get(originalHeader.indexOf(t.left))) >= Float.parseFloat(t.right)));
-                                break;
-                            case "!=":
-                                csv.removeIf(row -> !(Float.parseFloat(row.get(originalHeader.indexOf(t.left))) != Float.parseFloat(t.right)));
-                                break;
-                            case "equals":
-                                csv.removeIf(row -> !(row.get(originalHeader.indexOf(t.left)).equals(t.right)));
-                                break;
-                            case "different":
-                                csv.removeIf(row -> row.get(originalHeader.indexOf(t.left)).equals(t.right));
-                                break;
-                            case "contains":
-                                csv.removeIf(row -> !(row.get(originalHeader.indexOf(t.left)).contains(t.right)));
-                                break;
-                            case "starts with":
-                                csv.removeIf(row -> !(row.get(originalHeader.indexOf(t.left)).startsWith(t.right)));
-                                break;
-                            case "ends with":
-                                csv.removeIf(row -> !(row.get(originalHeader.indexOf(t.left)).endsWith(t.right)));
-                                break;
-                        }
-                    }
-                    // Deleting fields
-                    List<String> viewHeader = new ArrayList<>(originalHeader);
-                    List<String> viewFieldDeletions = new ArrayList<>(originalHeader);
-                    viewFieldDeletions.removeAll(viewFieldSelections);
-                    for (String field : viewFieldDeletions) {
-                        csv.forEach(row -> row.remove(viewHeader.indexOf(field)));
-                        viewHeader.remove(field);
-                    }
-                        
+                    TabularDataSource tds = (TabularDataSource) context.getSession().get("tabularDataSource");
                     int pageLimit = 10;
                     int pageCount = 1;
                     if (context.getIntent().getMatchedInput().equals("next page")) {
                         pageCount = (int) context.getSession().get("pageCount") + 1;
                     }
-                    int totalEntries = csv.size(); // Total rows after filtering
+                    int totalEntries = tds.getNumVisibleRows(); // Total rows after filtering
                     int totalPages = totalEntries / pageLimit;
                     if (totalEntries % pageLimit != 0) {
                         totalPages += 1;
                     }
                     if (pageCount > totalPages) {
-                        // page overflow
+                        // Page overflow
                         pageCount = 1;
                     }
                     int offset = (pageCount - 1) * pageLimit;
                     context.getSession().put("pageCount", pageCount);
-                        
+                
                     if (totalEntries > 0) {
                         // print table
                         String header =
-                                "|" + String.join("|", viewHeader) + "|" + "\\n" +
-                                        "|" + String.join("|", viewHeader.stream().map(e ->"---").collect(Collectors.joining("|"))) + "|" + "\\n";
+                                "|" + String.join("|", tds.getMaskedHeader()) + "|" + "\\n" +
+                                        "|" + String.join("|", tds.getMaskedHeader().stream().map(e ->"---").collect(Collectors.joining("|"))) + "|" + "\\n";
                         String data = "";
                         for (int i = offset; i < totalEntries && i < offset + pageLimit; i++) {
-                            data += "|" + String.join("|", csv.get(i)) + "|" + "\\n";
+                            data += "|" + String.join("|", tds.getMaskedRowValues(i)) + "|" + "\\n";
                         }
                         int selectedEntries = (offset + pageLimit > totalEntries ? totalEntries - offset : pageLimit);
                         reactPlatform.reply(context, "Showing " + selectedEntries + " records of a total of " + totalEntries);
@@ -303,9 +245,12 @@ public class BotProperties {
                     String numericFieldName = (String) context.getIntent().getValue("numericFieldName");
                     String fieldName = (isNull(textualFieldName) || textualFieldName.isEmpty() ? numericFieldName : textualFieldName);
                     List<String> viewFieldOptions = (List<String>) context.getSession().get("viewFieldOptions");
-                    List<String> viewFieldSelections = (List<String>) context.getSession().get("viewFieldSelections");
+                    TabularDataSource tds = (TabularDataSource) context.getSession().get("tabularDataSource");
+                    if (tds.allColumnsAreVisible()) {
+                        tds.makeAllColumnsNonVisible();
+                    }
+                    tds.makeColumnVisible(fieldName);
                     viewFieldOptions.remove(fieldName);
-                    viewFieldSelections.add(fieldName);
                     reactPlatform.reply(context, fieldName + " added to the view");
                 }
                 """;
@@ -374,6 +319,8 @@ public class BotProperties {
                         (ArrayList<ImmutableTriple<String, String, String>>)
                             context.getSession().get("filtersApplied");
                     filtersApplied.add(new ImmutableTriple<>(fieldName, operatorName, operatorValue));
+                    TabularDataSource tds = (TabularDataSource) context.getSession().get("tabularDataSource");
+                    tds.filter(fieldName, operatorName, operatorValue);
                     reactPlatform.reply(context,
                         "'" + fieldName + " " + operatorName + " " + operatorValue + "' added");
                 }
