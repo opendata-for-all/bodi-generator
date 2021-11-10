@@ -1,5 +1,6 @@
 package bodigenerator.dataschema;
 
+import bodigenerator.datasource.TabularDataSource;
 import com.xatkit.bot.metamodel.AutomaticTransition;
 import com.xatkit.bot.metamodel.CoreIntentParameterType;
 import com.xatkit.bot.metamodel.CustomBody;
@@ -10,10 +11,12 @@ import com.xatkit.bot.metamodel.IntentParameterType;
 import com.xatkit.bot.metamodel.Mapping;
 import com.xatkit.bot.metamodel.MappingEntry;
 import com.xatkit.bot.metamodel.State;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class BotProperties {
@@ -133,15 +136,13 @@ public class BotProperties {
         awaitingInput.setVarName("awaitingInput");
         String awaitingInputBody = """
                 context -> {
-                        if (context.getSession().containsKey("tabularDataSource")) {
-                            ((TabularDataSource) context.getSession().get("tabularDataSource"))
-                                .makeAllColumnsVisible()
-                                .restartFilters();
-                        } else {
-                            context.getSession().put("tabularDataSource", new TabularDataSource(Objects.requireNonNull(""" + botName + ".class.getClassLoader().getResource(\""+ csvFileName + "\""
-                + """
+                    if (!context.getSession().containsKey("tabularDataSource")) {
+                        context.getSession().put("tabularDataSource", new TabularDataSource(Objects.requireNonNull(""" + botName + ".class.getClassLoader().getResource(\""+ csvFileName + "\""
+                    + """
                 )).getPath()));
-                        }
+                    }
+                    TabularDataSource tds = (TabularDataSource) context.getSession().get("tabularDataSource");
+                    context.getSession().put("statement", tds.createStatement());
                     List<String> filterFieldOptions = new ArrayList<>(Arrays.asList("""
                         + numericFieldEntity.getEntries().stream().map(e -> "\"" + e.getValue() + "\"").collect(Collectors.joining(", "))
                         + ", "
@@ -157,7 +158,6 @@ public class BotProperties {
                 + """
                 ));
                     context.getSession().put("viewFieldOptions", viewFieldOptions);
-                    context.getSession().put("filtersApplied", new ArrayList<ImmutableTriple<String, String, String>>());
                     reactPlatform.reply(context, "Data Structures initialized");
                 }
                 """;
@@ -187,13 +187,14 @@ public class BotProperties {
         showDataState.setVarName("showDataState");
         String showDataStateBody = """
                 context -> {
-                    TabularDataSource tds = (TabularDataSource) context.getSession().get("tabularDataSource");
+                    Statement statement = (Statement) context.getSession().get("statement");
+                    ResultSet resultSet = statement.executeQuery();
                     int pageLimit = 10;
                     int pageCount = 1;
                     if (context.getIntent().getMatchedInput().equals("next page")) {
                         pageCount = (int) context.getSession().get("pageCount") + 1;
                     }
-                    int totalEntries = tds.getNumVisibleRows(); // Total rows after filtering
+                    int totalEntries = resultSet.getNumRows();
                     int totalPages = totalEntries / pageLimit;
                     if (totalEntries % pageLimit != 0) {
                         totalPages += 1;
@@ -208,11 +209,11 @@ public class BotProperties {
                     if (totalEntries > 0) {
                         // print table
                         String header =
-                                "|" + String.join("|", tds.getMaskedHeader()) + "|" + "\\n" +
-                                        "|" + String.join("|", tds.getMaskedHeader().stream().map(e ->"---").collect(Collectors.joining("|"))) + "|" + "\\n";
+                                "|" + String.join("|", resultSet.getHeader()) + "|" + "\\n" +
+                                        "|" + String.join("|", resultSet.getHeader().stream().map(e ->"---").collect(Collectors.joining("|"))) + "|" + "\\n";
                         String data = "";
                         for (int i = offset; i < totalEntries && i < offset + pageLimit; i++) {
-                            data += "|" + String.join("|", tds.getMaskedRowValues(i)) + "|" + "\\n";
+                            data += "|" + String.join("|", resultSet.getRow(i).getValues()) + "|" + "\\n";
                         }
                         int selectedEntries = (offset + pageLimit > totalEntries ? totalEntries - offset : pageLimit);
                         reactPlatform.reply(context, "Showing " + selectedEntries + " records of a total of " + totalEntries);
@@ -244,12 +245,9 @@ public class BotProperties {
                     String textualFieldName = (String) context.getIntent().getValue("textualFieldName");
                     String numericFieldName = (String) context.getIntent().getValue("numericFieldName");
                     String fieldName = (isNull(textualFieldName) || textualFieldName.isEmpty() ? numericFieldName : textualFieldName);
+                    Statement statement = (Statement) context.getSession().get("statement");
+                    statement.addField(fieldName);
                     List<String> viewFieldOptions = (List<String>) context.getSession().get("viewFieldOptions");
-                    TabularDataSource tds = (TabularDataSource) context.getSession().get("tabularDataSource");
-                    if (tds.allColumnsAreVisible()) {
-                        tds.makeAllColumnsNonVisible();
-                    }
-                    tds.makeColumnVisible(fieldName);
                     viewFieldOptions.remove(fieldName);
                     reactPlatform.reply(context, fieldName + " added to the view");
                 }
@@ -315,12 +313,8 @@ public class BotProperties {
                     String fieldName = (String) context.getSession().get("lastFieldName");
                     String operatorName = (String) context.getSession().get("lastOperatorName");
                     String operatorValue = (String) context.getIntent().getValue("operatorValue");
-                    ArrayList<ImmutableTriple<String, String, String>> filtersApplied =
-                        (ArrayList<ImmutableTriple<String, String, String>>)
-                            context.getSession().get("filtersApplied");
-                    filtersApplied.add(new ImmutableTriple<>(fieldName, operatorName, operatorValue));
-                    TabularDataSource tds = (TabularDataSource) context.getSession().get("tabularDataSource");
-                    tds.filter(fieldName, operatorName, operatorValue);
+                    Statement statement = (Statement) context.getSession().get("statement");
+                    statement.addFilter(fieldName, operatorName, operatorValue);
                     reactPlatform.reply(context,
                         "'" + fieldName + " " + operatorName + " " + operatorValue + "' added");
                 }

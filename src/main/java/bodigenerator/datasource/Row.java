@@ -5,22 +5,21 @@ import java.util.List;
 public class Row {
 
     private List<String> values;
-    private boolean visible;
 
-    public Row(List<String> values, boolean visible) {
+    public Row(List<String> values) {
         this.values = values;
-        this.visible = visible;
     }
 
-    public boolean isVisible() {
-        return visible;
-    }
-
-    public void setVisible(boolean visible) {
-        this.visible = visible;
+    public String removeValue(int i) {
+        return this.values.remove(i);
     }
 
     public String getColumnValue(int index) {
         return this.values.get(index);
     }
+
+    public List<String> getValues() {
+        return values;
+    }
+
 }
