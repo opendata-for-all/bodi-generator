@@ -1,6 +1,5 @@
 package bodigenerator.dataschema;
 
-import bodigenerator.datasource.TabularDataSource;
 import com.xatkit.bot.metamodel.AutomaticTransition;
 import com.xatkit.bot.metamodel.CoreIntentParameterType;
 import com.xatkit.bot.metamodel.CustomBody;
@@ -11,12 +10,10 @@ import com.xatkit.bot.metamodel.IntentParameterType;
 import com.xatkit.bot.metamodel.Mapping;
 import com.xatkit.bot.metamodel.MappingEntry;
 import com.xatkit.bot.metamodel.State;
-import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class BotProperties {
@@ -32,18 +29,31 @@ public class BotProperties {
 
     }
 
-    public void createBotStructure(List<String> numericFields, List<String> textualFields) {
+    public void createBotStructure(DataSchema ds) {
+        EntityType mainEntityType = ds.getEntityType("mainEntityType");
 
         /*
-         Creates NumericField and NumericOperator entities if there is some numeric field
+         Create NumericField and TextualField entities
          */
 
         Mapping numericFieldEntity = new Mapping("NumericField", "numericFieldEntity");
-        for (String numericField : numericFields) {
-            MappingEntry entry = new MappingEntry(numericField); // Here you can add synonyms
-            numericFieldEntity.addMappingEntry(entry);
+        Mapping textualFieldEntity = new Mapping("TextualField", "textualFieldEntity");
+        for (EntityField entityField : mainEntityType.getEntityFields()) {
+            MappingEntry entry = new MappingEntry(entityField.getOriginalName()); // Here you can add synonyms
+            if (entityField.getType().equals("numeric")) {
+                numericFieldEntity.addMappingEntry(entry);
+            } else {
+                textualFieldEntity.addMappingEntry(entry);
+            }
+
         }
         types.add(numericFieldEntity);
+        types.add(textualFieldEntity);
+
+        /*
+         Create NumericOperator and TextualOperator entities
+         */
+
         Mapping numericOperatorEntity = new Mapping("NumericOperator", "numericOperatorEntity");
         numericOperatorEntity.addMappingEntry(new MappingEntry("="));
         numericOperatorEntity.addMappingEntry(new MappingEntry("<", Arrays.asList("less than", "lower than")));
@@ -53,16 +63,6 @@ public class BotProperties {
         numericOperatorEntity.addMappingEntry(new MappingEntry("!=", Arrays.asList("not equals", "different")));
         types.add(numericOperatorEntity);
 
-        /*
-         Creates TextualField and TextualOperator entities if there is some textual field
-         */
-
-        Mapping textualFieldEntity = new Mapping("TextualField", "textualFieldEntity");
-        for (String textualField : textualFields) {
-            MappingEntry entry = new MappingEntry(textualField); // Here you can add synonyms
-            textualFieldEntity.addMappingEntry(entry);
-        }
-        types.add(textualFieldEntity);
         Mapping textualOperatorEntity = new Mapping("TextualOperator", "textualOperatorEntity");
         textualOperatorEntity.addMappingEntry(new MappingEntry("equals"));
         textualOperatorEntity.addMappingEntry(new MappingEntry("different"));

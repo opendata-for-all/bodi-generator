@@ -30,23 +30,6 @@ public class TabularDataSource {
         }
     }
 
-    public Column getColumn(String columnName) {
-        List<String> columnValues = new ArrayList<>();
-        String columnType = "numeric";
-        for (Row row : table) {
-            int columnIndex = header.indexOf(columnName);
-            String value = row.getColumnValue(columnIndex);
-            columnValues.add(value);
-            try {
-                Double.parseDouble(value);
-            }
-            catch (NumberFormatException nfe) {
-                columnType = "textual";
-            }
-        }
-        return new Column(columnName, columnType, columnValues);
-    }
-
     public int getNumRows() {
         return numRows;
     }
