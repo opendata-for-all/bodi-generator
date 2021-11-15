@@ -99,6 +99,25 @@ public class BotProperties {
         addFieldToViewIntent.addTrainingSentence("add field to view");
         intents.add(addFieldToViewIntent);
 
+        Intent customQueryIntent = new Intent("CustomQuery", "customQueryIntent");
+        customQueryIntent.addTrainingSentence("custom query");
+        intents.add(customQueryIntent);
+
+        Intent customFilterIntent = new Intent("CustomFilter", "customFilterIntent");
+        // TODO: Check that NUMERICFIELD && NUMERICOPERATOR OR TEXTUALFIELD && TEXTUALOPERATOR (and also check values)
+        customFilterIntent.addTrainingSentence("I want to filter NUMERICFIELD NUMERICOPERATOR VALUE");
+        customFilterIntent.addTrainingSentence("I want to filter TEXTUALFIELD TEXTUALOPERATOR VALUE");
+        customFilterIntent.addTrainingSentence("filter NUMERICFIELD NUMERICOPERATOR VALUE");
+        customFilterIntent.addTrainingSentence("filter TEXTUALFIELD TEXTUALOPERATOR VALUE");
+        customFilterIntent.addTrainingSentence("NUMERICFIELD NUMERICOPERATOR VALUE");
+        customFilterIntent.addTrainingSentence("TEXTUALFIELD TEXTUALOPERATOR VALUE");
+        customFilterIntent.addParameter(new IntentParameter("numericFieldName", "NUMERICFIELD", numericFieldEntity));
+        customFilterIntent.addParameter(new IntentParameter("numericOperatorName", "NUMERICOPERATOR", numericOperatorEntity));
+        customFilterIntent.addParameter(new IntentParameter("textualFieldName", "TEXTUALFIELD", textualFieldEntity));
+        customFilterIntent.addParameter(new IntentParameter("textualOperatorName", "TEXTUALOPERATOR", textualOperatorEntity));
+        customFilterIntent.addParameter(new IntentParameter("operatorValue", "VALUE", new CoreIntentParameterType("any")));
+        intents.add(customFilterIntent);
+
         Intent fieldNameIntent = new Intent("FieldName", "fieldNameIntent");
         fieldNameIntent.addTrainingSentence("NUMERICFIELD");
         fieldNameIntent.addTrainingSentence("TEXTUALFIELD");
@@ -131,6 +150,8 @@ public class BotProperties {
         State selectOperatorNameState = new State();
         State selectOperatorValueState = new State();
         State saveFilterState = new State();
+        State awaitingCustomQueryState = new State();
+        State saveCustomFilterState = new State();
 
         awaitingInput.setName("AwaitingInput");
         awaitingInput.setVarName("awaitingInput");
@@ -172,6 +193,7 @@ public class BotProperties {
                         + "\"" + addFilterIntent.getTrainingSentences().get(0)  + "\", "
                         + "\"" + addFieldToViewIntent.getTrainingSentences().get(0)  + "\", "
                         + "\"" + showDataIntent.getTrainingSentences().get(0)  + "\", "
+                        + "\"" + customQueryIntent.getTrainingSentences().get(0)  + "\", "
                         + "\"" + restartIntent.getTrainingSentences().get(0)  + "\""
                 + """
                 ));
@@ -181,7 +203,41 @@ public class BotProperties {
         startState.addOutTransition(new GuardedTransition(startState, selectFilterFieldState, addFilterIntent));
         startState.addOutTransition(new GuardedTransition(startState, selectViewFieldState, addFieldToViewIntent));
         startState.addOutTransition(new GuardedTransition(startState, showDataState, showDataIntent));
+        startState.addOutTransition(new GuardedTransition(startState, awaitingCustomQueryState, customQueryIntent));
         startState.addOutTransition(new GuardedTransition(startState, awaitingInput, restartIntent));
+
+        awaitingCustomQueryState.setName("AwaitingCustomQuery");
+        awaitingCustomQueryState.setVarName("awaitingCustomQueryState");
+        String awaitingCustomQueryStateBody = """
+                context -> {
+                    reactPlatform.reply(context, "Write your query");
+                }
+                """;
+        awaitingCustomQueryState.setBody(new CustomBody(awaitingCustomQueryStateBody));
+        awaitingCustomQueryState.addOutTransition(new GuardedTransition(awaitingCustomQueryState, saveCustomFilterState, customFilterIntent));
+
+        saveCustomFilterState.setName("SaveCustomFilter");
+        saveCustomFilterState.setVarName("saveCustomFilterState");
+        String saveCustomFilterStateBody = """
+                context -> {
+                    String textualFieldName = (String) context.getIntent().getValue("textualFieldName");
+                    String numericFieldName = (String) context.getIntent().getValue("numericFieldName");
+                    String fieldName = (isNull(textualFieldName) || textualFieldName.isEmpty() ? numericFieldName : textualFieldName);
+
+                    String textualOperatorName = (String) context.getIntent().getValue("textualOperatorName");
+                    String numericOperatorName = (String) context.getIntent().getValue("numericOperatorName");
+                    String operatorName = (isNull(textualOperatorName) || textualOperatorName.isEmpty() ? numericOperatorName : textualOperatorName);
+                    
+                    String operatorValue = (String) context.getIntent().getValue("operatorValue");
+                    
+                    Statement statement = (Statement) context.getSession().get("statement");
+                    statement.addFilter(fieldName, operatorName, operatorValue);
+                    reactPlatform.reply(context,
+                        "'" + fieldName + " " + operatorName + " " + operatorValue + "' added");
+                }
+                """;
+        saveCustomFilterState.setBody(new CustomBody(saveCustomFilterStateBody));
+        saveCustomFilterState.addOutTransition(new AutomaticTransition(saveCustomFilterState, startState));
 
         showDataState.setName("ShowData");
         showDataState.setVarName("showDataState");
@@ -331,6 +387,9 @@ public class BotProperties {
         states.add(selectOperatorNameState);
         states.add(selectOperatorValueState);
         states.add(saveFilterState);
+        states.add(awaitingCustomQueryState);
+        states.add(saveCustomFilterState);
+
     }
 
     public String getBotName() {
