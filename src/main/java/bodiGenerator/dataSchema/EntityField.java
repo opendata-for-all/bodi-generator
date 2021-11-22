@@ -1,4 +1,4 @@
-package bodigenerator.dataschema;
+package bodiGenerator.dataSchema;
 
 import java.util.ArrayList;
 import java.util.List;

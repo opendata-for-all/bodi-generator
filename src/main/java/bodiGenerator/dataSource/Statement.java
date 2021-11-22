@@ -1,4 +1,4 @@
-package bodigenerator.datasource;
+package bodiGenerator.dataSource;
 
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 

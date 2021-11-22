@@ -1,9 +1,11 @@
-import bodigenerator.dataschema.BotProperties;
-import bodigenerator.dataschema.DataSchema;
-import bodigenerator.dataschema.EntityField;
-import bodigenerator.dataschema.EntityType;
-import bodigenerator.datasource.Row;
-import bodigenerator.datasource.TabularDataSource;
+package bodiGenerator;
+
+import bodiGenerator.dataSchema.BotProperties;
+import bodiGenerator.dataSchema.DataSchema;
+import bodiGenerator.dataSchema.EntityField;
+import bodiGenerator.dataSchema.EntityType;
+import bodiGenerator.dataSource.Row;
+import bodiGenerator.dataSource.TabularDataSource;
 import com.xatkit.bot.metamodel.Bot;
 import com.xatkit.bot.metamodel.generator.BotToCode;
 import com.xatkit.bot.metamodel.generator.BotToCodeConfProperties;
@@ -14,7 +16,9 @@ import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -77,10 +81,8 @@ public class BodiGenerator {
     }
 
     public static BotProperties dataSchemaToBotProperties(DataSchema ds, BotToCodeConfProperties conf) {
-        BotProperties bp = new BotProperties();
-        bp.setBotName(conf.getBotName());
-        bp.setCsvFileName(conf.getInputDocName());
-        bp.createBotStructure(ds);
+        BotProperties bp = new BotProperties(conf.getBotName(), conf.getInputDocName(), ds);
+        bp.createBotStructure();
         return bp;
     }
 
@@ -106,12 +108,34 @@ public class BodiGenerator {
         }
         // Copy the datasource code to the bot directory
         try {
-            File dsSource = new File("src/main/java/bodigenerator/datasource/");
-            File dsDest = new File(conf.getOutputFolder() + "src/main/java/bodigenerator/datasource/");
+            File dsSource = new File("src/main/java/bodiGenerator/dataSource/");
+            File dsDest = new File(conf.getOutputFolder() + "src/main/java/bodiGenerator/dataSource/");
             FileUtils.copyDirectory(dsSource, dsDest);
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("The datasource folder was not copied to the Bot folder");
+        }
+        // Copy the Bot code to the bot directory
+        try {
+            File botSource = new File("src/main/java/com/xatkit/bot/");
+            File botDest = new File(conf.getOutputFolder() + "src/main/java/com/xatkit/bot/");
+            FileUtils.copyDirectory(botSource, botDest);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("The datasource folder was not copied to the Bot folder");
+        }
+
+        // Overwrite Entities.java in the bot directory with the generated entities
+        try (PrintWriter out = new PrintWriter(conf.getOutputFolder() + "src/main/java/com/xatkit/bot/library/Entities.java")) {
+            out.println(bp.getEntitiesFile());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        // Create resource botInfo.properties in the bot directory
+        try (PrintWriter out = new PrintWriter(conf.getOutputFolder() + "src/main/resources/botInfo.properties")) {
+            out.println(bp.getBotInfoPropertiesFile());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         }
     }
 }

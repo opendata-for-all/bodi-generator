@@ -1,4 +1,4 @@
-package bodigenerator.datasource;
+package bodiGenerator.dataSource;
 
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
