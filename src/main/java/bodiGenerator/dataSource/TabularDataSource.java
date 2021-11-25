@@ -19,7 +19,7 @@ public class TabularDataSource {
     public TabularDataSource(String filePath) {
         try (CSVReader reader = new CSVReader(new FileReader(filePath))) {
             List<String[]> csv = reader.readAll();
-            header = Arrays.asList(csv.get(0));
+            header = new ArrayList<>(Arrays.asList(csv.get(0)));
             csv.remove(0);
             table = new ArrayList<>();
             csv.forEach(row -> table.add(new Row(new ArrayList<>(Arrays.asList(row)))));
@@ -56,6 +56,18 @@ public class TabularDataSource {
 
     public Statement createStatement() {
         return new Statement(this);
+    }
+
+    public TabularDataSource removeColumn(String columnName) {
+        return removeColumn(header.indexOf(columnName));
+    }
+
+    public TabularDataSource removeColumn(int i) {
+        header.remove(i);
+        for (Row row : table) {
+            row.removeValue(i);
+        }
+        return this;
     }
 
 }

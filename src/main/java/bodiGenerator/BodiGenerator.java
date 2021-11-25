@@ -22,6 +22,7 @@ import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class BodiGenerator {
 
@@ -96,6 +97,17 @@ public class BodiGenerator {
         // Create bot directory and files
         BotToCode.createBot(bot, conf);
 
+        // Create new csv with deleted columns
+        try (PrintWriter out = new PrintWriter(conf.getOutputFolder() + "src/main/resources/" + conf.getInputDocName())) {
+            out.println(tds.getHeader().stream().map(field -> "\"" + field + "\"").collect(Collectors.joining(",")));
+            for (int i = 0; i < tds.getNumRows(); ++i) {
+                out.println(tds.getRow(i).getValues().stream().map(field -> "\"" + field + "\"").collect(Collectors.joining(",")));
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        /*
         // Copy the csv to the bot directory
         try {
             File source = new File(Objects.requireNonNull(BodiGenerator.class.getClassLoader().getResource(
@@ -106,6 +118,8 @@ public class BodiGenerator {
             e.printStackTrace();
             System.out.println("The csv file was not copied to the Bot folder");
         }
+         */
+
         // Copy the datasource code to the bot directory
         try {
             File dsSource = new File("src/main/java/bodiGenerator/dataSource/");
