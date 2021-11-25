@@ -7,9 +7,9 @@ import java.util.List;
 
 public class Statement {
 
-    TabularDataSource tds;
-    List<ImmutableTriple<String, String, String>> filters;
-    List<String> fields;
+    private TabularDataSource tds;
+    private List<ImmutableTriple<String, String, String>> filters;
+    private List<String> fields;
 
     public Statement(TabularDataSource tds) {
         this.tds = tds;
@@ -17,16 +17,24 @@ public class Statement {
         fields = new ArrayList<>();
     }
 
+    public TabularDataSource getTabularDataSource() {
+        return tds;
+    }
+
     public Statement addFilter(String field, String operator, String value) {
-        // TODO: Check not duplicated
-        filters.add(new ImmutableTriple<>(field, operator, value));
+        if (!filters.contains(new ImmutableTriple<>(field, operator, value))) {
+            filters.add(new ImmutableTriple<>(field, operator, value));
+        }
         return this;
     }
 
     // TODO: removeFilter Method
+    // TODO: removeField Method
 
     public Statement addField(String field) {
-        fields.add(field);
+        if (!fields.contains(field)) {
+            fields.add(field);
+        }
         return this;
     }
 
@@ -81,6 +89,14 @@ public class Statement {
             }
         }
         return new ResultSet(header, table);
+    }
+
+    public int getNumFilters() {
+        return filters.size();
+    }
+
+    public int getNumFields() {
+        return fields.size();
     }
 
 }

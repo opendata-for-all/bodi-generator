@@ -30,6 +30,10 @@ public class TabularDataSource {
         }
     }
 
+    public Row getRow(int i) {
+        return table.get(i);
+    }
+
     public int getNumRows() {
         return numRows;
     }
