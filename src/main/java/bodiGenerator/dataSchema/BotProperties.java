@@ -140,7 +140,7 @@ public class BotProperties {
     }
 
     public void createBotInfoPropertiesFile() {
-        botInfoPropertiesFile = CodeGenerator.generateBotInfoPropertiesFile(inputDocName, this.getTypes());
+        botInfoPropertiesFile = CodeGenerator.generateBotInfoPropertiesFile(inputDocName);
     }
 
     public void createBotStructure() {

@@ -3,11 +3,8 @@ package bodiGenerator.dataSchema;
 import com.xatkit.bot.metamodel.IntentParameterType;
 import com.xatkit.bot.metamodel.Mapping;
 import com.xatkit.bot.metamodel.MappingEntry;
-import com.xatkit.dsl.entity.EntityDefinitionReferenceProvider;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class CodeGenerator {
 
@@ -47,24 +44,10 @@ public class CodeGenerator {
                 """.formatted(entities);
     }
 
-    public static String generateBotInfoPropertiesFile(String inputDocName, List<IntentParameterType> types) {
+    public static String generateBotInfoPropertiesFile(String inputDocName) {
         String propertiesFile = """
                 InputDocName=%s
                 """.formatted(inputDocName);
-        for (IntentParameterType type : types) {
-            Mapping mapping = (Mapping) type;
-            String propertyName = type.getName();
-            List<MappingEntry> mappingEntries = mapping.getEntries();
-            List<String> values = new ArrayList<>();
-            for (MappingEntry mappingEntry : mappingEntries) {
-                values.add(mappingEntry.getValue());
-            }
-
-            propertiesFile += """
-                    %s=\\
-                    %s
-                    """.formatted(propertyName, String.join("\\n\\\n", values));
-        }
         return propertiesFile;
     }
 }

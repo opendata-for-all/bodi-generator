@@ -1,7 +1,10 @@
 package com.xatkit.bot.library;
 
+import com.xatkit.dsl.entity.EntityDefinitionReferenceProvider;
 import com.xatkit.i18n.XatkitI18nHelper;
+import com.xatkit.intent.MappingEntityDefinition;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -16,25 +19,10 @@ public class Utils {
         return i18nHelper.getString("InputDocName");
     }
 
-    public static List<String> getFields() {
-        List<String> numericFields = Arrays.asList(i18nHelper.getStringArray("NumericField"));
-        List<String> textualFields = Arrays.asList(i18nHelper.getStringArray("TextualField"));
-        return Stream.concat(numericFields.stream(), textualFields.stream()).collect(Collectors.toList());
-    }
-
-    public static List<String> getNumericFields() {
-        return Arrays.asList(i18nHelper.getStringArray("NumericField"));
-    }
-
-    public static List<String> getTextualFields() {
-        return Arrays.asList(i18nHelper.getStringArray("TextualField"));
-    }
-
-    public static List<String> getNumericOperators() {
-        return Arrays.asList(i18nHelper.getStringArray("NumericOperator"));
-    }
-
-    public static List<String> getTextualOperators() {
-        return Arrays.asList(i18nHelper.getStringArray("TextualOperator"));
+    public static List<String> getEntityValues(EntityDefinitionReferenceProvider entity) {
+        List<String> entityValues = new ArrayList<>();
+        ((MappingEntityDefinition) entity.getEntityReference().getReferredEntity()).getEntries()
+                .forEach(mappingEntityDefinitionEntry -> entityValues.add(mappingEntityDefinitionEntry.getReferenceValue()));
+        return entityValues;
     }
 }
