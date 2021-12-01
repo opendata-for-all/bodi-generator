@@ -1,8 +1,6 @@
 package bodiGenerator.dataSchema;
 
-import com.xatkit.bot.metamodel.CoreIntentParameterType;
 import com.xatkit.bot.metamodel.Intent;
-import com.xatkit.bot.metamodel.IntentParameter;
 import com.xatkit.bot.metamodel.IntentParameterType;
 import com.xatkit.bot.metamodel.Mapping;
 import com.xatkit.bot.metamodel.MappingEntry;
@@ -68,71 +66,6 @@ public class BotProperties {
         textualOperatorEntity.addMappingEntry(new MappingEntry("starts with"));
         textualOperatorEntity.addMappingEntry(new MappingEntry("ends with"));
         types.put("textualOperatorEntity", textualOperatorEntity);
-    }
-
-    // Actually not necessary
-    public void createIntents() {
-        Intent restartIntent = new Intent("Restart", "restartIntent");
-        restartIntent.addTrainingSentence("restart");
-        intents.put("restartIntent", restartIntent);
-
-        Intent showDataIntent = new Intent("ShowData", "showDataIntent");
-        showDataIntent.addTrainingSentence("show data");
-        intents.put("showDataIntent", showDataIntent);
-
-        Intent showNextPageIntent = new Intent("ShowNextPage", "showNextPageIntent");
-        showNextPageIntent.addTrainingSentence("next page");
-        intents.put("showNextPageIntent", showNextPageIntent);
-
-        Intent stopViewIntent = new Intent("StopView", "stopViewIntent");
-        stopViewIntent.addTrainingSentence("stop view");
-        intents.put("stopViewIntent", stopViewIntent);
-
-        Intent addFilterIntent = new Intent("AddFilter", "addFilterIntent");
-        addFilterIntent.addTrainingSentence("add filter");
-        intents.put("addFilterIntent", addFilterIntent);
-
-        Intent addFieldToViewIntent = new Intent("AddFieldToView", "addFieldToViewIntent");
-        addFieldToViewIntent.addTrainingSentence("add field to view");
-        intents.put("addFieldToViewIntent", addFieldToViewIntent);
-
-        Intent customQueryIntent = new Intent("CustomQuery", "customQueryIntent");
-        customQueryIntent.addTrainingSentence("custom query");
-        intents.put("customQueryIntent", customQueryIntent);
-
-        Intent customFilterIntent = new Intent("CustomFilter", "customFilterIntent");
-        // TODO: Check that NUMERICFIELD && NUMERICOPERATOR OR TEXTUALFIELD && TEXTUALOPERATOR (and also check values)
-        customFilterIntent.addTrainingSentence("I want to filter NUMERICFIELD NUMERICOPERATOR VALUE");
-        customFilterIntent.addTrainingSentence("I want to filter TEXTUALFIELD TEXTUALOPERATOR VALUE");
-        customFilterIntent.addTrainingSentence("filter NUMERICFIELD NUMERICOPERATOR VALUE");
-        customFilterIntent.addTrainingSentence("filter TEXTUALFIELD TEXTUALOPERATOR VALUE");
-        customFilterIntent.addTrainingSentence("NUMERICFIELD NUMERICOPERATOR VALUE");
-        customFilterIntent.addTrainingSentence("TEXTUALFIELD TEXTUALOPERATOR VALUE");
-        customFilterIntent.addParameter(new IntentParameter("numericFieldName", "NUMERICFIELD", types.get("numericFieldEntity")));
-        customFilterIntent.addParameter(new IntentParameter("numericOperatorName", "NUMERICOPERATOR", types.get("numericOperatorEntity")));
-        customFilterIntent.addParameter(new IntentParameter("textualFieldName", "TEXTUALFIELD", types.get("textualFieldEntity")));
-        customFilterIntent.addParameter(new IntentParameter("textualOperatorName", "TEXTUALOPERATOR", types.get("textualOperatorEntity")));
-        customFilterIntent.addParameter(new IntentParameter("operatorValue", "VALUE", new CoreIntentParameterType("any")));
-        intents.put("customFilterIntent", customFilterIntent);
-
-        Intent fieldNameIntent = new Intent("FieldName", "fieldNameIntent");
-        fieldNameIntent.addTrainingSentence("NUMERICFIELD");
-        fieldNameIntent.addTrainingSentence("TEXTUALFIELD");
-        fieldNameIntent.addParameter(new IntentParameter("numericFieldName", "NUMERICFIELD", types.get("numericFieldEntity")));
-        fieldNameIntent.addParameter(new IntentParameter("textualFieldName", "TEXTUALFIELD", types.get("textualFieldEntity")));
-        intents.put("fieldNameIntent", fieldNameIntent);
-
-        Intent operatorNameIntent = new Intent("OperatorName", "operatorNameIntent");
-        operatorNameIntent.addTrainingSentence("NUMERICOPERATOR");
-        operatorNameIntent.addTrainingSentence("TEXTUALOPERATOR");
-        operatorNameIntent.addParameter(new IntentParameter("numericOperatorName", "NUMERICOPERATOR", types.get("numericOperatorEntity")));
-        operatorNameIntent.addParameter(new IntentParameter("textualOperatorName", "TEXTUALOPERATOR", types.get("textualOperatorEntity")));
-        intents.put("operatorNameIntent", operatorNameIntent);
-
-        Intent operatorValueIntent = new Intent("OperatorValue", "operatorValueIntent");
-        operatorValueIntent.addTrainingSentence("VALUE");
-        operatorValueIntent.addParameter(new IntentParameter("operatorValue", "VALUE", new CoreIntentParameterType("any")));
-        intents.put("operatorValueIntent", operatorValueIntent); // TODO: SEPARATE NUMERIC AND TEXTUAL ("any") VALUES
     }
 
     public void createEntitiesFile() {

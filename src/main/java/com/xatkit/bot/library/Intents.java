@@ -1,92 +1,86 @@
 package com.xatkit.bot.library;
 
+import com.xatkit.i18n.XatkitI18nHelper;
 import com.xatkit.intent.IntentDefinition;
+
+import java.util.Locale;
 
 import static com.xatkit.dsl.DSL.any;
 import static com.xatkit.dsl.DSL.intent;
+import static com.xatkit.dsl.DSL.number;
 
 
 public class Intents {
 
+    public final static XatkitI18nHelper bundle = new XatkitI18nHelper("intents", Locale.ROOT);
+
     public static final IntentDefinition restartIntent = intent("Restart")
-            .trainingSentence("restart")
+            .trainingSentences(bundle.getStringArray("Restart"))
             .getIntentDefinition()
             ;
     public static final IntentDefinition showDataIntent = intent("ShowData")
-            .trainingSentence("show data")
+            .trainingSentences(bundle.getStringArray("ShowData"))
             .getIntentDefinition()
             ;
     public static final IntentDefinition showNextPageIntent = intent("ShowNextPage")
-            .trainingSentence("next page")
+            .trainingSentences(bundle.getStringArray("ShowNextPage"))
             .getIntentDefinition()
             ;
     public static final IntentDefinition stopViewIntent = intent("StopView")
-            .trainingSentence("stop view")
+            .trainingSentences(bundle.getStringArray("StopView"))
             .getIntentDefinition()
             ;
     public static final IntentDefinition addFilterIntent = intent("AddFilter")
-            .trainingSentence("add filter")
+            .trainingSentences(bundle.getStringArray("AddFilter"))
             .getIntentDefinition()
             ;
     public static final IntentDefinition addFieldToViewIntent = intent("AddFieldToView")
-            .trainingSentence("add field to view")
+            .trainingSentences(bundle.getStringArray("AddFieldToView"))
             .getIntentDefinition()
             ;
     public static final IntentDefinition customQueryIntent = intent("CustomQuery")
-            .trainingSentence("custom query")
+            .trainingSentences(bundle.getStringArray("CustomQuery"))
             .getIntentDefinition()
             ;
     public static final IntentDefinition customFilterIntent = intent("CustomFilter")
-            .trainingSentence("I want to filter NUMERICFIELD NUMERICOPERATOR VALUE")
-            .trainingSentence("I want to filter TEXTUALFIELD TEXTUALOPERATOR VALUE")
-            .trainingSentence("filter NUMERICFIELD NUMERICOPERATOR VALUE")
-            .trainingSentence("filter TEXTUALFIELD TEXTUALOPERATOR VALUE")
-            .trainingSentence("NUMERICFIELD NUMERICOPERATOR VALUE")
-            .trainingSentence("TEXTUALFIELD TEXTUALOPERATOR VALUE")
-            .parameter(ContextKeys.numericFieldName)
-            .fromFragment("NUMERICFIELD")
-            .entity(Entities.numericFieldEntity)
-            .parameter(ContextKeys.numericOperatorName)
-            .fromFragment("NUMERICOPERATOR")
-            .entity(Entities.numericOperatorEntity)
-            .parameter(ContextKeys.textualFieldName)
-            .fromFragment("TEXTUALFIELD")
-            .entity(Entities.textualFieldEntity)
-            .parameter(ContextKeys.textualOperatorName)
-            .fromFragment("TEXTUALOPERATOR")
-            .entity(Entities.textualOperatorEntity)
-            .parameter(ContextKeys.operatorValue)
-            .fromFragment("VALUE")
-            .entity(any())
+            .trainingSentences(bundle.getStringArray("CustomFilter"))
+
+            .parameter(ContextKeys.numericFieldName).fromFragment("NUMERIC_FIELD").entity(Entities.numericFieldEntity)
+            .parameter(ContextKeys.numericOperatorName).fromFragment("NUMERIC_OPERATOR").entity(Entities.numericOperatorEntity)
+
+            .parameter(ContextKeys.textualFieldName).fromFragment("TEXTUAL_FIELD").entity(Entities.textualFieldEntity)
+            .parameter(ContextKeys.textualOperatorName).fromFragment("TEXTUAL_OPERATOR").entity(Entities.textualOperatorEntity)
+
+            .parameter(ContextKeys.value).fromFragment("VALUE").entity(any())
             .getIntentDefinition()
             ;
     public static final IntentDefinition fieldNameIntent = intent("FieldName")
-            .trainingSentence("NUMERICFIELD")
-            .trainingSentence("TEXTUALFIELD")
-            .parameter(ContextKeys.numericFieldName)
-            .fromFragment("NUMERICFIELD")
-            .entity(Entities.numericFieldEntity)
-            .parameter(ContextKeys.textualFieldName)
-            .fromFragment("TEXTUALFIELD")
-            .entity(Entities.textualFieldEntity)
+            .trainingSentences(bundle.getStringArray("FieldName"))
+            .parameter(ContextKeys.numericFieldName).fromFragment("NUMERIC_FIELD").entity(Entities.numericFieldEntity)
+            .parameter(ContextKeys.textualFieldName).fromFragment("TEXTUAL_FIELD").entity(Entities.textualFieldEntity)
             .getIntentDefinition()
             ;
     public static final IntentDefinition operatorNameIntent = intent("OperatorName")
-            .trainingSentence("NUMERICOPERATOR")
-            .trainingSentence("TEXTUALOPERATOR")
-            .parameter(ContextKeys.numericOperatorName)
-            .fromFragment("NUMERICOPERATOR")
-            .entity(Entities.numericOperatorEntity)
-            .parameter(ContextKeys.textualOperatorName)
-            .fromFragment("TEXTUALOPERATOR")
-            .entity(Entities.textualOperatorEntity)
+            .trainingSentences(bundle.getStringArray("OperatorName"))
+            .parameter(ContextKeys.numericOperatorName).fromFragment("NUMERIC_OPERATOR").entity(Entities.numericOperatorEntity)
+            .parameter(ContextKeys.textualOperatorName).fromFragment("TEXTUAL_OPERATOR").entity(Entities.textualOperatorEntity)
             .getIntentDefinition()
             ;
-    public static final IntentDefinition operatorValueIntent = intent("OperatorValue")
-            .trainingSentence("VALUE")
-            .parameter(ContextKeys.operatorValue)
-            .fromFragment("VALUE")
-            .entity(any())
+    public static final IntentDefinition valueIntent = intent("Value")
+            .trainingSentences(bundle.getStringArray("Value"))
+            .parameter(ContextKeys.value).fromFragment("VALUE").entity(any())
+            .getIntentDefinition()
+        ;
+    /*
+    public static final IntentDefinition numericValueIntent = intent("NumericValue")
+            .trainingSentences(bundle.getStringArray("NumericValue"))
+            .parameter(ContextKeys.numericValue).fromFragment("NUMERIC_VALUE").entity(number())
             .getIntentDefinition()
             ;
+    public static final IntentDefinition textualValueIntent = intent("TextualValue")
+            .trainingSentences(bundle.getStringArray("TextualValue"))
+            .parameter(ContextKeys.textualValue).fromFragment("TEXTUAL_VALUE").entity(any())
+            .getIntentDefinition()
+            ;
+     */
 }

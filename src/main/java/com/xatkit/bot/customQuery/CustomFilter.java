@@ -8,8 +8,9 @@ import com.xatkit.plugins.react.platform.ReactPlatform;
 import lombok.Getter;
 import lombok.val;
 
+import static com.xatkit.bot.library.Utils.isNumeric;
 import static com.xatkit.dsl.DSL.state;
-import static java.util.Objects.isNull;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 public class CustomFilter {
 
@@ -23,18 +24,30 @@ public class CustomFilter {
                 .body(context -> {
                             String textualFieldName = (String) context.getIntent().getValue(ContextKeys.textualFieldName);
                             String numericFieldName = (String) context.getIntent().getValue(ContextKeys.numericFieldName);
-                            String fieldName = (isNull(textualFieldName) || textualFieldName.isEmpty() ? numericFieldName : textualFieldName);
+                            String fieldName = (!isEmpty(textualFieldName) ? textualFieldName : numericFieldName);
 
                             String textualOperatorName = (String) context.getIntent().getValue(ContextKeys.textualOperatorName);
                             String numericOperatorName = (String) context.getIntent().getValue(ContextKeys.numericOperatorName);
-                            String operatorName = (isNull(textualOperatorName) || textualOperatorName.isEmpty() ? numericOperatorName : textualOperatorName);
+                            String operatorName = (!isEmpty(textualOperatorName) ? textualOperatorName : numericOperatorName);
 
-                            String operatorValue = (String) context.getIntent().getValue(ContextKeys.operatorValue);
+                            String value = (String) context.getIntent().getValue(ContextKeys.value);
 
-                            Statement statement = (Statement) context.getSession().get(ContextKeys.statement);
-                            statement.addFilter(fieldName, operatorName, operatorValue);
-                            reactPlatform.reply(context,
-                                    "'" + fieldName + " " + operatorName + " " + operatorValue + "' added");
+                            if (!isEmpty(numericFieldName) &&
+                                    !isEmpty(numericOperatorName) &&
+                                    !isNumeric(value)) {
+                                reactPlatform.reply(context, "Expected a numeric value");
+                            } else if (!isEmpty(numericFieldName) &&
+                                    !isEmpty(textualOperatorName)) {
+                                reactPlatform.reply(context, "Expected a numeric operator (and value)");
+                            } else if (!isEmpty(textualFieldName) &&
+                                    !isEmpty(numericOperatorName)){
+                                reactPlatform.reply(context, "Expected a textual operator");
+                            } else {
+                                Statement statement = (Statement) context.getSession().get(ContextKeys.statement);
+                                statement.addFilter(fieldName, operatorName, value);
+                                reactPlatform.reply(context,
+                                        "'" + fieldName + " " + operatorName + " " + value + "' added");
+                            }
                         }
                 )
                 .next()

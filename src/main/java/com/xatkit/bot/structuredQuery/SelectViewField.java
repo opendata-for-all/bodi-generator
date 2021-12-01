@@ -14,6 +14,7 @@ import java.util.List;
 import static com.xatkit.dsl.DSL.intentIs;
 import static com.xatkit.dsl.DSL.state;
 import static java.util.Objects.isNull;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 public class SelectViewField {
 
@@ -36,7 +37,7 @@ public class SelectViewField {
                 .body(context -> {
                             String textualFieldName = (String) context.getIntent().getValue(ContextKeys.textualFieldName);
                             String numericFieldName = (String) context.getIntent().getValue(ContextKeys.numericFieldName);
-                            String fieldName = (isNull(textualFieldName) || textualFieldName.isEmpty() ? numericFieldName : textualFieldName);
+                            String fieldName = (!isEmpty(textualFieldName) ? textualFieldName : numericFieldName);
                             Statement statement = (Statement) context.getSession().get(ContextKeys.statement);
                             statement.addField(fieldName);
                             List<String> viewFieldOptions = (List<String>) context.getSession().get(ContextKeys.viewFieldOptions);

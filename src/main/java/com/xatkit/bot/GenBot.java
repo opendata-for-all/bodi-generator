@@ -134,7 +134,7 @@ public class GenBot {
 			botConfiguration = configurations.properties(Thread.currentThread().getContextClassLoader().getResource("bot.properties"));
 		} catch (ConfigurationException e) {
 			e.printStackTrace();
-			System.out.println("file not found");
+			System.out.println("Configuration file not found");
 		}
 
 		XatkitBot xatkitBot = new XatkitBot(botModel, botConfiguration);
