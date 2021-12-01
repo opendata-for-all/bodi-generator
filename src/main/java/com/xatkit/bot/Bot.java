@@ -10,6 +10,8 @@ import com.xatkit.bot.showData.ShowData;
 import com.xatkit.bot.structuredQuery.SelectViewField;
 import com.xatkit.bot.structuredQuery.StructuredFilter;
 import com.xatkit.core.XatkitBot;
+import com.xatkit.core.recognition.IntentRecognitionProviderFactoryConfiguration;
+import com.xatkit.core.recognition.nlpjs.NlpjsConfiguration;
 import com.xatkit.plugins.react.platform.ReactPlatform;
 import com.xatkit.plugins.react.platform.io.ReactEventProvider;
 import com.xatkit.plugins.react.platform.io.ReactIntentProvider;
@@ -20,9 +22,10 @@ import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
+import java.util.ResourceBundle;
 
 import static com.xatkit.dsl.DSL.eventIs;
 import static com.xatkit.dsl.DSL.fallbackState;
@@ -33,7 +36,12 @@ import static com.xatkit.dsl.DSL.state;
 /*
  * This is an automatically generated bot
  */
-public class GenBot {
+public class Bot {
+
+	public static String LANGUAGE = "cat";
+	public static Locale LOCALE = new Locale(LANGUAGE);
+	//public static CoreLibraryI18n CoreLibrary = new CoreLibraryI18n(LOCALE);
+	public static ResourceBundle messages = ResourceBundle.getBundle("messages", LOCALE);
 
 	public static void main(String[] args) {
 
@@ -44,7 +52,6 @@ public class GenBot {
 		ReactPlatform reactPlatform = new ReactPlatform();
 		ReactEventProvider reactEventProvider = reactPlatform.getReactEventProvider();
 		ReactIntentProvider reactIntentProvider = reactPlatform.getReactIntentProvider();
-
 
 		/*
 		 * Create the states we want to use in our bot.
@@ -74,7 +81,6 @@ public class GenBot {
 		awaitingInput
 				.body(context -> {
 							if (!context.getSession().containsKey(ContextKeys.tabularDataSource)) {
-								//context.getSession().put(ContextKeys.tabularDataSource,new TabularDataSource(Objects.requireNonNull(GenBot.class.getClassLoader().getResource("odata_poblacio_nacionalitat_genere.csv")).getPath()));
 								context.getSession().put(ContextKeys.tabularDataSource,
 										new TabularDataSource(Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResource(Utils.getInputDocName())).getPath()));
 							}
@@ -87,7 +93,7 @@ public class GenBot {
 							context.getSession().put(ContextKeys.filterFieldOptions, filterFieldOptions);
 							List<String> viewFieldOptions = new ArrayList<>(fields);
 							context.getSession().put(ContextKeys.viewFieldOptions, viewFieldOptions);
-							reactPlatform.reply(context, "Data Structures initialized");
+							reactPlatform.reply(context, messages.getString("DataStructuresInitialized"));
 						}
 				)
 				.next()
@@ -95,7 +101,13 @@ public class GenBot {
 		;
 		startState
 				.body(context -> {
-							reactPlatform.reply(context, "Select an operation", Arrays.asList("add filter", "add field to view", "show data", "custom query", "restart"));
+							reactPlatform.reply(context, messages.getString("SelectOperation"),
+									Utils.getFirstTrainingSentences(
+											Intents.addFilterIntent,
+											Intents.addFieldToViewIntent,
+											Intents.showDataIntent,
+											Intents.customQueryIntent,
+											Intents.restartIntent));
 						}
 				)
 				.next()
@@ -111,7 +123,7 @@ public class GenBot {
 		 * doesn't contain a fallback.
 		 */
 		val defaultFallback = fallbackState()
-				.body(context -> reactPlatform.reply(context, "Sorry, I didn't get it"));
+				.body(context -> reactPlatform.reply(context, messages.getString("DefaultFallbackMessage")));
 
 		/*
 		 * Creates the bot model that will be executed by the Xatkit engine.

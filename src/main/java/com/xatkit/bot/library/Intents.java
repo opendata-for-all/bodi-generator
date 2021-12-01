@@ -1,18 +1,15 @@
 package com.xatkit.bot.library;
 
+import com.xatkit.bot.Bot;
 import com.xatkit.i18n.XatkitI18nHelper;
 import com.xatkit.intent.IntentDefinition;
 
-import java.util.Locale;
-
 import static com.xatkit.dsl.DSL.any;
 import static com.xatkit.dsl.DSL.intent;
-import static com.xatkit.dsl.DSL.number;
-
 
 public class Intents {
 
-    public final static XatkitI18nHelper bundle = new XatkitI18nHelper("intents", Locale.ROOT);
+    public final static XatkitI18nHelper bundle = new XatkitI18nHelper("intents", Bot.LOCALE);
 
     public static final IntentDefinition restartIntent = intent("Restart")
             .trainingSentences(bundle.getStringArray("Restart"))

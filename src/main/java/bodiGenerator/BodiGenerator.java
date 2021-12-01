@@ -120,6 +120,10 @@ public class BodiGenerator {
             Path pomFile = Files.createFile(Paths.get(outputFolder + "/pom.xml"));
             Files.write(pomFile, POMBotGenerator.pomTemplate(conf.getBotName()).getBytes());
 
+            // System.out.println("Creating the bot configuration file");
+            // Path confFile = Files.createFile(Paths.get(outputFolder + "/src/main/resources/bot.properties"));
+            // Files.write(confFile, ConfFileGenerator.confTemplate(conf).getBytes());
+
             // System.out.println("Creating the bot definition file");
             // Path botFile = Files.createFile(Paths.get(outputFolder + "/src/main/java/" + botName + ".java"));
             // Files.write(botFile, CoreBotGenerator.botTemplate(conf, bot).getBytes(), new OpenOption[0]);
@@ -146,6 +150,21 @@ public class BodiGenerator {
             File intentsSource = new File("src/main/resources/intents.properties");
             File intentsDest = new File(outputFolder + "/src/main/resources/intents.properties");
             FileUtils.copyFile(intentsSource, intentsDest);
+
+            System.out.println("Creating resource intents_cat.properties");
+            File intents_catSource = new File("src/main/resources/intents_cat.properties");
+            File intents_catDest = new File(outputFolder + "/src/main/resources/intents_cat.properties");
+            FileUtils.copyFile(intents_catSource, intents_catDest);
+
+            System.out.println("Creating resource messages.properties");
+            File messagesSource = new File("src/main/resources/messages.properties");
+            File messagesDest = new File(outputFolder + "/src/main/resources/messages.properties");
+            FileUtils.copyFile(messagesSource, messagesDest);
+
+            System.out.println("Creating resource messages_cat.properties");
+            File messages_catSource = new File("src/main/resources/messages_cat.properties");
+            File messages_catDest = new File(outputFolder + "/src/main/resources/messages_cat.properties");
+            FileUtils.copyFile(messages_catSource, messages_catDest);
         } catch (IOException e) {
             e.printStackTrace();
         }

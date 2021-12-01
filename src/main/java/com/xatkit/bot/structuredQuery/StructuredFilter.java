@@ -11,8 +11,10 @@ import com.xatkit.plugins.react.platform.ReactPlatform;
 import lombok.Getter;
 import lombok.val;
 
+import java.text.MessageFormat;
 import java.util.List;
 
+import static com.xatkit.bot.Bot.messages;
 import static com.xatkit.bot.library.Utils.isNumeric;
 import static com.xatkit.dsl.DSL.intentIs;
 import static com.xatkit.dsl.DSL.state;
@@ -31,7 +33,8 @@ public class StructuredFilter {
 
         selectFilterFieldState
                 .body(context -> {
-                            reactPlatform.reply(context, "Select a field", (List<String>) context.getSession().get(ContextKeys.filterFieldOptions));
+                            reactPlatform.reply(context, messages.getString("SelectField"),
+                                    (List<String>) context.getSession().get(ContextKeys.filterFieldOptions));
                         }
                 )
                 .next()
@@ -43,10 +46,12 @@ public class StructuredFilter {
                             String numericFieldName = (String) context.getIntent().getValue(ContextKeys.numericFieldName);
                             if (!isEmpty(textualFieldName)) {
                                 context.getSession().put(ContextKeys.lastFieldName, textualFieldName);
-                                reactPlatform.reply(context, "Select an operator", Utils.getEntityValues(Entities.textualOperatorEntity));
+                                reactPlatform.reply(context, messages.getString("SelectOperator"),
+                                        Utils.getEntityValues(Entities.textualOperatorEntity));
                             } else if (!isEmpty(numericFieldName)) {
                                 context.getSession().put(ContextKeys.lastFieldName, numericFieldName);
-                                reactPlatform.reply(context, "Select an operator", Utils.getEntityValues(Entities.numericOperatorEntity));
+                                reactPlatform.reply(context, messages.getString("SelectOperator"),
+                                        Utils.getEntityValues(Entities.numericOperatorEntity));
                             }
                         }
                 )
@@ -64,7 +69,7 @@ public class StructuredFilter {
                                 context.getSession().put(ContextKeys.lastOperatorName, numericOperatorName);
                                 context.getSession().put(ContextKeys.lastOperatorType, "numeric");
                             }
-                            reactPlatform.reply(context, "Write a value");
+                            reactPlatform.reply(context, messages.getString("WriteValue"));
                         }
                 )
                 .next()
@@ -81,12 +86,12 @@ public class StructuredFilter {
                             //String value = (String) context.getIntent().getValue(ContextKeys.value);
                             if (operatorType.equals("numeric") && !isNumeric(value)) {
                                 context.getSession().put(ContextKeys.operatorValueError, true);
-                                reactPlatform.reply(context, "Expected a numeric value...");
+                                reactPlatform.reply(context, messages.getString("ExpectedNumericValue"));
                             } else {
                                 Statement statement = (Statement) context.getSession().get(ContextKeys.statement);
                                 statement.addFilter(fieldName, operatorName, value);
-                                reactPlatform.reply(context,
-                                        "'" + fieldName + " " + operatorName + " " + value + "' added");
+                                reactPlatform.reply(context, MessageFormat.format(messages.getString("FilterAdded"),
+                                        fieldName, operatorName, value));
                             }
                             /*
                             if (!isEmpty(textualValue)) {

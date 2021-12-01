@@ -9,11 +9,12 @@ import com.xatkit.plugins.react.platform.ReactPlatform;
 import lombok.Getter;
 import lombok.val;
 
+import java.text.MessageFormat;
 import java.util.List;
 
+import static com.xatkit.bot.Bot.messages;
 import static com.xatkit.dsl.DSL.intentIs;
 import static com.xatkit.dsl.DSL.state;
-import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 public class SelectViewField {
@@ -27,7 +28,8 @@ public class SelectViewField {
 
         selectViewFieldState
                 .body(context -> {
-                            reactPlatform.reply(context, "Select a field", (List<String>) context.getSession().get(ContextKeys.viewFieldOptions));
+                            reactPlatform.reply(context, messages.getString("SelectField"),
+                                    (List<String>) context.getSession().get(ContextKeys.viewFieldOptions));
                         }
                 )
                 .next()
@@ -42,7 +44,8 @@ public class SelectViewField {
                             statement.addField(fieldName);
                             List<String> viewFieldOptions = (List<String>) context.getSession().get(ContextKeys.viewFieldOptions);
                             viewFieldOptions.remove(fieldName);
-                            reactPlatform.reply(context, fieldName + " added to the view");
+                            reactPlatform.reply(context,
+                                    MessageFormat.format(messages.getString("FieldAddedToView"), fieldName));
                         }
                 )
                 .next()

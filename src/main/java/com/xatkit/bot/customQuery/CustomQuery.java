@@ -7,6 +7,7 @@ import com.xatkit.plugins.react.platform.ReactPlatform;
 import lombok.Getter;
 import lombok.val;
 
+import static com.xatkit.bot.Bot.messages;
 import static com.xatkit.dsl.DSL.intentIs;
 import static com.xatkit.dsl.DSL.state;
 
@@ -21,7 +22,7 @@ public class CustomQuery {
 
         awaitingCustomQueryState
                 .body(context -> {
-                            reactPlatform.reply(context, "Write your query");
+                            reactPlatform.reply(context, messages.getString("WriteYourQuery"));
                         }
                 )
                 .next()

@@ -8,6 +8,9 @@ import com.xatkit.plugins.react.platform.ReactPlatform;
 import lombok.Getter;
 import lombok.val;
 
+import java.text.MessageFormat;
+
+import static com.xatkit.bot.Bot.messages;
 import static com.xatkit.bot.library.Utils.isNumeric;
 import static com.xatkit.dsl.DSL.state;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -35,18 +38,18 @@ public class CustomFilter {
                             if (!isEmpty(numericFieldName) &&
                                     !isEmpty(numericOperatorName) &&
                                     !isNumeric(value)) {
-                                reactPlatform.reply(context, "Expected a numeric value");
+                                reactPlatform.reply(context, messages.getString("ExpectedNumericValue"));
                             } else if (!isEmpty(numericFieldName) &&
                                     !isEmpty(textualOperatorName)) {
-                                reactPlatform.reply(context, "Expected a numeric operator (and value)");
+                                reactPlatform.reply(context, messages.getString("ExpectedNumericOperator"));
                             } else if (!isEmpty(textualFieldName) &&
                                     !isEmpty(numericOperatorName)){
-                                reactPlatform.reply(context, "Expected a textual operator");
+                                reactPlatform.reply(context, messages.getString("ExpectedTextualOperator"));
                             } else {
                                 Statement statement = (Statement) context.getSession().get(ContextKeys.statement);
                                 statement.addFilter(fieldName, operatorName, value);
-                                reactPlatform.reply(context,
-                                        "'" + fieldName + " " + operatorName + " " + value + "' added");
+                                reactPlatform.reply(context, MessageFormat.format(messages.getString("FilterAdded"),
+                                        fieldName, operatorName, value));
                             }
                         }
                 )

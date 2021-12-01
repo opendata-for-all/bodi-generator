@@ -4,15 +4,17 @@ import bodiGenerator.dataSource.ResultSet;
 import bodiGenerator.dataSource.Statement;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Intents;
+import com.xatkit.bot.library.Utils;
 import com.xatkit.dsl.state.StateProvider;
 import com.xatkit.execution.State;
 import com.xatkit.plugins.react.platform.ReactPlatform;
 import lombok.Getter;
 import lombok.val;
 
-import java.util.Arrays;
+import java.text.MessageFormat;
 import java.util.stream.Collectors;
 
+import static com.xatkit.bot.Bot.messages;
 import static com.xatkit.dsl.DSL.intentIs;
 import static com.xatkit.dsl.DSL.state;
 
@@ -23,13 +25,14 @@ public class ShowData {
 
     public ShowData(ReactPlatform reactPlatform, StateProvider returnState) {
         val showDataState = state("ShowData");
+
         showDataState
                 .body(context -> {
                             Statement statement = (Statement) context.getSession().get(ContextKeys.statement);
                             ResultSet resultSet = statement.executeQuery();
                             int pageLimit = 10;
                             int pageCount = 1;
-                            if (context.getIntent().getMatchedInput().equals("next page")) {
+                            if (context.getIntent().getMatchedInput().equals(Intents.showNextPageIntent.getTrainingSentences().get(0))) {
                                 pageCount = (int) context.getSession().get(ContextKeys.pageCount) + 1;
                             }
                             int totalEntries = resultSet.getNumRows();
@@ -54,11 +57,14 @@ public class ShowData {
                                     data += "|" + String.join("|", resultSet.getRow(i).getValues()) + "|" + "\n";
                                 }
                                 int selectedEntries = (offset + pageLimit > totalEntries ? totalEntries - offset : pageLimit);
-                                reactPlatform.reply(context, "Showing " + selectedEntries + " records of a total of " + totalEntries);
-                                reactPlatform.reply(context, "Page " + pageCount + "/" + totalPages);
-                                reactPlatform.reply(context, header + data, Arrays.asList("next page", "stop view"));
+                                reactPlatform.reply(context, MessageFormat.format(messages.getString("ShowingRecords"), selectedEntries, totalEntries));
+                                reactPlatform.reply(context, MessageFormat.format(messages.getString("PageCount"), pageCount, totalPages));
+                                reactPlatform.reply(context, header + data, Utils.getFirstTrainingSentences(
+                                        Intents.showNextPageIntent,
+                                        Intents.stopViewIntent));
                             } else {
-                                reactPlatform.reply(context, "Nothing found.", Arrays.asList("stop view"));
+                                reactPlatform.reply(context, messages.getString("NothingFound"),
+                                        Utils.getFirstTrainingSentences(Intents.stopViewIntent));
                             }
                         }
                 )
