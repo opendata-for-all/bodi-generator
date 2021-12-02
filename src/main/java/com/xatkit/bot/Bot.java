@@ -10,8 +10,6 @@ import com.xatkit.bot.showData.ShowData;
 import com.xatkit.bot.structuredQuery.SelectViewField;
 import com.xatkit.bot.structuredQuery.StructuredFilter;
 import com.xatkit.core.XatkitBot;
-import com.xatkit.core.recognition.IntentRecognitionProviderFactoryConfiguration;
-import com.xatkit.core.recognition.nlpjs.NlpjsConfiguration;
 import com.xatkit.plugins.react.platform.ReactPlatform;
 import com.xatkit.plugins.react.platform.io.ReactEventProvider;
 import com.xatkit.plugins.react.platform.io.ReactIntentProvider;
@@ -38,13 +36,32 @@ import static com.xatkit.dsl.DSL.state;
  */
 public class Bot {
 
-	public static String LANGUAGE = "cat";
-	public static Locale LOCALE = new Locale(LANGUAGE);
+	public static String LANGUAGE = null;
+	public static String BOT_PROPERTIES_FILE = "bot.properties";
+	public static ResourceBundle messages = null;
+	public static Locale LOCALE = null;
+	public static String inputDoc = null;
 	//public static CoreLibraryI18n CoreLibrary = new CoreLibraryI18n(LOCALE);
-	public static ResourceBundle messages = ResourceBundle.getBundle("messages", LOCALE);
 
 	public static void main(String[] args) {
 
+		/*
+		 * Add configuration properties (e.g. authentication tokens, platform tuning, intent provider to use).
+		 * Check the corresponding platform's wiki page for further information on optional/mandatory parameters and
+		 * their values.
+		 */
+		Configuration botConfiguration = new BaseConfiguration();
+		Configurations configurations = new Configurations();
+		try {
+			botConfiguration = configurations.properties(Thread.currentThread().getContextClassLoader().getResource(BOT_PROPERTIES_FILE));
+		} catch (ConfigurationException e) {
+			e.printStackTrace();
+			System.out.println("Configuration file not found");
+		}
+		LANGUAGE = botConfiguration.getString("bot.language", "en");
+		LOCALE = new Locale(LANGUAGE);
+		messages = ResourceBundle.getBundle("messages", LOCALE);
+		inputDoc = botConfiguration.getString("xls.importer.xls");
 
 		/*
 		 * Instantiate the platform and providers we will use in the bot definition.
@@ -67,22 +84,16 @@ public class Bot {
 
 		/*
 		 * Specify the content of the bot states (i.e. the behavior of the bot).
-		 *
 		 */
 		init
 				.next()
-				/*
-				 * We check that the received event matches the ClientReady event defined in the
-				 * ReactEventProvider. The list of events defined in a provider is available in the provider's
-				 * wiki page.
-				 */
 				.when(eventIs(ReactEventProvider.ClientReady)).moveTo(awaitingInput)
 		;
 		awaitingInput
 				.body(context -> {
 							if (!context.getSession().containsKey(ContextKeys.tabularDataSource)) {
 								context.getSession().put(ContextKeys.tabularDataSource,
-										new TabularDataSource(Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResource(Utils.getInputDocName())).getPath()));
+										new TabularDataSource(Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResource(inputDoc)).getPath()));
 							}
 							List<String> fields = new ArrayList<>();
 							fields.addAll(Utils.getEntityValues(Entities.numericFieldEntity));
@@ -135,19 +146,6 @@ public class Bot {
 				.initState(init)
 				.defaultFallbackState(defaultFallback);
 
-		Configuration botConfiguration = new BaseConfiguration();
-		/*
-		 * Add configuration properties (e.g. authentication tokens, platform tuning, intent provider to use).
-		 * Check the corresponding platform's wiki page for further information on optional/mandatory parameters and
-		 * their values.
-		 */
-		Configurations configurations = new Configurations();
-		try {
-			botConfiguration = configurations.properties(Thread.currentThread().getContextClassLoader().getResource("bot.properties"));
-		} catch (ConfigurationException e) {
-			e.printStackTrace();
-			System.out.println("Configuration file not found");
-		}
 
 		XatkitBot xatkitBot = new XatkitBot(botModel, botConfiguration);
 		xatkitBot.run();

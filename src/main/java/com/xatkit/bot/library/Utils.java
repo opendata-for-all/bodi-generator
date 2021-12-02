@@ -1,7 +1,6 @@
 package com.xatkit.bot.library;
 
 import com.xatkit.dsl.entity.EntityDefinitionReferenceProvider;
-import com.xatkit.i18n.XatkitI18nHelper;
 import com.xatkit.intent.EntityDefinition;
 import com.xatkit.intent.IntentDefinition;
 import com.xatkit.intent.MappingEntityDefinition;
@@ -11,7 +10,6 @@ import lombok.NonNull;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.Collectors;
 
 import static fr.inria.atlanmod.commons.Preconditions.checkArgument;
@@ -19,12 +17,6 @@ import static fr.inria.atlanmod.commons.Preconditions.checkNotNull;
 import static java.util.Objects.nonNull;
 
 public class Utils {
-
-    private final static XatkitI18nHelper BOT_INFO = new XatkitI18nHelper("botInfo", Locale.ROOT);
-
-    public static String getInputDocName() {
-        return BOT_INFO.getString("InputDocName");
-    }
 
     public static List<String> getEntityValues(EntityDefinitionReferenceProvider entity) {
         EntityDefinition referredEntity = entity.getEntityReference().getReferredEntity();
