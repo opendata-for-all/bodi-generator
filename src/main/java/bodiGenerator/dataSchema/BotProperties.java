@@ -21,7 +21,6 @@ public class BotProperties {
     private Map<String, Intent> intents = new HashMap<>();
     private List<State> states = new ArrayList<>();
     private String entitiesFile;
-    private String botInfoPropertiesFile;
 
     public BotProperties(String botName, String inputDocName, DataSchema ds) {
         this.botName = botName;
@@ -72,15 +71,10 @@ public class BotProperties {
         entitiesFile = CodeGenerator.generateEntitiesFile(this.getTypes());
     }
 
-    public void createBotInfoPropertiesFile() {
-        botInfoPropertiesFile = CodeGenerator.generateBotInfoPropertiesFile(inputDocName);
-    }
-
     public void createBotStructure() {
         EntityType mainEntityType = ds.getEntityType("mainEntityType");
         createTypes(mainEntityType);
         createEntitiesFile();
-        createBotInfoPropertiesFile();
     }
 
     public String getBotName() {
@@ -105,9 +99,5 @@ public class BotProperties {
 
     public String getEntitiesFile() {
         return entitiesFile;
-    }
-
-    public String getBotInfoPropertiesFile() {
-        return botInfoPropertiesFile;
     }
 }

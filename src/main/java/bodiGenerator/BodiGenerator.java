@@ -92,7 +92,7 @@ public class BodiGenerator {
 
     public static void main(String[] args) {
         // Load bot properties
-        BotToCodeConfProperties conf = loadBotConfProperties("botconfiguration.properties");
+        BotToCodeConfProperties conf = loadBotConfProperties("bot.properties");
         TabularDataSource tds = createTabularDataSource(conf.getInputDocName());
         DataSchema ds = tabularDataSourceToDataSchema(tds);
         BotProperties bp = dataSchemaToBotProperties(ds, conf);
@@ -124,6 +124,11 @@ public class BodiGenerator {
             // Path confFile = Files.createFile(Paths.get(outputFolder + "/src/main/resources/bot.properties"));
             // Files.write(confFile, ConfFileGenerator.confTemplate(conf).getBytes());
 
+            System.out.println("Creating the bot configuration file");
+            File botConfSource = new File("src/main/resources/bot.properties");
+            File botConfDest = new File(outputFolder + "/src/main/resources/bot.properties");
+            FileUtils.copyFile(botConfSource, botConfDest);
+
             // System.out.println("Creating the bot definition file");
             // Path botFile = Files.createFile(Paths.get(outputFolder + "/src/main/java/" + botName + ".java"));
             // Files.write(botFile, CoreBotGenerator.botTemplate(conf, bot).getBytes(), new OpenOption[0]);
@@ -141,10 +146,6 @@ public class BodiGenerator {
             System.out.println("Overwriting Entities.java");
             Path entitiesFile = Paths.get(outputFolder + "/src/main/java/com/xatkit/bot/library/Entities.java");
             Files.write(entitiesFile, bp.getEntitiesFile().getBytes());
-
-            System.out.println("Creating resource botInfo.properties");
-            Path botInfo = Files.createFile(Paths.get(outputFolder + "/src/main/resources/botInfo.properties"));
-            Files.write(botInfo, bp.getBotInfoPropertiesFile().getBytes());
 
             System.out.println("Creating resource intents.properties");
             File intentsSource = new File("src/main/resources/intents.properties");

@@ -43,11 +43,4 @@ public class CodeGenerator {
                 }
                 """.formatted(entities);
     }
-
-    public static String generateBotInfoPropertiesFile(String inputDocName) {
-        String propertiesFile = """
-                InputDocName=%s
-                """.formatted(inputDocName);
-        return propertiesFile;
-    }
 }
