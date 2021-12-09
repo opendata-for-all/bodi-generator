@@ -38,10 +38,10 @@ public class EntityType {
             for (Row row : tds.getTableCopy()) {
                 String value = row.getColumnValue(columnIndex);
                 fieldValuesSet.add(value);
-                if (dataTypes.get(NUMBER) && isNumeric(value)) {
+                if (dataTypes.get(NUMBER) && !isNumeric(value)) {
                     dataTypes.put(NUMBER, false);
                 }
-                if (dataTypes.get(DATE) && isDate(value)) {
+                if (dataTypes.get(DATE) && !isDate(value)) {
                     dataTypes.put(DATE, false);
                 }
             }
