@@ -101,6 +101,8 @@ public class Bot {
 							fields.addAll(Utils.getEntityValues(Entities.dateFieldEntity));
 							TabularDataSource tds = (TabularDataSource) context.getSession().get(ContextKeys.tabularDataSource);
 							context.getSession().put(ContextKeys.statement, tds.createStatement());
+							// Uncomment to disable case-sensitivity in filter values
+								//.ignoreCaseFilterValue(true));
 							List<String> filterFieldOptions = new ArrayList<>(fields);
 							context.getSession().put(ContextKeys.filterFieldOptions, filterFieldOptions);
 							List<String> viewFieldOptions = new ArrayList<>(fields);

@@ -10,11 +10,18 @@ public class Statement {
     private TabularDataSource tds;
     private List<ImmutableTriple<String, String, String>> filters;
     private List<String> fields;
+    private boolean ignoreCaseFilterValue;
 
     public Statement(TabularDataSource tds) {
         this.tds = tds;
-        filters = new ArrayList<>();
-        fields = new ArrayList<>();
+        this.filters = new ArrayList<>();
+        this.fields = new ArrayList<>();
+        this.ignoreCaseFilterValue = false;
+    }
+
+    public Statement ignoreCaseFilterValue(boolean ignoreCaseFilterValue) {
+        this.ignoreCaseFilterValue = ignoreCaseFilterValue;
+        return this;
     }
 
     public TabularDataSource getTabularDataSource() {
@@ -43,39 +50,47 @@ public class Statement {
         List<Row> table = tds.getTableCopy();
         // Filtering
         for (ImmutableTriple<String, String, String> f : filters) {
+            String value;
+            if (ignoreCaseFilterValue) {
+                value = f.right.toLowerCase();
+            } else {
+                value = f.right;
+            }
             switch(f.middle) {
+                // Numeric Filters
                 case "=":
-                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) == Float.parseFloat(f.right)));
+                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) == Float.parseFloat(value)));
                     break;
                 case "<":
-                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) < Float.parseFloat(f.right)));
+                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) < Float.parseFloat(value)));
                     break;
                 case "<=":
-                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) <= Float.parseFloat(f.right)));
+                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) <= Float.parseFloat(value)));
                     break;
                 case ">":
-                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) > Float.parseFloat(f.right)));
+                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) > Float.parseFloat(value)));
                     break;
                 case ">=":
-                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) >= Float.parseFloat(f.right)));
+                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) >= Float.parseFloat(value)));
                     break;
                 case "!=":
-                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) != Float.parseFloat(f.right)));
+                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) != Float.parseFloat(value)));
                     break;
+                // Textual Filters
                 case "equals":
-                    table.removeIf(row -> !(row.getColumnValue(header.indexOf(f.left)).equals(f.right)));
+                    table.removeIf(row -> !(row.getColumnValue(header.indexOf(f.left), ignoreCaseFilterValue).equals(value)));
                     break;
                 case "different":
-                    table.removeIf(row -> row.getColumnValue(header.indexOf(f.left)).equals(f.right));
+                    table.removeIf(row -> row.getColumnValue(header.indexOf(f.left), ignoreCaseFilterValue).equals(value));
                     break;
                 case "contains":
-                    table.removeIf(row -> !(row.getColumnValue(header.indexOf(f.left)).contains(f.right)));
+                    table.removeIf(row -> !(row.getColumnValue(header.indexOf(f.left), ignoreCaseFilterValue).contains(value)));
                     break;
                 case "starts with":
-                    table.removeIf(row -> !(row.getColumnValue(header.indexOf(f.left)).startsWith(f.right)));
+                    table.removeIf(row -> !(row.getColumnValue(header.indexOf(f.left), ignoreCaseFilterValue).startsWith(value)));
                     break;
                 case "ends with":
-                    table.removeIf(row -> !(row.getColumnValue(header.indexOf(f.left)).endsWith(f.right)));
+                    table.removeIf(row -> !(row.getColumnValue(header.indexOf(f.left), ignoreCaseFilterValue).endsWith(value)));
                     break;
             }
         }

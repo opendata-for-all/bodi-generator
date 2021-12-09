@@ -18,6 +18,13 @@ public class Row {
         return this.values.get(index);
     }
 
+    public String getColumnValue(int index, boolean lowerCase) {
+        if (lowerCase) {
+            return this.values.get(index).toLowerCase();
+        }
+        return this.values.get(index);
+    }
+
     public List<String> getValues() {
         return values;
     }
