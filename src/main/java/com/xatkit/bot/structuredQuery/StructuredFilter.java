@@ -15,6 +15,7 @@ import java.text.MessageFormat;
 import java.util.List;
 
 import static com.xatkit.bot.Bot.messages;
+import static com.xatkit.bot.library.Utils.isDate;
 import static com.xatkit.bot.library.Utils.isNumeric;
 import static com.xatkit.dsl.DSL.intentIs;
 import static com.xatkit.dsl.DSL.state;
@@ -44,6 +45,7 @@ public class StructuredFilter {
                 .body(context -> {
                             String textualFieldName = (String) context.getIntent().getValue(ContextKeys.textualFieldName);
                             String numericFieldName = (String) context.getIntent().getValue(ContextKeys.numericFieldName);
+                            String dateFieldName = (String) context.getIntent().getValue(ContextKeys.dateFieldName);
                             if (!isEmpty(textualFieldName)) {
                                 context.getSession().put(ContextKeys.lastFieldName, textualFieldName);
                                 reactPlatform.reply(context, messages.getString("SelectOperator"),
@@ -52,6 +54,10 @@ public class StructuredFilter {
                                 context.getSession().put(ContextKeys.lastFieldName, numericFieldName);
                                 reactPlatform.reply(context, messages.getString("SelectOperator"),
                                         Utils.getEntityValues(Entities.numericOperatorEntity));
+                            } else if (!isEmpty(dateFieldName)) {
+                                context.getSession().put(ContextKeys.lastFieldName, dateFieldName);
+                                reactPlatform.reply(context, messages.getString("SelectOperator"),
+                                        Utils.getEntityValues(Entities.dateOperatorEntity));
                             }
                         }
                 )
@@ -62,12 +68,16 @@ public class StructuredFilter {
                 .body(context -> {
                             String textualOperatorName = (String) context.getIntent().getValue(ContextKeys.textualOperatorName);
                             String numericOperatorName = (String) context.getIntent().getValue(ContextKeys.numericOperatorName);
+                            String dateOperatorName = (String) context.getIntent().getValue(ContextKeys.dateOperatorName);
                             if (!isEmpty(textualOperatorName)) {
                                 context.getSession().put(ContextKeys.lastOperatorName, textualOperatorName);
                                 context.getSession().put(ContextKeys.lastOperatorType, "textual");
                             } else if (!isEmpty(numericOperatorName)) {
                                 context.getSession().put(ContextKeys.lastOperatorName, numericOperatorName);
                                 context.getSession().put(ContextKeys.lastOperatorType, "numeric");
+                            } else if (!isEmpty(dateOperatorName)) {
+                                context.getSession().put(ContextKeys.lastOperatorName, dateOperatorName);
+                                context.getSession().put(ContextKeys.lastOperatorType, "date");
                             }
                             reactPlatform.reply(context, messages.getString("WriteValue"));
                         }
@@ -87,37 +97,15 @@ public class StructuredFilter {
                             if (operatorType.equals("numeric") && !isNumeric(value)) {
                                 context.getSession().put(ContextKeys.operatorValueError, true);
                                 reactPlatform.reply(context, messages.getString("ExpectedNumericValue"));
+                            } else if (operatorType.equals("date") && !isDate(value)) {
+                                context.getSession().put(ContextKeys.operatorValueError, true);
+                                reactPlatform.reply(context, messages.getString("ExpectedDateValue"));
                             } else {
                                 Statement statement = (Statement) context.getSession().get(ContextKeys.statement);
                                 statement.addFilter(fieldName, operatorName, value);
                                 reactPlatform.reply(context, MessageFormat.format(messages.getString("FilterAdded"),
                                         fieldName, operatorName, value));
                             }
-                            /*
-                            if (!isEmpty(textualValue)) {
-                                if (operatorType.equals("textual")) {
-                                    operatorValue = textualValue;
-                                } else {
-                                    // error
-                                    context.getSession().put(ContextKeys.operatorValueError, true);
-                                    reactPlatform.reply(context, "Not expected a textual value...");
-                                }
-                            } else if (!isEmpty(numericValue)) {
-                                if (operatorType.equals("numeric") || operatorType.equals("textual")) {
-                                    operatorValue = numericValue;
-                                } else {
-                                    // error
-                                    context.getSession().put(ContextKeys.operatorValueError, true);
-                                    reactPlatform.reply(context, "Not expected a numeric value...");
-                                }
-                            }
-                            if (nonNull(value)) {
-                                Statement statement = (Statement) context.getSession().get(ContextKeys.statement);
-                                statement.addFilter(fieldName, operatorName, value);
-                                reactPlatform.reply(context,
-                                        "'" + fieldName + " " + operatorName + " " + value + "' added");
-                            }
-                             */
                         }
                 )
                 .next()

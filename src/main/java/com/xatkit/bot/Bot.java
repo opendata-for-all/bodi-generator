@@ -98,6 +98,7 @@ public class Bot {
 							List<String> fields = new ArrayList<>();
 							fields.addAll(Utils.getEntityValues(Entities.numericFieldEntity));
 							fields.addAll(Utils.getEntityValues(Entities.textualFieldEntity));
+							fields.addAll(Utils.getEntityValues(Entities.dateFieldEntity));
 							TabularDataSource tds = (TabularDataSource) context.getSession().get(ContextKeys.tabularDataSource);
 							context.getSession().put(ContextKeys.statement, tds.createStatement());
 							List<String> filterFieldOptions = new ArrayList<>(fields);

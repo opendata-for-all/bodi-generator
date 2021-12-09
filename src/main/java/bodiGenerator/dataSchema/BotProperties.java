@@ -12,6 +12,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static bodiGenerator.dataSchema.DataType.DATE;
+import static bodiGenerator.dataSchema.DataType.NUMBER;
+import static bodiGenerator.dataSchema.DataType.TEXT;
+
 public class BotProperties {
 
     private DataSchema ds;
@@ -33,17 +37,21 @@ public class BotProperties {
          Create NumericField and TextualField entities
          */
         Mapping numericFieldEntity = new Mapping("NumericField", "numericFieldEntity");
+        Mapping dateFieldEntity = new Mapping("DateField", "dateFieldEntity");
         Mapping textualFieldEntity = new Mapping("TextualField", "textualFieldEntity");
         for (EntityField entityField : mainEntityType.getEntityFields()) {
             MappingEntry entry = new MappingEntry(entityField.getOriginalName()); // Here you can add synonyms
-            if (entityField.getType().equals("numeric")) {
+            if (entityField.getType().equals(NUMBER)) {
                 numericFieldEntity.addMappingEntry(entry);
-            } else {
+            } else if (entityField.getType().equals(DATE)) {
+                dateFieldEntity.addMappingEntry(entry);
+            } else if (entityField.getType().equals(TEXT)){
                 textualFieldEntity.addMappingEntry(entry);
             }
 
         }
         types.put("numericFieldEntity", numericFieldEntity);
+        types.put("dateFieldEntity", dateFieldEntity);
         types.put("textualFieldEntity", textualFieldEntity);
 
         /*
@@ -65,6 +73,13 @@ public class BotProperties {
         textualOperatorEntity.addMappingEntry(new MappingEntry("starts with"));
         textualOperatorEntity.addMappingEntry(new MappingEntry("ends with"));
         types.put("textualOperatorEntity", textualOperatorEntity);
+
+        Mapping dateOperatorEntity = new Mapping("DateOperator", "dateOperatorEntity");
+        dateOperatorEntity.addMappingEntry(new MappingEntry("equals"));
+        dateOperatorEntity.addMappingEntry(new MappingEntry("different"));
+        dateOperatorEntity.addMappingEntry(new MappingEntry("before"));
+        dateOperatorEntity.addMappingEntry(new MappingEntry("after"));
+        types.put("dateOperatorEntity", dateOperatorEntity);
     }
 
     public void createEntitiesFile() {

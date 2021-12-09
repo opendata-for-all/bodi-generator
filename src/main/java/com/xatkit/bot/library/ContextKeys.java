@@ -20,8 +20,10 @@ public class ContextKeys {
      */
     public static final String textualFieldName = "textualFieldName";
     public static final String numericFieldName = "numericFieldName";
+    public static final String dateFieldName = "dateFieldName";
     public static final String textualOperatorName = "textualOperatorName";
     public static final String numericOperatorName = "numericOperatorName";
+    public static final String dateOperatorName = "dateOperatorName";
     public static final String value = "value";
     //public static final String numericValue = "numericValue";
     //public static final String textualValue = "textualValue";

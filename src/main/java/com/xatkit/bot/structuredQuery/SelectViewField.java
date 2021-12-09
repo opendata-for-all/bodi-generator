@@ -37,9 +37,14 @@ public class SelectViewField {
         ;
         saveViewFieldState
                 .body(context -> {
+
                             String textualFieldName = (String) context.getIntent().getValue(ContextKeys.textualFieldName);
                             String numericFieldName = (String) context.getIntent().getValue(ContextKeys.numericFieldName);
-                            String fieldName = (!isEmpty(textualFieldName) ? textualFieldName : numericFieldName);
+                            String dateFieldName = (String) context.getIntent().getValue(ContextKeys.dateFieldName);
+                            String fieldName = null;
+                            fieldName = (!isEmpty(textualFieldName) ? textualFieldName : fieldName);
+                            fieldName = (!isEmpty(numericFieldName) ? numericFieldName : fieldName);
+                            fieldName = (!isEmpty(dateFieldName) ? dateFieldName : fieldName);
                             Statement statement = (Statement) context.getSession().get(ContextKeys.statement);
                             statement.addField(fieldName);
                             List<String> viewFieldOptions = (List<String>) context.getSession().get(ContextKeys.viewFieldOptions);

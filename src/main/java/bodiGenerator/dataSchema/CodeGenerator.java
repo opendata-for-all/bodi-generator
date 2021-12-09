@@ -28,7 +28,7 @@ public class CodeGenerator {
                         %s""".formatted(mappingEntry.getValue(), synonyms).indent(INDENT_SIZE);
             }
             entities += """
-                    public static final EntityDefinitionReferenceProvider %s = mapping("%s")
+                    public static final EntityDefinitionReferenceProvider %s = (EntityDefinitionReferenceProvider) mapping("%s")
                     %s;""".formatted(mapping.getVarName(), mapping.getName(), entries).indent(INDENT_SIZE);
         }
         return """

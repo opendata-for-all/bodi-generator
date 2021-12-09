@@ -2,9 +2,7 @@ package bodiGenerator;
 
 import bodiGenerator.dataSchema.BotProperties;
 import bodiGenerator.dataSchema.DataSchema;
-import bodiGenerator.dataSchema.EntityField;
 import bodiGenerator.dataSchema.EntityType;
-import bodiGenerator.dataSource.Row;
 import bodiGenerator.dataSource.TabularDataSource;
 import com.xatkit.bot.metamodel.generator.BotToCode;
 import com.xatkit.bot.metamodel.generator.BotToCodeConfProperties;
@@ -22,9 +20,7 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class BodiGenerator {
@@ -57,29 +53,7 @@ public class BodiGenerator {
     public static DataSchema tabularDataSourceToDataSchema(TabularDataSource tds) {
         DataSchema ds = new DataSchema();
         EntityType entityType = new EntityType("mainEntityType");
-        for (String fieldName : tds.getHeader()) {
-            Set<String> fieldValuesSet = new HashSet<>();
-            String fieldType = "numeric";
-            for (Row row : tds.getTableCopy()) {
-                int columnIndex = tds.getHeader().indexOf(fieldName);
-                String value = row.getColumnValue(columnIndex);
-                fieldValuesSet.add(value);
-                if (fieldType.equals("numeric")) {
-                    try {
-                        Double.parseDouble(value);
-                    }
-                    catch (NumberFormatException nfe) {
-                        fieldType = "textual";
-                    }
-                }
-            }
-            EntityField entityField = new EntityField();
-            entityField.setOriginalName(fieldName);
-            entityField.setReadableName(fieldName);
-            entityField.setType(fieldType);
-            entityField.setNumDifferentValues(fieldValuesSet.size());
-            entityType.addEntityField(entityField);
-        }
+        entityType.fill(tds);
         ds.addEntityType(entityType);
         return ds;
     }

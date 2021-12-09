@@ -8,7 +8,7 @@ public class EntityField {
     private String originalName;
     private String readableName;
     private List<String> synonyms;
-    private String type;
+    private DataType type;
     private int numDifferentValues;
 
     public EntityField() {
@@ -31,11 +31,11 @@ public class EntityField {
         this.readableName = readableName;
     }
 
-    public String getType() {
+    public DataType getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(DataType type) {
         this.type = type;
     }
 

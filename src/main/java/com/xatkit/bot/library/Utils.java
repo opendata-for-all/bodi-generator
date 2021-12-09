@@ -9,12 +9,16 @@ import lombok.NonNull;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+import static bodiGenerator.dataSchema.DataType.DATE;
 import static fr.inria.atlanmod.commons.Preconditions.checkArgument;
 import static fr.inria.atlanmod.commons.Preconditions.checkNotNull;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 
 public class Utils {
 
@@ -45,6 +49,17 @@ public class Utils {
             //text = text.replaceFirst(",", ".");
             Float.parseFloat(text);
         } catch (NumberFormatException e) {
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean isDate(String text) {
+        try {
+            // TODO: Find Date parser (String -> Date)
+            new Date(text);
+        }
+        catch (IllegalArgumentException e) {
             return false;
         }
         return true;

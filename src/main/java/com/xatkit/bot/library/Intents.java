@@ -55,12 +55,14 @@ public class Intents {
             .trainingSentences(bundle.getStringArray("FieldName"))
             .parameter(ContextKeys.numericFieldName).fromFragment("NUMERIC_FIELD").entity(Entities.numericFieldEntity)
             .parameter(ContextKeys.textualFieldName).fromFragment("TEXTUAL_FIELD").entity(Entities.textualFieldEntity)
+            .parameter(ContextKeys.dateFieldName).fromFragment("DATE_FIELD").entity(Entities.dateFieldEntity)
             .getIntentDefinition()
             ;
     public static final IntentDefinition operatorNameIntent = intent("OperatorName")
             .trainingSentences(bundle.getStringArray("OperatorName"))
             .parameter(ContextKeys.numericOperatorName).fromFragment("NUMERIC_OPERATOR").entity(Entities.numericOperatorEntity)
             .parameter(ContextKeys.textualOperatorName).fromFragment("TEXTUAL_OPERATOR").entity(Entities.textualOperatorEntity)
+            .parameter(ContextKeys.dateOperatorName).fromFragment("DATE_OPERATOR").entity(Entities.dateOperatorEntity)
             .getIntentDefinition()
             ;
     public static final IntentDefinition valueIntent = intent("Value")
