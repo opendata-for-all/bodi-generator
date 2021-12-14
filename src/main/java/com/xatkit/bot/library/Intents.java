@@ -5,7 +5,9 @@ import com.xatkit.i18n.XatkitI18nHelper;
 import com.xatkit.intent.IntentDefinition;
 
 import static com.xatkit.dsl.DSL.any;
+import static com.xatkit.dsl.DSL.date;
 import static com.xatkit.dsl.DSL.intent;
+import static com.xatkit.dsl.DSL.number;
 
 public class Intents {
 
@@ -39,16 +41,25 @@ public class Intents {
             .trainingSentences(bundle.getStringArray("CustomQuery"))
             .getIntentDefinition()
             ;
-    public static final IntentDefinition customFilterIntent = intent("CustomFilter")
+    public static final IntentDefinition customNumericFilterIntent = intent("CustomNumericFilter")
             .trainingSentences(bundle.getStringArray("CustomFilter"))
-
-            .parameter(ContextKeys.numericFieldName).fromFragment("NUMERIC_FIELD").entity(Entities.numericFieldEntity)
-            .parameter(ContextKeys.numericOperatorName).fromFragment("NUMERIC_OPERATOR").entity(Entities.numericOperatorEntity)
-
-            .parameter(ContextKeys.textualFieldName).fromFragment("TEXTUAL_FIELD").entity(Entities.textualFieldEntity)
-            .parameter(ContextKeys.textualOperatorName).fromFragment("TEXTUAL_OPERATOR").entity(Entities.textualOperatorEntity)
-
-            .parameter(ContextKeys.value).fromFragment("VALUE").entity(any())
+            .parameter(ContextKeys.numericFieldName).fromFragment("FIELD").entity(Entities.numericFieldEntity)
+            .parameter(ContextKeys.numericOperatorName).fromFragment("OPERATOR").entity(Entities.numericOperatorEntity)
+            .parameter(ContextKeys.numericValue).fromFragment("VALUE").entity(number())
+            .getIntentDefinition()
+            ;
+    public static final IntentDefinition customDateFilterIntent = intent("CustomDateFilter")
+            .trainingSentences(bundle.getStringArray("CustomFilter"))
+            .parameter(ContextKeys.dateFieldName).fromFragment("FIELD").entity(Entities.dateFieldEntity)
+            .parameter(ContextKeys.dateOperatorName).fromFragment("OPERATOR").entity(Entities.dateOperatorEntity)
+            .parameter(ContextKeys.dateValue).fromFragment("VALUE").entity(date())
+            .getIntentDefinition()
+            ;
+    public static final IntentDefinition customTextualFilterIntent = intent("CustomTextualFilter")
+            .trainingSentences(bundle.getStringArray("CustomFilter"))
+            .parameter(ContextKeys.textualFieldName).fromFragment("FIELD").entity(Entities.textualFieldEntity)
+            .parameter(ContextKeys.textualOperatorName).fromFragment("OPERATOR").entity(Entities.textualOperatorEntity)
+            .parameter(ContextKeys.textualValue).fromFragment("VALUE").entity(any())
             .getIntentDefinition()
             ;
     public static final IntentDefinition fieldNameIntent = intent("FieldName")
@@ -65,21 +76,20 @@ public class Intents {
             .parameter(ContextKeys.dateOperatorName).fromFragment("DATE_OPERATOR").entity(Entities.dateOperatorEntity)
             .getIntentDefinition()
             ;
-    public static final IntentDefinition valueIntent = intent("Value")
-            .trainingSentences(bundle.getStringArray("Value"))
-            .parameter(ContextKeys.value).fromFragment("VALUE").entity(any())
-            .getIntentDefinition()
-        ;
-    /*
     public static final IntentDefinition numericValueIntent = intent("NumericValue")
             .trainingSentences(bundle.getStringArray("NumericValue"))
-            .parameter(ContextKeys.numericValue).fromFragment("NUMERIC_VALUE").entity(number())
+            .parameter(ContextKeys.value).fromFragment("VALUE").entity(number())
+            .getIntentDefinition()
+            ;
+    public static final IntentDefinition dateValueIntent = intent("DateValue")
+            .trainingSentences(bundle.getStringArray("DateValue"))
+            .parameter(ContextKeys.value).fromFragment("VALUE").entity(date())
             .getIntentDefinition()
             ;
     public static final IntentDefinition textualValueIntent = intent("TextualValue")
             .trainingSentences(bundle.getStringArray("TextualValue"))
-            .parameter(ContextKeys.textualValue).fromFragment("TEXTUAL_VALUE").entity(any())
+            .parameter(ContextKeys.value).fromFragment("VALUE").entity(any())
             .getIntentDefinition()
             ;
-     */
+
 }

@@ -26,7 +26,9 @@ public class CustomQuery {
                         }
                 )
                 .next()
-                .when(intentIs(Intents.customFilterIntent)).moveTo(customFilter.getSaveCustomFilterState())
+                .when(intentIs(Intents.customNumericFilterIntent)).moveTo(customFilter.getSaveNumericFilterState())
+                .when(intentIs(Intents.customDateFilterIntent)).moveTo(customFilter.getSaveDateFilterState())
+                .when(intentIs(Intents.customTextualFilterIntent)).moveTo(customFilter.getSaveTextualFilterState())
         ;
         this.awaitingCustomQueryState = awaitingCustomQueryState.getState();
     }

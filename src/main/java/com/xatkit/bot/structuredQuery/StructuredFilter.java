@@ -15,8 +15,6 @@ import java.text.MessageFormat;
 import java.util.List;
 
 import static com.xatkit.bot.Bot.messages;
-import static com.xatkit.bot.library.Utils.isDate;
-import static com.xatkit.bot.library.Utils.isNumeric;
 import static com.xatkit.dsl.DSL.intentIs;
 import static com.xatkit.dsl.DSL.state;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -29,8 +27,13 @@ public class StructuredFilter {
     public StructuredFilter(ReactPlatform reactPlatform, StateProvider returnState) {
         val selectFilterFieldState = state("SelectFilterField");
         val selectOperatorNameState = state("SelectOperatorName");
-        val selectOperatorValueState = state("SelectOperatorValue");
-        val saveFilterState = state("SaveFilterState");
+        val saveOperatorType = state("SaveOperatorType");
+        val writeDateValue = state("WriteDateValue");
+        val writeTextualValue = state("WriteTextualValue");
+        val writeNumericValue = state("WriteNumericValue");
+        val saveFilterState = state("saveFilterState");
+        final String[] expectedValueIntent = new String[1];
+
 
         selectFilterFieldState
                 .body(context -> {
@@ -62,45 +65,61 @@ public class StructuredFilter {
                         }
                 )
                 .next()
-                .when(intentIs(Intents.operatorNameIntent)).moveTo(selectOperatorValueState)
+                .when(intentIs(Intents.operatorNameIntent)).moveTo(saveOperatorType)
         ;
-        selectOperatorValueState
+        saveOperatorType
                 .body(context -> {
                             String textualOperatorName = (String) context.getIntent().getValue(ContextKeys.textualOperatorName);
                             String numericOperatorName = (String) context.getIntent().getValue(ContextKeys.numericOperatorName);
                             String dateOperatorName = (String) context.getIntent().getValue(ContextKeys.dateOperatorName);
                             if (!isEmpty(textualOperatorName)) {
                                 context.getSession().put(ContextKeys.lastOperatorName, textualOperatorName);
-                                context.getSession().put(ContextKeys.lastOperatorType, "textual");
+                                expectedValueIntent[0] = "textual";
                             } else if (!isEmpty(numericOperatorName)) {
                                 context.getSession().put(ContextKeys.lastOperatorName, numericOperatorName);
-                                context.getSession().put(ContextKeys.lastOperatorType, "numeric");
+                                expectedValueIntent[0] = "numeric";
                             } else if (!isEmpty(dateOperatorName)) {
                                 context.getSession().put(ContextKeys.lastOperatorName, dateOperatorName);
-                                context.getSession().put(ContextKeys.lastOperatorType, "date");
+                                expectedValueIntent[0] = "date";
                             }
-                            reactPlatform.reply(context, messages.getString("WriteValue"));
                         }
                 )
                 .next()
-                .when(intentIs(Intents.valueIntent)).moveTo(saveFilterState)
-                //.when(intentIs(Intents.numericValueIntent).or(intentIs(Intents.textualValueIntent))).moveTo(saveFilterState)
+                .when(context -> expectedValueIntent[0].equals("textual")).moveTo(writeTextualValue)
+                .when(context -> expectedValueIntent[0].equals("numeric")).moveTo(writeNumericValue)
+                .when(context -> expectedValueIntent[0].equals("date")).moveTo(writeDateValue)
+        ;
+        writeTextualValue
+                .body(context -> {
+                            reactPlatform.reply(context, messages.getString("WriteTextualValue"));
+                        }
+                )
+                .next()
+                .when(intentIs(Intents.textualValueIntent)).moveTo(saveFilterState)
+        ;
+        writeNumericValue
+                .body(context -> {
+                            reactPlatform.reply(context, messages.getString("WriteNumericValue"));
+                        }
+                )
+                .next()
+                .when(intentIs(Intents.numericValueIntent)).moveTo(saveFilterState)
+        ;
+        writeDateValue
+                .body(context -> {
+                            reactPlatform.reply(context, messages.getString("WriteDateValue"));
+                        }
+                )
+                .next()
+                .when(intentIs(Intents.dateValueIntent)).moveTo(saveFilterState)
         ;
         saveFilterState
                 .body(context -> {
-                            context.getSession().put(ContextKeys.operatorValueError, false);
                             String fieldName = (String) context.getSession().get(ContextKeys.lastFieldName);
                             String operatorName = (String) context.getSession().get(ContextKeys.lastOperatorName);
-                            String operatorType = (String) context.getSession().get(ContextKeys.lastOperatorType);
-                            String value = context.getIntent().getMatchedInput();
-                            //String value = (String) context.getIntent().getValue(ContextKeys.value);
-                            if (operatorType.equals("numeric") && !isNumeric(value)) {
-                                context.getSession().put(ContextKeys.operatorValueError, true);
-                                reactPlatform.reply(context, messages.getString("ExpectedNumericValue"));
-                            } else if (operatorType.equals("date") && !isDate(value)) {
-                                context.getSession().put(ContextKeys.operatorValueError, true);
-                                reactPlatform.reply(context, messages.getString("ExpectedDateValue"));
-                            } else {
+                            String value = (String) context.getIntent().getValue(ContextKeys.value);
+
+                            if (!isEmpty(value)) {
                                 Statement statement = (Statement) context.getSession().get(ContextKeys.statement);
                                 statement.addFilter(fieldName, operatorName, value);
                                 reactPlatform.reply(context, MessageFormat.format(messages.getString("FilterAdded"),
@@ -109,8 +128,7 @@ public class StructuredFilter {
                         }
                 )
                 .next()
-                .when(context -> (boolean) context.getSession().get(ContextKeys.operatorValueError)).moveTo(selectOperatorValueState)
-                .when(context -> !((boolean) context.getSession().get(ContextKeys.operatorValueError))).moveTo(returnState)
+                .moveTo(returnState)
         ;
 
         this.selectFilterFieldState = selectFilterFieldState.getState();

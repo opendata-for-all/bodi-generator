@@ -8,8 +8,10 @@ import com.xatkit.intent.MappingEntityDefinitionEntry;
 import lombok.NonNull;
 
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,9 +56,9 @@ public class Utils {
     public static boolean isDate(String text) {
         try {
             // TODO: Find Date parser (String -> Date)
-            new Date(text);
+            LocalDateTime.parse(text, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         }
-        catch (IllegalArgumentException e) {
+        catch (DateTimeParseException e) {
             return false;
         }
         return true;

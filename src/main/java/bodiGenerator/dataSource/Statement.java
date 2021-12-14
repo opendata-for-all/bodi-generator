@@ -2,6 +2,8 @@ package bodiGenerator.dataSource;
 
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,22 +61,22 @@ public class Statement {
             switch(f.middle) {
                 // Numeric Filters
                 case "=":
-                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) == Float.parseFloat(value)));
+                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) == Float.parseFloat(f.right)));
                     break;
                 case "<":
-                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) < Float.parseFloat(value)));
+                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) < Float.parseFloat(f.right)));
                     break;
                 case "<=":
-                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) <= Float.parseFloat(value)));
+                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) <= Float.parseFloat(f.right)));
                     break;
                 case ">":
-                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) > Float.parseFloat(value)));
+                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) > Float.parseFloat(f.right)));
                     break;
                 case ">=":
-                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) >= Float.parseFloat(value)));
+                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) >= Float.parseFloat(f.right)));
                     break;
                 case "!=":
-                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) != Float.parseFloat(value)));
+                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) != Float.parseFloat(f.right)));
                     break;
                 // Textual Filters
                 case "equals":
@@ -91,6 +93,23 @@ public class Statement {
                     break;
                 case "ends with":
                     table.removeIf(row -> !(row.getColumnValue(header.indexOf(f.left), ignoreCaseFilterValue).endsWith(value)));
+                    break;
+                // Date Filters
+                case "before":
+                    LocalDateTime filterDate = LocalDateTime.parse(f.right, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+                    table.removeIf(row -> {
+                        String rowDateString = row.getColumnValue(header.indexOf(f.left));
+                        LocalDateTime rowDate = LocalDateTime.parse(rowDateString, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+                        return rowDate.isAfter(filterDate);
+                    });
+                    break;
+                case "after":
+                    filterDate = LocalDateTime.parse(f.right, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+                    table.removeIf(row -> {
+                        String rowDateString = row.getColumnValue(header.indexOf(f.left));
+                        LocalDateTime rowDate = LocalDateTime.parse(rowDateString, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+                        return rowDate.isBefore(filterDate);
+                    });
                     break;
             }
         }

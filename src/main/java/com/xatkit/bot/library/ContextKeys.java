@@ -12,8 +12,6 @@ public class ContextKeys {
     public static final String pageCount = "pageCount";
     public static final String lastFieldName = "lastFieldName";
     public static final String lastOperatorName = "lastOperatorName";
-    public static final String lastOperatorType = "lastOperatorType";
-    public static final String operatorValueError = "operatorValueError";
 
     /*
      Intent Parameter Keys
@@ -25,7 +23,8 @@ public class ContextKeys {
     public static final String numericOperatorName = "numericOperatorName";
     public static final String dateOperatorName = "dateOperatorName";
     public static final String value = "value";
-    //public static final String numericValue = "numericValue";
-    //public static final String textualValue = "textualValue";
+    public static final String numericValue = "numericValue";
+    public static final String dateValue = "dateValue";
+    public static final String textualValue = "textualValue";
 
 }
