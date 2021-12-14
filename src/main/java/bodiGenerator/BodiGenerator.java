@@ -2,7 +2,10 @@ package bodiGenerator;
 
 import bodiGenerator.dataSchema.BotProperties;
 import bodiGenerator.dataSchema.DataSchema;
+import bodiGenerator.dataSchema.DataType;
+import bodiGenerator.dataSchema.EntityField;
 import bodiGenerator.dataSchema.EntityType;
+import bodiGenerator.dataSource.Row;
 import bodiGenerator.dataSource.TabularDataSource;
 import com.xatkit.bot.metamodel.generator.BotToCode;
 import com.xatkit.bot.metamodel.generator.BotToCodeConfProperties;
@@ -20,8 +23,18 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import static bodiGenerator.dataSchema.DataType.DATE;
+import static bodiGenerator.dataSchema.DataType.NUMBER;
+import static bodiGenerator.dataSchema.DataType.TEXT;
+import static com.xatkit.bot.library.Utils.isDate;
+import static com.xatkit.bot.library.Utils.isNumeric;
 
 public class BodiGenerator {
 
@@ -53,7 +66,36 @@ public class BodiGenerator {
     public static DataSchema tabularDataSourceToDataSchema(TabularDataSource tds) {
         DataSchema ds = new DataSchema();
         EntityType entityType = new EntityType("mainEntityType");
-        entityType.fill(tds);
+        for (String fieldName : tds.getHeader()) {
+            Set<String> fieldValuesSet = new HashSet<>();
+            Map<DataType, Boolean> dataTypes = new HashMap<>();
+            dataTypes.put(NUMBER, true);
+            dataTypes.put(DATE, true);
+            dataTypes.put(TEXT, true);
+            int columnIndex = tds.getHeader().indexOf(fieldName);
+            for (Row row : tds.getTableCopy()) {
+                String value = row.getColumnValue(columnIndex);
+                fieldValuesSet.add(value);
+                if (dataTypes.get(NUMBER) && !isNumeric(value)) {
+                    dataTypes.put(NUMBER, false);
+                }
+                if (dataTypes.get(DATE) && !isDate(value)) {
+                    dataTypes.put(DATE, false);
+                }
+            }
+            EntityField entityField = new EntityField();
+            entityField.setOriginalName(fieldName);
+            entityField.setReadableName(fieldName);
+            if (dataTypes.get(DATE)) {
+                entityField.setType(DATE);
+            } else if (dataTypes.get(NUMBER)) {
+                entityField.setType(NUMBER);
+            } else {
+                entityField.setType(TEXT);
+            }
+            entityField.setNumDifferentValues(fieldValuesSet.size());
+            entityType.addEntityField(entityField);
+        }
         ds.addEntityType(entityType);
         return ds;
     }
