@@ -64,6 +64,7 @@ public class TabularDataSource {
 
     public TabularDataSource removeColumn(int i) {
         header.remove(i);
+        --numColumns;
         for (Row row : table) {
             row.removeValue(i);
         }
