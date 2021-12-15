@@ -20,7 +20,7 @@ public class Row {
 
     public String getColumnValue(int index, boolean lowerCase) {
         if (lowerCase) {
-            return this.values.get(index).toLowerCase();
+            return this.getColumnValue(index).toLowerCase();
         }
         return this.values.get(index);
     }
