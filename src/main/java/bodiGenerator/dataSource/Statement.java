@@ -48,7 +48,7 @@ public class Statement {
     }
 
     public ResultSet executeQuery() {
-        List<String> header = new ArrayList<>(tds.getHeader());
+        List<String> header =tds.getHeaderCopy();
         List<Row> table = tds.getTableCopy();
         // Filtering
         for (ImmutableTriple<String, String, String> f : filters) {
@@ -115,7 +115,7 @@ public class Statement {
         }
         // Deleting fields
         if (!fields.isEmpty()) {
-            List<String> fieldsToDelete = new ArrayList<>(tds.getHeader());
+            List<String> fieldsToDelete = tds.getHeaderCopy();
             fieldsToDelete.removeAll(fields);
             for (String field : fieldsToDelete) {
                 table.forEach(row -> row.removeValue(header.indexOf(field)));

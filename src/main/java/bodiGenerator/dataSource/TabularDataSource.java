@@ -42,8 +42,8 @@ public class TabularDataSource {
         return numColumns;
     }
 
-    public List<String> getHeader() {
-        return header;
+    public List<String> getHeaderCopy() {
+        return new ArrayList<>(header);
     }
 
     public List<Row> getTableCopy() {

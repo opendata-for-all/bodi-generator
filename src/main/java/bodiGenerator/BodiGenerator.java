@@ -66,13 +66,13 @@ public class BodiGenerator {
     public static DataSchema tabularDataSourceToDataSchema(TabularDataSource tds) {
         DataSchema ds = new DataSchema();
         EntityType entityType = new EntityType("mainEntityType");
-        for (String fieldName : tds.getHeader()) {
+        for (String fieldName : tds.getHeaderCopy()) {
             Set<String> fieldValuesSet = new HashSet<>();
             Map<DataType, Boolean> dataTypes = new HashMap<>();
             dataTypes.put(NUMBER, true);
             dataTypes.put(DATE, true);
             dataTypes.put(TEXT, true);
-            int columnIndex = tds.getHeader().indexOf(fieldName);
+            int columnIndex = tds.getHeaderCopy().indexOf(fieldName);
             for (Row row : tds.getTableCopy()) {
                 String value = row.getColumnValue(columnIndex);
                 fieldValuesSet.add(value);
@@ -187,7 +187,7 @@ public class BodiGenerator {
         }
         // Create new csv with deleted columns
         try (PrintWriter out = new PrintWriter(outputFolder + "/src/main/resources/" + conf.getInputDocName())) {
-            out.println(tds.getHeader().stream().map(field -> "\"" + field + "\"").collect(Collectors.joining(",")));
+            out.println(tds.getHeaderCopy().stream().map(field -> "\"" + field + "\"").collect(Collectors.joining(",")));
             for (int i = 0; i < tds.getNumRows(); ++i) {
                 out.println(tds.getRow(i).getValues().stream().map(field -> "\"" + field + "\"").collect(Collectors.joining(",")));
             }
