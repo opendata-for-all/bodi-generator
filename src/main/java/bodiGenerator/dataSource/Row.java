@@ -19,10 +19,11 @@ public class Row {
     }
 
     public String getColumnValue(int index, boolean lowerCase) {
+        String value = this.getColumnValue(index);
         if (lowerCase) {
-            return this.values.get(index).toLowerCase();
+            return value.toLowerCase();
         }
-        return this.values.get(index);
+        return value;
     }
 
     public List<String> getValues() {
