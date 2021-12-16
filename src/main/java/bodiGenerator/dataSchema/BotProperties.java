@@ -6,7 +6,6 @@ import com.xatkit.bot.metamodel.Mapping;
 import com.xatkit.bot.metamodel.MappingEntry;
 import com.xatkit.bot.metamodel.State;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -22,9 +21,6 @@ public class BotProperties {
     private String botName;
     private String inputDocName;
     private Map<String, IntentParameterType> types = new HashMap<>();
-    private Map<String, Intent> intents = new HashMap<>();
-    private List<State> states = new ArrayList<>();
-    private String entitiesFile;
 
     public BotProperties(String botName, String inputDocName, DataSchema ds) {
         this.botName = botName;
@@ -32,20 +28,20 @@ public class BotProperties {
         this.ds = ds;
     }
 
-    public void createTypes(EntityType mainEntityType) {
+    public void createTypes(SchemaType mainSchemaType) {
         /*
          Create NumericField and TextualField entities
          */
         Mapping numericFieldEntity = new Mapping("NumericField", "numericFieldEntity");
         Mapping dateFieldEntity = new Mapping("DateField", "dateFieldEntity");
         Mapping textualFieldEntity = new Mapping("TextualField", "textualFieldEntity");
-        for (EntityField entityField : mainEntityType.getEntityFields()) {
-            MappingEntry entry = new MappingEntry(entityField.getOriginalName()); // Here you can add synonyms
-            if (entityField.getType().equals(NUMBER)) {
+        for (SchemaField schemaField : mainSchemaType.getSchemaFields()) {
+            MappingEntry entry = new MappingEntry(schemaField.getOriginalName()); // Here you can add synonyms
+            if (schemaField.getType().equals(NUMBER)) {
                 numericFieldEntity.addMappingEntry(entry);
-            } else if (entityField.getType().equals(DATE)) {
+            } else if (schemaField.getType().equals(DATE)) {
                 dateFieldEntity.addMappingEntry(entry);
-            } else if (entityField.getType().equals(TEXT)){
+            } else if (schemaField.getType().equals(TEXT)){
                 textualFieldEntity.addMappingEntry(entry);
             }
 
@@ -82,14 +78,13 @@ public class BotProperties {
         types.put("dateOperatorEntity", dateOperatorEntity);
     }
 
-    public void createEntitiesFile() {
-        entitiesFile = CodeGenerator.generateEntitiesFile(this.getTypes());
+    public String getEntitiesFile() {
+        return CodeGenerator.generateEntitiesFile(this.getTypes());
     }
 
     public void createBotStructure() {
-        EntityType mainEntityType = ds.getEntityType("mainEntityType");
-        createTypes(mainEntityType);
-        createEntitiesFile();
+        SchemaType mainSchemaType = ds.getSchemaType("mainSchemaType");
+        createTypes(mainSchemaType);
     }
 
     public String getBotName() {
@@ -104,15 +99,4 @@ public class BotProperties {
         return types.values().stream().toList();
     }
 
-    public List<Intent> getIntents() {
-        return intents.values().stream().toList();
-    }
-
-    public List<State> getStates() {
-        return states;
-    }
-
-    public String getEntitiesFile() {
-        return entitiesFile;
-    }
 }

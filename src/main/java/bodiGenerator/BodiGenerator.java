@@ -3,8 +3,8 @@ package bodiGenerator;
 import bodiGenerator.dataSchema.BotProperties;
 import bodiGenerator.dataSchema.DataSchema;
 import bodiGenerator.dataSchema.DataType;
-import bodiGenerator.dataSchema.EntityField;
-import bodiGenerator.dataSchema.EntityType;
+import bodiGenerator.dataSchema.SchemaField;
+import bodiGenerator.dataSchema.SchemaType;
 import bodiGenerator.dataSource.Row;
 import bodiGenerator.dataSource.TabularDataSource;
 import com.xatkit.bot.metamodel.generator.BotToCode;
@@ -65,7 +65,7 @@ public class BodiGenerator {
 
     public static DataSchema tabularDataSourceToDataSchema(TabularDataSource tds) {
         DataSchema ds = new DataSchema();
-        EntityType entityType = new EntityType("mainEntityType");
+        SchemaType schemaType = new SchemaType("mainSchemaType");
         for (String fieldName : tds.getHeaderCopy()) {
             Set<String> fieldValuesSet = new HashSet<>();
             Map<DataType, Boolean> dataTypes = new HashMap<>();
@@ -83,20 +83,20 @@ public class BodiGenerator {
                     dataTypes.put(DATE, false);
                 }
             }
-            EntityField entityField = new EntityField();
-            entityField.setOriginalName(fieldName);
-            entityField.setReadableName(fieldName);
+            SchemaField schemaField = new SchemaField();
+            schemaField.setOriginalName(fieldName);
+            schemaField.setReadableName(fieldName);
             if (dataTypes.get(DATE)) {
-                entityField.setType(DATE);
+                schemaField.setType(DATE);
             } else if (dataTypes.get(NUMBER)) {
-                entityField.setType(NUMBER);
+                schemaField.setType(NUMBER);
             } else {
-                entityField.setType(TEXT);
+                schemaField.setType(TEXT);
             }
-            entityField.setNumDifferentValues(fieldValuesSet.size());
-            entityType.addEntityField(entityField);
+            schemaField.setNumDifferentValues(fieldValuesSet.size());
+            schemaType.addSchemaField(schemaField);
         }
-        ds.addEntityType(entityType);
+        ds.addSchemaType(schemaType);
         return ds;
     }
 

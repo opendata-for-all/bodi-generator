@@ -5,21 +5,21 @@ import java.util.List;
 
 public class DataSchema {
 
-    private List<EntityType> entityTypes;
+    private List<SchemaType> schemaTypes;
 
     public DataSchema() {
-        entityTypes = new ArrayList<>();
+        schemaTypes = new ArrayList<>();
 
     }
 
-    public void addEntityType(EntityType entityType) {
-        entityTypes.add(entityType);
+    public void addSchemaType(SchemaType schemaType) {
+        schemaTypes.add(schemaType);
     }
 
-    public EntityType getEntityType(String name) {
-        for (EntityType entityType : entityTypes) {
-            if (entityType.getName().equals(name)) {
-                return entityType;
+    public SchemaType getSchemaType(String name) {
+        for (SchemaType schemaType : schemaTypes) {
+            if (schemaType.getName().equals(name)) {
+                return schemaType;
             }
         }
         return null;

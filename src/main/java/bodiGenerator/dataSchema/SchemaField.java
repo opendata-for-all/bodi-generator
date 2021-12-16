@@ -3,7 +3,7 @@ package bodiGenerator.dataSchema;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EntityField {
+public class SchemaField {
 
     private String originalName;
     private String readableName;
@@ -11,7 +11,7 @@ public class EntityField {
     private DataType type;
     private int numDifferentValues;
 
-    public EntityField() {
+    public SchemaField() {
         synonyms = new ArrayList<>();
     }
 

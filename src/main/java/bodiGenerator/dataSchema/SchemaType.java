@@ -2,22 +2,22 @@ package bodiGenerator.dataSchema;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EntityType {
+public class SchemaType {
 
     private String name;
-    private List<EntityField> entityFields;
+    private List<SchemaField> schemaFields;
 
-    public EntityType(String name) {
+    public SchemaType(String name) {
         this.name = name;
-        this.entityFields = new ArrayList<>();
+        this.schemaFields = new ArrayList<>();
     }
 
     public String getName() {
         return name;
     }
 
-    public List<EntityField> getEntityFields() {
-        return entityFields;
+    public List<SchemaField> getSchemaFields() {
+        return schemaFields;
     }
 
     public void addEntityField(EntityField entityField) {
