@@ -20,8 +20,8 @@ public class SchemaType {
         return schemaFields;
     }
 
-    public void addEntityField(EntityField entityField) {
-        entityFields.add(entityField);
+    public void addSchemaField(SchemaField schemaField) {
+        schemaFields.add(schemaField);
     }
 
 }
