@@ -3,13 +3,33 @@ package bodiGenerator.dataSchema;
 import com.xatkit.bot.metamodel.IntentParameterType;
 import com.xatkit.bot.metamodel.Mapping;
 import com.xatkit.bot.metamodel.MappingEntry;
+import com.xatkit.dsl.entity.EntityDefinitionReferenceProvider;
 
 import java.util.List;
 
+
+/**
+ * This class isolates methods that generate code for a chatbot.
+ * <p>
+ * This code must be generated because it depends on the input data of the chatbot (e.g. a csv file), which means
+ * that it is not generic for all chatbots.
+ */
 public class CodeGenerator {
 
+    /**
+     * The number of whitespaces an indent has.
+     */
     private static final int INDENT_SIZE = 4;
 
+    /**
+     * Generates a file (a Java class) containing all entities of a chatbot.
+     *
+     * @param types the types on which the entities are based
+     * @return the string
+     *
+     * @see IntentParameterType
+     * @see EntityDefinitionReferenceProvider
+     */
     public static String generateEntitiesFile(List<IntentParameterType> types) {
         String entities = "";
         for (IntentParameterType type : types) {

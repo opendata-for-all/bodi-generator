@@ -1,10 +1,10 @@
 package bodiGenerator.dataSchema;
 
-import com.xatkit.bot.metamodel.Intent;
+import bodiGenerator.BodiGenerator;
 import com.xatkit.bot.metamodel.IntentParameterType;
 import com.xatkit.bot.metamodel.Mapping;
 import com.xatkit.bot.metamodel.MappingEntry;
-import com.xatkit.bot.metamodel.State;
+import com.xatkit.dsl.entity.EntityDefinitionReferenceProvider;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -15,22 +15,63 @@ import static bodiGenerator.dataSchema.DataType.DATE;
 import static bodiGenerator.dataSchema.DataType.NUMBER;
 import static bodiGenerator.dataSchema.DataType.TEXT;
 
+/**
+ * Generates and stores bot information and components, which are used to generate the source code of a bot.
+ */
 public class BotProperties {
 
+    /**
+     * Contains higher-level information about a tabular data source. It is used to generate bot components.
+     */
     private DataSchema ds;
+
+    /**
+     * The name of the bot this {@link BotProperties} refers to.
+     */
     private String botName;
+
+    /**
+     * The name of the document that the bot must read at runtime to satisfy the user queries
+     * <p>
+     * This file should be the same as the one used to define {@link #ds} (consider any usage of
+     * {@link BodiGenerator#createTabularDataSource(String)} before setting this attribute)
+     */
     private String inputDocName;
+
+    /**
+     * Collection of metamodels of the bot entities
+     * <p>
+     * It is implemented as a {@link Map} since some other meta-concepts of a chatbot may need references to the types,
+     * thus with a map it is possible to get a type knowing its name (the key)
+     *
+     * @see IntentParameterType
+     * @see EntityDefinitionReferenceProvider
+     */
     private Map<String, IntentParameterType> types = new HashMap<>();
 
+    /**
+     * Instantiates a new {@link BotProperties}
+     *
+     * @param botName      the bot name
+     * @param inputDocName the name of the input document
+     * @param ds           the data schema
+     */
     public BotProperties(String botName, String inputDocName, DataSchema ds) {
         this.botName = botName;
         this.inputDocName = inputDocName;
         this.ds = ds;
     }
 
+    /**
+     * Create the types of a chatbot from a given {@link SchemaType}.
+     *
+     * @param mainSchemaType the schema type
+     *
+     * @see #types
+     */
     public void createTypes(SchemaType mainSchemaType) {
         /*
-         Create NumericField and TextualField entities
+         Create NumericField, DateField and TextualField entities
          */
         Mapping numericFieldEntity = new Mapping("NumericField", "numericFieldEntity");
         Mapping dateFieldEntity = new Mapping("DateField", "dateFieldEntity");
@@ -51,7 +92,7 @@ public class BotProperties {
         types.put("textualFieldEntity", textualFieldEntity);
 
         /*
-         Create NumericOperator and TextualOperator entities
+         Create NumericOperator, DateOperator and TextualOperator entities
          */
         Mapping numericOperatorEntity = new Mapping("NumericOperator", "numericOperatorEntity");
         numericOperatorEntity.addMappingEntry(new MappingEntry("="));
@@ -78,23 +119,46 @@ public class BotProperties {
         types.put("dateOperatorEntity", dateOperatorEntity);
     }
 
+    /**
+     * Generates and gets the entities file corresponding to the {@link BotProperties}
+     *
+     * @return the entities file
+     */
     public String getEntitiesFile() {
         return CodeGenerator.generateEntitiesFile(this.getTypes());
     }
 
+    /**
+     * Creates the elements that will be part of the bot.
+     */
     public void createBotStructure() {
         SchemaType mainSchemaType = ds.getSchemaType("mainSchemaType");
         createTypes(mainSchemaType);
     }
 
+    /**
+     * Gets the bot name.
+     *
+     * @return the bot name
+     */
     public String getBotName() {
         return botName;
     }
 
+    /**
+     * Gets input document name.
+     *
+     * @return the input document name
+     */
     public String getInputDocName() {
         return inputDocName;
     }
 
+    /**
+     * Gets types of the bot.
+     *
+     * @return the types
+     */
     public List<IntentParameterType> getTypes() {
         return types.values().stream().toList();
     }
