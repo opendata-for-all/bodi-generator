@@ -117,4 +117,20 @@ class DataSourceTest{
         assertEquals(1, statement.getNumFields());
     }
 
+    /**
+     * Test that the {@code ignoreCase} feature of a Statement works. That is, a filter can match despite the
+     * upper/lower cases
+     */
+    @Test
+    void testIgnoreCaseFiltering() {
+        statement
+                .addFilter("DESC_NACIONALITAT", "equals", "XINA")
+                .ignoreCaseFilterValue(true);
+        ResultSet resultSet1 = statement.executeQuery();
+        assertEquals(27, resultSet1.getNumRows());
+        for (int i = 0; i < resultSet1.getNumRows(); i++) {
+            assertEquals("Xina", resultSet1.getRow(i).getColumnValue(2));
+        }
+    }
+
 }
