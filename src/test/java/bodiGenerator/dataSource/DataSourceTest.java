@@ -1,11 +1,15 @@
 package bodiGenerator.dataSource;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Objects;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DataSourceTest{
 
@@ -14,20 +18,30 @@ class DataSourceTest{
 
     @BeforeEach
     public void setUp() {
-        this.tds = new TabularDataSource(Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResource("testTable.csv")).getPath());
+        this.tds = new TabularDataSource(Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResource("odata_poblacio_nacionalitat_genere.csv")).getPath());
+        this.statement = tds.createStatement();
+    }
+
+    /**
+     * Test that TabularDataSource and Statement are loaded properly.
+     */
+    @Test
+    void testInitialization() {
         assertEquals(1113, this.tds.getNumRows());
         assertEquals(7, this.tds.getNumColumns());
-        assertEquals(7, this.tds.getHeader().size());
-        this.statement = new Statement(tds);
+        assertEquals(7, this.tds.getHeaderCopy().size());
         assertSame(this.tds, this.statement.getTabularDataSource());
     }
 
     /**
      * Test:
-     *  - The table of the ResultSet is deeply copied, that is, the Rows of the table are deeply copied (i.e. they
+     * <p>
+     * - The table of the ResultSet is deeply copied, that is, the Rows of the table are deeply copied (i.e. they
      *    are not references to the Rows of the TabularDataSource)
-     *  - The Values List of each ResultSet Row is also a deep copy of the original TabularDataSource Row's Values List
-     *  - The structure and content of the ResultSet table is the same as the TabularDataSource's one (numColumns,
+     * <p>
+     * - The Values List of each ResultSet Row is also a deep copy of the original TabularDataSource Row's Values List
+     * <p>
+     * - The structure and content of the ResultSet table is the same as the TabularDataSource's one (numColumns,
      *    numRows, header, row values for each row) given that there is no filter of field selection applied to the
      *    Statement
      */
@@ -36,7 +50,7 @@ class DataSourceTest{
         ResultSet resultSet = statement.executeQuery();
         assertEquals(resultSet.getNumRows(), tds.getNumRows());
         assertEquals(resultSet.getNumColumns(), tds.getNumColumns());
-        assertNotSame(resultSet.getHeader(), tds.getHeader());
+        assertNotSame(resultSet.getHeader(), tds.getHeaderCopy());
         for (int i = 0; i < tds.getNumRows(); i++) {
             assertNotSame(tds.getRow(i), resultSet.getRow(i));
             assertEquals(tds.getRow(i).getValues(), resultSet.getRow(i).getValues());
