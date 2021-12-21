@@ -8,6 +8,7 @@ import com.xatkit.intent.MappingEntityDefinitionEntry;
 import lombok.NonNull;
 
 import java.text.MessageFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -19,12 +20,20 @@ import static fr.inria.atlanmod.commons.Preconditions.checkArgument;
 import static fr.inria.atlanmod.commons.Preconditions.checkNotNull;
 import static java.util.Objects.nonNull;
 
+/**
+ * A set of methods that provide useful functionalities to be used in a chatbot system
+ */
 public class Utils {
 
+    /**
+     * Gets the values of a chatbot entity
+     *
+     * @param entity the entity
+     * @return the entity values
+     */
     public static List<String> getEntityValues(EntityDefinitionReferenceProvider entity) {
         EntityDefinition referredEntity = entity.getEntityReference().getReferredEntity();
-        if (referredEntity instanceof MappingEntityDefinition) {
-            MappingEntityDefinition mapping = (MappingEntityDefinition) referredEntity;
+        if (referredEntity instanceof MappingEntityDefinition mapping) {
             return mapping.getEntries().stream().map(MappingEntityDefinitionEntry::getReferenceValue).collect(Collectors.toList());
         } else {
             throw new IllegalArgumentException(MessageFormat.format("Expected a {0}, found a {1}",
@@ -32,6 +41,12 @@ public class Utils {
         }
     }
 
+    /**
+     * Gets the first training sentence of all the provided intents
+     *
+     * @param intents the intents
+     * @return a collection containing the first training sentence of all the intents
+     */
     public static List<String> getFirstTrainingSentences(@NonNull IntentDefinition... intents) {
         for (IntentDefinition intent : intents) {
             checkNotNull(intent);
@@ -43,6 +58,12 @@ public class Utils {
         return Arrays.stream(intents).map(i -> i.getTrainingSentences().get(0)).collect(Collectors.toList());
     }
 
+    /**
+     * Checks if a given text is a number (i.e. an integer or a floating point)
+     *
+     * @param text the text to be parsed to a date
+     * @return {@code true} if the text can be parsed as a number, {@code false} otherwise
+     */
     public static boolean isNumeric(String text) {
         try {
             //text = text.replaceFirst(",", ".");
@@ -53,6 +74,16 @@ public class Utils {
         return true;
     }
 
+
+    /**
+     * Checks if a given text is a date
+     * <p>
+     * It supports ISO-8601 and RFC-1123 standards.
+     *
+     * @param text the text to be parsed to a date
+     * @return {@code true} if the text can be parsed as a date, {@code false} otherwise
+     * @see DateTimeFormatter
+     */
     public static boolean isDate(String text) {
         try {
             LocalDate.parse(text, DateTimeFormatter.ISO_DATE);
