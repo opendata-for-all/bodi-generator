@@ -1,15 +1,13 @@
 package bodiGenerator;
 
 import bodiGenerator.dataSchema.BotProperties;
+import bodiGenerator.dataSchema.CodeGenerator;
 import bodiGenerator.dataSchema.DataSchema;
 import bodiGenerator.dataSchema.DataType;
 import bodiGenerator.dataSchema.SchemaField;
 import bodiGenerator.dataSchema.SchemaType;
 import bodiGenerator.dataSource.Row;
 import bodiGenerator.dataSource.TabularDataSource;
-import com.xatkit.bot.metamodel.generator.BotToCode;
-import com.xatkit.bot.metamodel.generator.BotToCodeConfProperties;
-import com.xatkit.bot.metamodel.generator.POMBotGenerator;
 import org.apache.commons.configuration2.BaseConfiguration;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
@@ -38,7 +36,22 @@ import static com.xatkit.bot.library.Utils.isNumeric;
 
 public class BodiGenerator {
 
-    public static BotToCodeConfProperties loadBotConfProperties(String fileName) {
+    public static void deleteFolder(File file) {
+        File[] listFiles = file.listFiles();
+        int length = Objects.requireNonNull(listFiles).length;
+        for(int i = 0; i < length; ++i) {
+            File subFile = listFiles[i];
+            boolean isDirectory = subFile.isDirectory();
+            if (isDirectory) {
+                deleteFolder(subFile);
+            } else {
+                subFile.delete();
+            }
+        }
+        file.delete();
+    }
+
+    public static Configuration loadBotConfProperties(String fileName) {
         Configurations configurations = new Configurations();
         Configuration botConfiguration = new BaseConfiguration();
         try {
@@ -47,17 +60,17 @@ public class BodiGenerator {
             e.printStackTrace();
             System.out.println("'" + fileName + "' file not found");
         }
-        return BotToCodeConfProperties.from(botConfiguration);
+        return botConfiguration;
     }
 
-    public static TabularDataSource createTabularDataSource(String csvFileName) {
+    public static TabularDataSource createTabularDataSource(String inputDocName) {
         TabularDataSource tds = null;
         try {
             tds = new TabularDataSource(Objects.requireNonNull(BodiGenerator.class.getClassLoader()
-                    .getResource(csvFileName)).getPath());
+                    .getResource(inputDocName)).getPath());
         } catch (NullPointerException e) {
             e.printStackTrace();
-            System.out.println("'" + csvFileName + "' file not found");
+            System.out.println("'" + inputDocName + "' file not found");
             System.exit(1);
         }
         return tds;
@@ -100,27 +113,27 @@ public class BodiGenerator {
         return ds;
     }
 
-    public static BotProperties dataSchemaToBotProperties(DataSchema ds, BotToCodeConfProperties conf) {
-        BotProperties bp = new BotProperties(conf.getBotName(), conf.getInputDocName(), ds);
+    public static BotProperties dataSchemaToBotProperties(DataSchema ds, String botName, String inputDocName) {
+        BotProperties bp = new BotProperties(botName, inputDocName, ds);
         bp.createBotStructure();
         return bp;
     }
 
     public static void main(String[] args) {
         // Load bot properties
-        BotToCodeConfProperties conf = loadBotConfProperties("bot.properties");
-        TabularDataSource tds = createTabularDataSource(conf.getInputDocName());
+        Configuration conf = loadBotConfProperties("bot.properties");
+        String inputDocName = conf.getString("xls.importer.xls");
+        String botName = conf.getString("xls.generator.bot.name");
+        String outputFolder = conf.getString("xls.generator.output");
+
+        TabularDataSource tds = createTabularDataSource(inputDocName);
         DataSchema ds = tabularDataSourceToDataSchema(tds);
-        BotProperties bp = dataSchemaToBotProperties(ds, conf);
-        // Bot bot = new Bot(bp.getIntents(), bp.getTypes(), bp.getStates());
-        // BotToCode.createBot(bot, conf);
+        BotProperties bp = dataSchemaToBotProperties(ds, botName, inputDocName);
 
-        String outputFolder = conf.getOutputFolder();
-
-        System.out.println("Attempting to create the bot " + conf.getBotName() + " in " + outputFolder);
+        System.out.println("Attempting to create the bot " + botName + " in " + outputFolder);
         try {
             File outputFolderFile = new File(outputFolder);
-            BotToCode.deleteFolder(outputFolderFile);
+            deleteFolder(outputFolderFile);
         } catch (NullPointerException e) {
             System.out.println("Error deleting the existing content of the " + outputFolder + " folder. Maybe it does not exist?");
         }
@@ -134,20 +147,12 @@ public class BodiGenerator {
 
             System.out.println("Creating the pom file");
             Path pomFile = Files.createFile(Paths.get(outputFolder + "/pom.xml"));
-            Files.write(pomFile, POMBotGenerator.pomTemplate(conf.getBotName()).getBytes());
-
-            // System.out.println("Creating the bot configuration file");
-            // Path confFile = Files.createFile(Paths.get(outputFolder + "/src/main/resources/bot.properties"));
-            // Files.write(confFile, ConfFileGenerator.confTemplate(conf).getBytes());
+            Files.write(pomFile, CodeGenerator.generatePomFile(botName).getBytes());
 
             System.out.println("Creating the bot configuration file");
             File botConfSource = new File("src/main/resources/bot.properties");
             File botConfDest = new File(outputFolder + "/src/main/resources/bot.properties");
             FileUtils.copyFile(botConfSource, botConfDest);
-
-            // System.out.println("Creating the bot definition file");
-            // Path botFile = Files.createFile(Paths.get(outputFolder + "/src/main/java/" + botName + ".java"));
-            // Files.write(botFile, CoreBotGenerator.botTemplate(conf, bot).getBytes(), new OpenOption[0]);
 
             System.out.println("Copying the bodiGenerator.dataSource package");
             File dsSource = new File("src/main/java/bodiGenerator/dataSource/");
@@ -186,7 +191,7 @@ public class BodiGenerator {
             e.printStackTrace();
         }
         // Create new csv with deleted columns
-        try (PrintWriter out = new PrintWriter(outputFolder + "/src/main/resources/" + conf.getInputDocName())) {
+        try (PrintWriter out = new PrintWriter(outputFolder + "/src/main/resources/" + inputDocName)) {
             out.println(tds.getHeaderCopy().stream().map(field -> "\"" + field + "\"").collect(Collectors.joining(",")));
             for (int i = 0; i < tds.getNumRows(); ++i) {
                 out.println(tds.getRow(i).getValues().stream().map(field -> "\"" + field + "\"").collect(Collectors.joining(",")));
