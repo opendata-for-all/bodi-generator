@@ -33,7 +33,8 @@ public class Utils {
      */
     public static List<String> getEntityValues(EntityDefinitionReferenceProvider entity) {
         EntityDefinition referredEntity = entity.getEntityReference().getReferredEntity();
-        if (referredEntity instanceof MappingEntityDefinition mapping) {
+        if (referredEntity instanceof MappingEntityDefinition) {
+            MappingEntityDefinition mapping = (MappingEntityDefinition) referredEntity;
             return mapping.getEntries().stream().map(MappingEntityDefinitionEntry::getReferenceValue).collect(Collectors.toList());
         } else {
             throw new IllegalArgumentException(MessageFormat.format("Expected a {0}, found a {1}",
