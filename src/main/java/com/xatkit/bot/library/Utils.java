@@ -55,12 +55,21 @@ public class Utils {
 
     public static boolean isDate(String text) {
         try {
-            // TODO: Find Date parser (String -> Date)
-            LocalDateTime.parse(text, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-        }
-        catch (DateTimeParseException e) {
-            return false;
-        }
-        return true;
+            LocalDate.parse(text, DateTimeFormatter.ISO_DATE);
+            return true;
+        } catch (DateTimeParseException ignored) {}
+        try {
+            LocalDateTime.parse(text, DateTimeFormatter.ISO_DATE_TIME);
+            return true;
+        } catch (DateTimeParseException ignored) {}
+        try {
+            LocalDateTime.parse(text, DateTimeFormatter.ISO_INSTANT);
+            return true;
+        } catch (DateTimeParseException ignored) {}
+        try {
+            LocalDateTime.parse(text, DateTimeFormatter.RFC_1123_DATE_TIME);
+            return true;
+        } catch (DateTimeParseException ignored) {}
+        return false;
     }
 }
