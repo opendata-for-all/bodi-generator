@@ -1,4 +1,4 @@
-package bodiGenerator.dataSource;
+package bodi.generator.dataSource;
 
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 
@@ -16,7 +16,7 @@ import java.util.List;
 public class Statement {
 
     /**
-     * The {@link TabularDataSource} object bound to this {@link Statement}
+     * The {@link TabularDataSource} object bound to this {@link Statement}.
      * @see TabularDataSource
      */
     private TabularDataSource tds;
@@ -56,7 +56,7 @@ public class Statement {
     private boolean ignoreCaseFilterValue;
 
     /**
-     * Instantiates a new Statement bound to a given {@link TabularDataSource}
+     * Instantiates a new Statement bound to a given {@link TabularDataSource}.
      *
      * @param tds the {@link TabularDataSource}
      */
@@ -68,7 +68,7 @@ public class Statement {
     }
 
     /**
-     * Sets {@code #ignoreCaseFilterValue}
+     * Sets {@code #ignoreCaseFilterValue}.
      *
      * @param ignoreCaseFilterValue the value
      * @return the statement
@@ -79,7 +79,7 @@ public class Statement {
     }
 
     /**
-     * Gets the {@link TabularDataSource} bound to the {@link Statement}
+     * Gets the {@link TabularDataSource} bound to the {@link Statement}.
      *
      * @return the tabular data source
      */
@@ -88,7 +88,7 @@ public class Statement {
     }
 
     /**
-     * Add a new filter to {@link #filters}
+     * Add a new filter to {@link #filters}.
      *
      * @param field    the filter's field
      * @param operator the filter's operator
@@ -126,7 +126,7 @@ public class Statement {
      * @see ResultSet
      */
     public ResultSet executeQuery() {
-        List<String> header =tds.getHeaderCopy();
+        List<String> header = tds.getHeaderCopy();
         List<Row> table = tds.getTableCopy();
         // Filtering
         for (ImmutableTriple<String, String, String> f : filters) {
@@ -136,48 +136,60 @@ public class Statement {
             } else {
                 value = f.right;
             }
-            switch(f.middle) {
+            switch (f.middle) {
                 // Numeric Filters
                 case "=":
-                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) == Float.parseFloat(f.right)));
+                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left)))
+                            == Float.parseFloat(f.right)));
                     break;
                 case "<":
-                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) < Float.parseFloat(f.right)));
+                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left)))
+                            < Float.parseFloat(f.right)));
                     break;
                 case "<=":
-                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) <= Float.parseFloat(f.right)));
+                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left)))
+                            <= Float.parseFloat(f.right)));
                     break;
                 case ">":
-                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) > Float.parseFloat(f.right)));
+                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left)))
+                            > Float.parseFloat(f.right)));
                     break;
                 case ">=":
-                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) >= Float.parseFloat(f.right)));
+                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left)))
+                            >= Float.parseFloat(f.right)));
                     break;
                 case "!=":
-                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) != Float.parseFloat(f.right)));
+                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left)))
+                            != Float.parseFloat(f.right)));
                     break;
                 // Textual Filters
                 case "equals": // Also a date filter
-                    table.removeIf(row -> !(row.getColumnValue(header.indexOf(f.left), ignoreCaseFilterValue).equals(value)));
+                    table.removeIf(row -> !(row.getColumnValue(header.indexOf(f.left), ignoreCaseFilterValue)
+                            .equals(value)));
                     break;
                 case "different": // Also a date filter
-                    table.removeIf(row -> row.getColumnValue(header.indexOf(f.left), ignoreCaseFilterValue).equals(value));
+                    table.removeIf(row -> row.getColumnValue(header.indexOf(f.left), ignoreCaseFilterValue)
+                            .equals(value));
                     break;
                 case "contains":
-                    table.removeIf(row -> !(row.getColumnValue(header.indexOf(f.left), ignoreCaseFilterValue).contains(value)));
+                    table.removeIf(row -> !(row.getColumnValue(header.indexOf(f.left), ignoreCaseFilterValue)
+                            .contains(value)));
                     break;
                 case "starts with":
-                    table.removeIf(row -> !(row.getColumnValue(header.indexOf(f.left), ignoreCaseFilterValue).startsWith(value)));
+                    table.removeIf(row -> !(row.getColumnValue(header.indexOf(f.left), ignoreCaseFilterValue)
+                            .startsWith(value)));
                     break;
                 case "ends with":
-                    table.removeIf(row -> !(row.getColumnValue(header.indexOf(f.left), ignoreCaseFilterValue).endsWith(value)));
+                    table.removeIf(row -> !(row.getColumnValue(header.indexOf(f.left), ignoreCaseFilterValue)
+                            .endsWith(value)));
                     break;
                 // Date Filters
                 case "before":
                     LocalDateTime filterDate = LocalDateTime.parse(f.right, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
                     table.removeIf(row -> {
                         String rowDateString = row.getColumnValue(header.indexOf(f.left));
-                        LocalDateTime rowDate = LocalDateTime.parse(rowDateString, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+                        LocalDateTime rowDate = LocalDateTime.parse(rowDateString,
+                                DateTimeFormatter.ISO_OFFSET_DATE_TIME);
                         return rowDate.isAfter(filterDate);
                     });
                     break;
@@ -185,9 +197,12 @@ public class Statement {
                     filterDate = LocalDateTime.parse(f.right, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
                     table.removeIf(row -> {
                         String rowDateString = row.getColumnValue(header.indexOf(f.left));
-                        LocalDateTime rowDate = LocalDateTime.parse(rowDateString, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+                        LocalDateTime rowDate = LocalDateTime.parse(rowDateString,
+                                DateTimeFormatter.ISO_OFFSET_DATE_TIME);
                         return rowDate.isBefore(filterDate);
                     });
+                    break;
+                default:
                     break;
             }
         }

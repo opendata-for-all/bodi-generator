@@ -1,6 +1,6 @@
-package bodiGenerator.dataSchema;
+package bodi.generator.dataSchema;
 
-import bodiGenerator.dataSource.TabularDataSource;
+import bodi.generator.dataSource.TabularDataSource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +48,7 @@ public class SchemaField {
     private int numDifferentValues;
 
     /**
-     * Instantiates a new empty {@link SchemaField}
+     * Instantiates a new empty {@link SchemaField}.
      */
     public SchemaField() {
         synonyms = new ArrayList<>();

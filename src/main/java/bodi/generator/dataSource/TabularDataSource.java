@@ -1,4 +1,4 @@
-package bodiGenerator.dataSource;
+package bodi.generator.dataSource;
 
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
@@ -124,7 +124,7 @@ public class TabularDataSource {
     }
 
     /**
-     * Create a {@link Statement} linked to the caller {@link TabularDataSource}
+     * Create a {@link Statement} linked to the caller {@link TabularDataSource}.
      *
      * @return the statement
      * @see Statement

@@ -1,10 +1,10 @@
-package bodiGenerator.dataSchema;
+package bodi.generator.dataSchema;
 
-import bodiGenerator.dataSource.TabularDataSource;
+import bodi.generator.dataSource.TabularDataSource;
 
 /**
  * Enumeration of all data types that can be inferred from a {@link TabularDataSource}, which are defined in the
- * {@link SchemaField} objects
+ * {@link SchemaField} objects.
  *
  * @see SchemaField
  */

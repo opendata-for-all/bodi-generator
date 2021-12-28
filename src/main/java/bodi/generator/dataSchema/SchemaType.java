@@ -1,5 +1,5 @@
-package bodiGenerator.dataSchema;
-import bodiGenerator.dataSource.TabularDataSource;
+package bodi.generator.dataSchema;
+import bodi.generator.dataSource.TabularDataSource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,12 +18,12 @@ import java.util.List;
 public class SchemaType {
 
     /**
-     * The name of the {@link SchemaType}
+     * The name of the {@link SchemaType}.
      */
     private String name;
 
     /**
-     * The collection of fields that form a {@link SchemaType}
+     * The collection of fields that form a {@link SchemaType}.
      */
     private List<SchemaField> schemaFields;
 
@@ -38,7 +38,7 @@ public class SchemaType {
     }
 
     /**
-     * Gets the name of the {@link SchemaType}
+     * Gets the name of the {@link SchemaType}.
      *
      * @return the name
      */
@@ -47,7 +47,7 @@ public class SchemaType {
     }
 
     /**
-     * Gets the collection of {@link SchemaField}
+     * Gets the collection of {@link SchemaField}.
      *
      * @return the schema fields
      */
@@ -56,7 +56,7 @@ public class SchemaType {
     }
 
     /**
-     * Adds a {@link SchemaField} to the {@link SchemaType}
+     * Adds a {@link SchemaField} to the {@link SchemaType}.
      *
      * @param schemaField the {@link SchemaField}
      */

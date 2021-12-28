@@ -1,6 +1,6 @@
-package bodiGenerator.dataSchema;
+package bodi.generator.dataSchema;
 
-import bodiGenerator.BodiGenerator;
+import bodi.generator.BodiGenerator;
 import com.xatkit.bot.metamodel.IntentParameterType;
 import com.xatkit.bot.metamodel.Mapping;
 import com.xatkit.bot.metamodel.MappingEntry;
@@ -11,9 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static bodiGenerator.dataSchema.DataType.DATE;
-import static bodiGenerator.dataSchema.DataType.NUMBER;
-import static bodiGenerator.dataSchema.DataType.TEXT;
+import static bodi.generator.dataSchema.DataType.DATE;
+import static bodi.generator.dataSchema.DataType.NUMBER;
+import static bodi.generator.dataSchema.DataType.TEXT;
 
 /**
  * Generates and stores bot information and components, which are used to generate the source code of a bot.
@@ -23,23 +23,23 @@ public class BotProperties {
     /**
      * Contains higher-level information about a tabular data source. It is used to generate bot components.
      */
-    private DataSchema ds;
+    private final DataSchema ds;
 
     /**
      * The name of the bot this {@link BotProperties} refers to.
      */
-    private String botName;
+    private final String botName;
 
     /**
-     * The name of the document that the bot must read at runtime to satisfy the user queries
+     * The name of the document that the bot must read at runtime to satisfy the user queries.
      * <p>
      * This file should be the same as the one used to define {@link #ds} (consider any usage of
      * {@link BodiGenerator#createTabularDataSource(String)} before setting this attribute)
      */
-    private String inputDocName;
+    private final String inputDocName;
 
     /**
-     * Collection of metamodels of the bot entities
+     * Collection of metamodels of the bot entities.
      * <p>
      * It is implemented as a {@link Map} since some other meta-concepts of a chatbot may need references to the types,
      * thus with a map it is possible to get a type knowing its name (the key)
@@ -47,10 +47,10 @@ public class BotProperties {
      * @see IntentParameterType
      * @see EntityDefinitionReferenceProvider
      */
-    private Map<String, IntentParameterType> types = new HashMap<>();
+    private final Map<String, IntentParameterType> types = new HashMap<>();
 
     /**
-     * Instantiates a new {@link BotProperties}
+     * Instantiates a new {@link BotProperties}.
      *
      * @param botName      the bot name
      * @param inputDocName the name of the input document
@@ -82,7 +82,7 @@ public class BotProperties {
                 numericFieldEntity.addMappingEntry(entry);
             } else if (schemaField.getType().equals(DATE)) {
                 dateFieldEntity.addMappingEntry(entry);
-            } else if (schemaField.getType().equals(TEXT)){
+            } else if (schemaField.getType().equals(TEXT)) {
                 textualFieldEntity.addMappingEntry(entry);
             }
 
@@ -97,9 +97,11 @@ public class BotProperties {
         Mapping numericOperatorEntity = new Mapping("NumericOperator", "numericOperatorEntity");
         numericOperatorEntity.addMappingEntry(new MappingEntry("="));
         numericOperatorEntity.addMappingEntry(new MappingEntry("<", Arrays.asList("less than", "lower than")));
-        numericOperatorEntity.addMappingEntry(new MappingEntry("<=", Arrays.asList("less than or equals", "lower than or equals")));
+        numericOperatorEntity.addMappingEntry(new MappingEntry("<=",
+                Arrays.asList("less than or equals", "lower than or equals")));
         numericOperatorEntity.addMappingEntry(new MappingEntry(">", Arrays.asList("greater than", "higher than")));
-        numericOperatorEntity.addMappingEntry(new MappingEntry(">=", Arrays.asList("greater than or equals", "higher than or equals")));
+        numericOperatorEntity.addMappingEntry(new MappingEntry(">=",
+                Arrays.asList("greater than or equals", "higher than or equals")));
         numericOperatorEntity.addMappingEntry(new MappingEntry("!=", Arrays.asList("not equals", "different")));
         types.put("numericOperatorEntity", numericOperatorEntity);
 
@@ -120,7 +122,7 @@ public class BotProperties {
     }
 
     /**
-     * Generates and gets the entities file corresponding to the {@link BotProperties}
+     * Generates and gets the entities file corresponding to the {@link BotProperties}.
      *
      * @return the entities file
      */

@@ -1,30 +1,85 @@
 package com.xatkit.bot.library;
 
-public class ContextKeys {
+/**
+ * This class stores constant keys used to access information relative to a chatbot, like parameters or intents.
+ */
+public final class ContextKeys {
 
-    /*
-     Session Keys
-     */
-    public static final String tabularDataSource = "tabularDataSource";
-    public static final String statement = "statement";
-    public static final String filterFieldOptions = "filterFieldOptions";
-    public static final String viewFieldOptions = "viewFieldOptions";
-    public static final String pageCount = "pageCount";
-    public static final String lastFieldName = "lastFieldName";
-    public static final String lastOperatorName = "lastOperatorName";
+    private ContextKeys() {
+    }
 
-    /*
-     Intent Parameter Keys
+    // Session Keys
+
+    /**
+     * The constant TABULAR_DATA_SOURCE.
      */
-    public static final String textualFieldName = "textualFieldName";
-    public static final String numericFieldName = "numericFieldName";
-    public static final String dateFieldName = "dateFieldName";
-    public static final String textualOperatorName = "textualOperatorName";
-    public static final String numericOperatorName = "numericOperatorName";
-    public static final String dateOperatorName = "dateOperatorName";
-    public static final String value = "value";
-    public static final String numericValue = "numericValue";
-    public static final String dateValue = "dateValue";
-    public static final String textualValue = "textualValue";
+    public static final String TABULAR_DATA_SOURCE = "TABULAR_DATA_SOURCE";
+    /**
+     * The constant STATEMENT.
+     */
+    public static final String STATEMENT = "STATEMENT";
+    /**
+     * The constant FILTER_FIELD_OPTIONS.
+     */
+    public static final String FILTER_FIELD_OPTIONS = "FILTER_FIELD_OPTIONS";
+    /**
+     * The constant VIEW_FIELD_OPTIONS.
+     */
+    public static final String VIEW_FIELD_OPTIONS = "VIEW_FIELD_OPTIONS";
+    /**
+     * The constant PAGE_COUNT.
+     */
+    public static final String PAGE_COUNT = "PAGE_COUNT";
+    /**
+     * The constant LAST_FIELD_NAME.
+     */
+    public static final String LAST_FIELD_NAME = "LAST_FIELD_NAME";
+    /**
+     * The constant LAST_OPERATOR_NAME.
+     */
+    public static final String LAST_OPERATOR_NAME = "LAST_OPERATOR_NAME";
+
+     // Intent Parameter Keys
+
+    /**
+     * The constant TEXTUAL_FIELD_NAME.
+     */
+    public static final String TEXTUAL_FIELD_NAME = "TEXTUAL_FIELD_NAME";
+    /**
+     * The constant NUMERIC_FIELD_NAME.
+     */
+    public static final String NUMERIC_FIELD_NAME = "NUMERIC_FIELD_NAME";
+    /**
+     * The constant DATE_FIELD_NAME.
+     */
+    public static final String DATE_FIELD_NAME = "DATE_FIELD_NAME";
+    /**
+     * The constant TEXTUAL_OPERATOR_NAME.
+     */
+    public static final String TEXTUAL_OPERATOR_NAME = "TEXTUAL_OPERATOR_NAME";
+    /**
+     * The constant NUMERIC_OPERATOR_NAME.
+     */
+    public static final String NUMERIC_OPERATOR_NAME = "NUMERIC_OPERATOR_NAME";
+    /**
+     * The constant DATE_OPERATOR_NAME.
+     */
+    public static final String DATE_OPERATOR_NAME = "DATE_OPERATOR_NAME";
+    /**
+     * The constant VALUE.
+     */
+    public static final String VALUE = "VALUE";
+    /**
+     * The constant NUMERIC_VALUE.
+     */
+    public static final String NUMERIC_VALUE = "NUMERIC_VALUE";
+    /**
+     * The constant DATE_VALUE.
+     */
+    public static final String DATE_VALUE = "DATE_VALUE";
+    /**
+     * The constant TEXTUAL_VALUE.
+     */
+    public static final String TEXTUAL_VALUE = "TEXTUAL_VALUE";
 
 }

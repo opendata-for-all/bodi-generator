@@ -1,4 +1,4 @@
-package bodiGenerator.dataSource;
+package bodi.generator.dataSource;
 
 import java.util.List;
 

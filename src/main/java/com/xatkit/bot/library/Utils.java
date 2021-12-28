@@ -21,12 +21,15 @@ import static fr.inria.atlanmod.commons.Preconditions.checkNotNull;
 import static java.util.Objects.nonNull;
 
 /**
- * A set of methods that provide useful functionalities to be used in a chatbot system
+ * A set of methods that provide useful functionalities to be used in a chatbot system.
  */
-public class Utils {
+public final class Utils {
+
+    private Utils() {
+    }
 
     /**
-     * Gets the values of a chatbot entity
+     * Gets the values of a chatbot entity.
      *
      * @param entity the entity
      * @return the entity values
@@ -35,7 +38,8 @@ public class Utils {
         EntityDefinition referredEntity = entity.getEntityReference().getReferredEntity();
         if (referredEntity instanceof MappingEntityDefinition) {
             MappingEntityDefinition mapping = (MappingEntityDefinition) referredEntity;
-            return mapping.getEntries().stream().map(MappingEntityDefinitionEntry::getReferenceValue).collect(Collectors.toList());
+            return mapping.getEntries().stream().map(MappingEntityDefinitionEntry::getReferenceValue)
+                    .collect(Collectors.toList());
         } else {
             throw new IllegalArgumentException(MessageFormat.format("Expected a {0}, found a {1}",
                     MappingEntityDefinition.class.getSimpleName(), referredEntity.getClass().getSimpleName()));
@@ -43,7 +47,7 @@ public class Utils {
     }
 
     /**
-     * Gets the first training sentence of all the provided intents
+     * Gets the first training sentence of all the provided intents.
      *
      * @param intents the intents
      * @return a collection containing the first training sentence of all the intents
@@ -60,7 +64,7 @@ public class Utils {
     }
 
     /**
-     * Checks if a given text is a number (i.e. an integer or a floating point)
+     * Checks if a given text is a number (i.e. an integer or a floating point).
      *
      * @param text the text to be parsed to a date
      * @return {@code true} if the text can be parsed as a number, {@code false} otherwise
@@ -89,19 +93,19 @@ public class Utils {
         try {
             LocalDate.parse(text, DateTimeFormatter.ISO_DATE);
             return true;
-        } catch (DateTimeParseException ignored) {}
+        } catch (DateTimeParseException ignored) { }
         try {
             LocalDateTime.parse(text, DateTimeFormatter.ISO_DATE_TIME);
             return true;
-        } catch (DateTimeParseException ignored) {}
+        } catch (DateTimeParseException ignored) { }
         try {
             LocalDateTime.parse(text, DateTimeFormatter.ISO_INSTANT);
             return true;
-        } catch (DateTimeParseException ignored) {}
+        } catch (DateTimeParseException ignored) { }
         try {
             LocalDateTime.parse(text, DateTimeFormatter.RFC_1123_DATE_TIME);
             return true;
-        } catch (DateTimeParseException ignored) {}
+        } catch (DateTimeParseException ignored) { }
         return false;
     }
 }

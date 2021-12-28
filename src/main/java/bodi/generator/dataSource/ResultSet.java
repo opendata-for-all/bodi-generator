@@ -1,4 +1,4 @@
-package bodiGenerator.dataSource;
+package bodi.generator.dataSource;
 
 import java.util.List;
 
@@ -81,7 +81,7 @@ public class ResultSet {
     }
 
     /**
-     * Gets the {@link #header} of the {@link ResultSet}
+     * Gets the {@link #header} of the {@link ResultSet}.
      *
      * @return the header
      */
