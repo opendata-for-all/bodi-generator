@@ -236,6 +236,7 @@ public final class BodiGenerator {
             e.printStackTrace();
         }
         // Create new csv with deleted columns (if any)
+        System.out.println("Creating the new " + inputDocName + " with deleted columns (if any)");
         try (PrintWriter out = new PrintWriter(outputFolder + "/src/main/resources/" + inputDocName)) {
             out.println(tds.getHeaderCopy().stream().map(field -> "\"" + field + "\"")
                     .collect(Collectors.joining(",")));
