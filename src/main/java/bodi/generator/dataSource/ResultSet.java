@@ -1,6 +1,7 @@
 package bodi.generator.dataSource;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 /**
@@ -89,4 +90,35 @@ public class ResultSet {
         return header;
     }
 
+    /**
+     * Gets a subset of the content of the {@link ResultSet} in the following format:
+     * <p>
+     * |Column[0]|Column[1]|...|Column[n]|
+     * <p>
+     * |---|---|...|---|
+     * <p>
+     * |Row[offset][0]|Row[offset][1]|...|Row[offset][n]|
+     * <p>
+     * |Row[offset+1][0]|Row[offset+1][1]|...|Row[offset+1][n]|
+     * <p>
+     * |Row[offset+maxRows][0]|Row[offset+maxRows][1]|...|Row[offset+maxRows][n]|
+     * <p>
+     * <p>
+     * Only the rows with index between {@code [offset, max(offset+maxRows, numRows)]} are included.
+     *
+     * @param offset the offset that indicates the first row
+     * @param maxRows the maximum number of rows that can be included in the result
+     * @return a {@code String} containing a tabular representation of the {@link ResultSet}
+     */
+    public String printTable(int offset, int maxRows) {
+        String headerString =
+                "|" + String.join("|", this.header) + "|" + "\n"
+                        + "|" + String.join("|", this.header.stream().map(e -> "---")
+                        .collect(Collectors.joining("|"))) + "|" + "\n";
+        String data = "";
+        for (int i = offset; i < this.numRows && i < offset + maxRows; i++) {
+            data += "|" + String.join("|", this.getRow(i).getValues()) + "|" + "\n";
+        }
+        return headerString + data;
+    }
 }

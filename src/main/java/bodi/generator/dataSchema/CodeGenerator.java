@@ -93,9 +93,10 @@ public final class CodeGenerator {
                         <maven-help-plugin.version>3.2.0</maven-help-plugin.version>
                         <junit.version>4.12</junit.version>
                         <assertj.version>3.14.0</assertj.version>
-                        <mockito-version>3.3.3</mockito-version>
+                        <mockito.version>3.3.3</mockito.version>
                         <lombok.version>LATEST</lombok.version>
                         <opencsv.version>5.5.2</opencsv.version>
+                        <csvjdbc.version>1.0.37</csvjdbc.version>
                     </properties>
                     <dependencies>
                         <dependency>
@@ -136,6 +137,10 @@ public final class CodeGenerator {
                             <groupId>org.mockito</groupId>
                             <artifactId>mockito-core</artifactId>
                         </dependency>
+                        <dependency>
+                            <groupId>net.sourceforge.csvjdbc</groupId>
+                            <artifactId>csvjdbc</artifactId>
+                        </dependency>
                     </dependencies>
                     <dependencyManagement>
                         <dependencies>
@@ -167,8 +172,13 @@ public final class CodeGenerator {
                             <dependency>
                                 <groupId>org.mockito</groupId>
                                 <artifactId>mockito-core</artifactId>
-                                <version>${mockito-version}</version>
+                                <version>${mockito.version}</version>
                                 <scope>test</scope>
+                            </dependency>
+                            <dependency>
+                                <groupId>net.sourceforge.csvjdbc</groupId>
+                                <artifactId>csvjdbc</artifactId>
+                                <version>${csvjdbc.version}</version>
                             </dependency>
                         </dependencies>
                     </dependencyManagement>

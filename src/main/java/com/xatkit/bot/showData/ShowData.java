@@ -12,7 +12,6 @@ import lombok.Getter;
 import lombok.val;
 
 import java.text.MessageFormat;
-import java.util.stream.Collectors;
 
 import static com.xatkit.bot.Bot.messages;
 import static com.xatkit.dsl.DSL.intentIs;
@@ -72,20 +71,13 @@ public class ShowData {
 
                     if (totalEntries > 0) {
                         // Print table
-                        String header =
-                                "|" + String.join("|", resultSet.getHeader()) + "|" + "\n"
-                                + "|" + String.join("|", resultSet.getHeader().stream().map(e -> "---")
-                                .collect(Collectors.joining("|"))) + "|" + "\n";
-                        String data = "";
-                        for (int i = offset; i < totalEntries && i < offset + pageLimit; i++) {
-                            data += "|" + String.join("|", resultSet.getRow(i).getValues()) + "|" + "\n";
-                        }
+                        String resultSetString = resultSet.printTable(offset, pageLimit);
                         int selectedEntries = (offset + pageLimit > totalEntries ? totalEntries - offset : pageLimit);
                         reactPlatform.reply(context, MessageFormat.format(
                                 messages.getString("ShowingRecords"), selectedEntries, totalEntries));
                         reactPlatform.reply(context, MessageFormat.format(
                                 messages.getString("PageCount"), pageCount, totalPages));
-                        reactPlatform.reply(context, header + data, Utils.getFirstTrainingSentences(
+                        reactPlatform.reply(context, resultSetString, Utils.getFirstTrainingSentences(
                                 Intents.showNextPageIntent,
                                 Intents.stopViewIntent));
                     } else {

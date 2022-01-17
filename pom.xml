@@ -64,6 +64,13 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>net.sourceforge.csvjdbc</groupId>
+            <artifactId>csvjdbc</artifactId>
+            <version>1.0.37</version>
+        </dependency>
+
+
     </dependencies>
 
 </project>
