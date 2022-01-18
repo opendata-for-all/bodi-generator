@@ -30,7 +30,14 @@ mvn clean compile
 mvn exec:java -Dexec.mainClass="bodi.generator.BodiGenerator"
 ```
 
-7- Once the chatbot is generated, you can run it:
+7- (Optional) Edit the [defaultFallback.properties](src/main/resources/defaultFallback.properties) file according to
+your needs (see [DefaultFallback Configuration](#defaultfallback-configuration)). Then, run the Python Flask server:
+
+```bash
+python3 flask_server.py
+```
+
+8- Once the chatbot is generated, you can run it:
 ```bash
 cd <bot-folder>
 mvn clean compile
@@ -56,3 +63,32 @@ set in [bot.properties](src/main/resources/bot.properties)
 
 > 📚 It is highly recommended to use an NLP engine supported in Xatkit (DialogFlow or NLP.js). Do not include 
 > properties for both NLP engines.
+
+## DefaultFallback Configuration
+
+When a user utterance is not matched with a bot intent, the DefaultFallback state is executed. We provide a 
+technique to empower the chatbot with language models able to find answers to a wide range of inputs. A Python Flask 
+server running a language model from [Huggingface](https://huggingface.co/) can be deployed and then, from the 
+DefaultFallback state, a request to this server is sent and a response is received. We consider 2 kinds of 
+language models: 
+- **Text-to-SQL**: The input of the language model is a natural language utterance. The output is a SQL statement 
+  equivalent to the utterance. This SQL statement is then executed within the tabular data file of the chatbot to 
+  obtain a result to the original utterance.
+
+  See this example model: [mrm8488/t5-base-finetuned-wikiSQL](https://huggingface.co/mrm8488/t5-base-finetuned-wikiSQL)
+
+- **Text-to-Table** (not supported yet): The input of the language model is a natural language utterance (together 
+  with a tabular data source such as a `.csv` table). The output is the answer to the utterance (that is, a tabular 
+  data result obtained from the original tabular data provided).
+
+  See this example model: [google/tapas-base-finetuned-wtq](https://huggingface.co/google/tapas-base-finetuned-wtq)
+
+Here are described the properties you can
+set in [defaultFallback.properties](src/main/resources/defaultFallback.properties)
+
+| Name                       | Description                                                                                          |
+|----------------------------|------------------------------------------------------------------------------------------------------|
+| `MODEL_NAME`               | The name of the language model (a [Huggingface endpoint](https://huggingface.co/models), e.g. `mrm8488/t5-base-finetuned-wikiSQL` |
+| `SERVER_URL`               | The URL where the server is hosted (e.g. `127.0.0.1:5002`)                                           |
+| `RUN_MODEL_ENDPOINT_SQL`   | The server endpoint that runs a query in the Text-to-SQL language model                              |
+| `RUN_MODEL_ENDPOINT_TABLE` | The server endpoint that runs a query in the Text-to-Table language model                            |
