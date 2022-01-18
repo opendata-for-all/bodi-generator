@@ -86,9 +86,9 @@ language models:
 Here are described the properties you can
 set in [defaultFallback.properties](src/main/resources/defaultFallback.properties)
 
-| Name                       | Description                                                                                          |
-|----------------------------|------------------------------------------------------------------------------------------------------|
+| Name                       | Description                                                                                                                       |
+|----------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
 | `MODEL_NAME`               | The name of the language model (a [Huggingface endpoint](https://huggingface.co/models), e.g. `mrm8488/t5-base-finetuned-wikiSQL` |
-| `SERVER_URL`               | The URL where the server is hosted (e.g. `127.0.0.1:5002`)                                           |
-| `RUN_MODEL_ENDPOINT_SQL`   | The server endpoint that runs a query in the Text-to-SQL language model                              |
-| `RUN_MODEL_ENDPOINT_TABLE` | The server endpoint that runs a query in the Text-to-Table language model                            |
+| `SERVER_URL`               | The URL where the server is hosted (e.g. `127.0.0.1:5002`)                                                                        |
+| `RUN_MODEL_ENDPOINT_SQL`   | The server endpoint that runs a query in the Text-to-SQL language model                                                           |
+| `RUN_MODEL_ENDPOINT_TABLE` | The server endpoint that runs a query in the Text-to-Table language model                                                         |
