@@ -79,12 +79,6 @@ public final class Bot {
      */
     public static String inputDoc = null;
 
-    /**
-     * {@code true} if the language model used within the default fallback state is properly set, {@code false}
-     * otherwise.
-     */
-    private static boolean defaultFallbackModelIsSet;
-
     // public static CoreLibraryI18n CoreLibrary = new CoreLibraryI18n(LOCALE);
 
     /**
@@ -132,7 +126,6 @@ public final class Bot {
         SelectViewField selectViewField = new SelectViewField(reactPlatform, startState);
         CustomQuery customQuery = new CustomQuery(reactPlatform, startState);
         TextToSQLClient defaultFallbackNLPClient = new TextToSQLClient();
-        defaultFallbackModelIsSet = defaultFallbackNLPClient.setModel();
 
         /*
          * Specify the content of the bot states (i.e. the behavior of the bot).
@@ -187,16 +180,12 @@ public final class Bot {
          */
         val defaultFallback = fallbackState()
                 .body(context -> {
-                    if (defaultFallbackModelIsSet) {
-                        String question = context.getIntent().getMatchedInput();
-                        ResultSet answer = defaultFallbackNLPClient.runSqlQuery(question);
-                        if (isEmpty(answer)) {
-                            reactPlatform.reply(context, messages.getString("DefaultFallbackMessage"));
-                        } else {
-                            reactPlatform.reply(context, answer.printTable(0, answer.getNumRows()));
-                        }
-                    } else {
+                    String question = context.getIntent().getMatchedInput();
+                    ResultSet answer = defaultFallbackNLPClient.runSqlQuery(question);
+                    if (isEmpty(answer)) {
                         reactPlatform.reply(context, messages.getString("DefaultFallbackMessage"));
+                    } else {
+                        reactPlatform.reply(context, answer.printTable(0, answer.getNumRows()));
                     }
                 });
 

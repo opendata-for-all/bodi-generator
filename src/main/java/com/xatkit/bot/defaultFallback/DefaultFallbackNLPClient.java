@@ -31,13 +31,6 @@ class DefaultFallbackNLPClient {
     private String modelServerUrl;
 
     /**
-     * The {@code SetModel} endpoint of the server.
-     * <p>
-     * This endpoint takes care of setting (loading) the language model.
-     */
-    private String setModelEndpoint;
-
-    /**
      * The {@code RunModel} endpoint of the server.
      * <p>
      * This endpoint takes care of running a query in the language model.
@@ -61,42 +54,16 @@ class DefaultFallbackNLPClient {
             configuration = configurations.properties(Thread.currentThread().getContextClassLoader()
                     .getResource("defaultFallback.properties"));
             this.modelName = configuration.getString("MODEL_NAME");
-            this.modelServerUrl = configuration.getString("SERVER_URL");
+            this.modelServerUrl = "http://" + configuration.getString("SERVER_URL") + "/";
             if (this instanceof TextToSQLClient) {
-                this.setModelEndpoint = configuration.getString("SET_MODEL_ENDPOINT_SQL");
                 this.runModelEndpoint = configuration.getString("RUN_MODEL_ENDPOINT_SQL");
             } else if (this instanceof TextToTableClient) {
-                this.setModelEndpoint = configuration.getString("SET_MODEL_ENDPOINT_TABLE");
                 this.runModelEndpoint = configuration.getString("RUN_MODEL_ENDPOINT_TABLE");
             }
         } catch (ConfigurationException e) {
             e.printStackTrace();
             System.out.println("Configuration file not found");
         }
-    }
-
-    /**
-     * Sets the language model.
-     *
-     * @return true if the language model was successfully set, false otherwise
-     */
-    public boolean setModel() {
-        JSONObject request = new JSONObject();
-        request.put("modelName", modelName);
-        try {
-            HttpResponse<JsonNode> response;
-            response = Unirest
-                    .post(modelServerUrl + setModelEndpoint)
-                    .header("Content-Type", "application/json")
-                    .body(request).asJson();
-            if (response.getStatus() == HTTP_STATUS_OK) {
-                Log.info("Language model {0} loaded in {1}", modelName, modelServerUrl);
-                return true;
-            }
-        } catch (Exception e) {
-            Log.error(e, "An error occurred while setting the model, see the attached exception");
-        }
-        return false;
     }
 
     /**
