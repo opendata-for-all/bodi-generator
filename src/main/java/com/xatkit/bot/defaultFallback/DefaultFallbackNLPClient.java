@@ -19,13 +19,6 @@ import org.json.JSONObject;
 class DefaultFallbackNLPClient {
 
     /**
-     * The name of the language model.
-     * <p>
-     * It must match with a Huggingface endpoint of a language model.
-     */
-    private String modelName;
-
-    /**
      * The URL of the server running the language model.
      */
     private String modelServerUrl;
@@ -53,7 +46,6 @@ class DefaultFallbackNLPClient {
         try {
             configuration = configurations.properties(Thread.currentThread().getContextClassLoader()
                     .getResource("defaultFallback.properties"));
-            this.modelName = configuration.getString("MODEL_NAME");
             this.modelServerUrl = "http://" + configuration.getString("SERVER_URL") + "/";
             if (this instanceof TextToSQLClient) {
                 this.runModelEndpoint = configuration.getString("RUN_MODEL_ENDPOINT_SQL");
