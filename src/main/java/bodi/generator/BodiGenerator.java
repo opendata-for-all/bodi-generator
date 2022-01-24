@@ -232,11 +232,6 @@ public final class BodiGenerator {
             File messagesCatSource = new File("src/main/resources/messages_cat.properties");
             File messagesCatDest = new File(outputFolder + "/src/main/resources/messages_cat.properties");
             FileUtils.copyFile(messagesCatSource, messagesCatDest);
-
-            System.out.println("Creating the defaultFallback NLP configuration file");
-            File dfConfSource = new File("src/main/resources/defaultFallback.properties");
-            File dfConfDest = new File(outputFolder + "/src/main/resources/defaultFallback.properties");
-            FileUtils.copyFile(dfConfSource, dfConfDest);
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -3,6 +3,7 @@ package com.xatkit.bot.defaultFallback;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
+import com.xatkit.bot.Bot;
 import fr.inria.atlanmod.commons.log.Log;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
@@ -45,7 +46,7 @@ class DefaultFallbackNLPClient {
         Configurations configurations = new Configurations();
         try {
             configuration = configurations.properties(Thread.currentThread().getContextClassLoader()
-                    .getResource("defaultFallback.properties"));
+                    .getResource(Bot.botPropertiesFile));
             this.modelServerUrl = "http://" + configuration.getString("SERVER_URL") + "/";
             if (this instanceof TextToSQLClient) {
                 this.runModelEndpoint = configuration.getString("RUN_MODEL_ENDPOINT_SQL");
