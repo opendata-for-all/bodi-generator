@@ -45,3 +45,12 @@ hs_err_pid*
 
 # Generated public/ folder
 **/public/
+
+# Generated com.xatkit.Bot/ folder
+**/Bot/
+
+# .DS_Store Mac files
+*.DS_Store
+
+# TabularSemanticparsing folder
+TabularSemanticParsing/
