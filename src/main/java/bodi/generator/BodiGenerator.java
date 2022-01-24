@@ -35,7 +35,7 @@ import static com.xatkit.bot.library.Utils.isDate;
 import static com.xatkit.bot.library.Utils.isNumeric;
 
 /**
- * The type Bodi generator.
+ * The entry point of the bodi-generator application. It generates a complete chatbot application.
  */
 public final class BodiGenerator {
 

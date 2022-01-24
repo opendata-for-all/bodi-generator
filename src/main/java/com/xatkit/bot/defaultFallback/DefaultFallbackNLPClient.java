@@ -65,7 +65,7 @@ class DefaultFallbackNLPClient {
      * @param input the input of the language model
      * @return the output of the language model if it was successfully obtained, {@code null} otherwise
      */
-    protected String runQuery(String input) {
+    protected JSONObject runQuery(String input) {
         JSONObject request = new JSONObject();
         request.put("input", input);
         HttpResponse<JsonNode> response;
@@ -74,7 +74,7 @@ class DefaultFallbackNLPClient {
                     .header("Content-Type", "application/json")
                     .body(request).asJson();
             if (response.getStatus() == HTTP_STATUS_OK) {
-                return response.getBody().getObject().getString("output");
+                return response.getBody().getObject();
             }
         } catch (Exception e) {
             Log.error(e, "An error occurred while computing the answer, see the attached exception");
