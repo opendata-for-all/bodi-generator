@@ -86,10 +86,11 @@ and a response is received. We consider 2 kinds of language models:
   data result obtained from the original tabular data provided).
 
   See this example model: [google/tapas-base-finetuned-wtq](https://huggingface.co/google/tapas-base-finetuned-wtq) and
-  [**our current favourite solution**](Bridging Textual and Tabular Data for Cross-Domain Text-to-SQL Semantic Parsing):
+  **our current favourite solution**: [Bridging Textual and Tabular Data for Cross-Domain Text-to-SQL Semantic
+  Parsing](https://github.com/mgv99/TabularSemanticParsing):
 
 Here are described the properties you can
-set in [bot.properties](src/main/resources/defaultFallback.properties) related to the default fallback state:
+set in [bot.properties](src/main/resources/bot.properties) related to the default fallback state:
 
 | Name                       | Description                                                                                                                                   |
 |----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
