@@ -9,6 +9,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+
 /**
  * This class is a client to make requests to a language model running in a server.
  * <p>
@@ -33,22 +35,32 @@ public class TextToTableClient extends DefaultFallbackNLPClient {
      */
     public ResultSet runTableQuery(String input) {
         JSONObject response = runQuery(input);
-        Log.info("Query text translated to SQL statement: {0}", response.getString("sql"));
-        JSONArray header_json = response.getJSONArray("header");
-        JSONArray table_json = response.getJSONArray("table");
-        List<String> header = new ArrayList<>();
-        for (int i = 0; i < header_json.length(); i++) {
-            header.add(header_json.getString(i));
-        }
-        List<Row> table = new ArrayList<>();
-        for (int i = 0; i < table_json.length(); i++) {
-            JSONArray row_json = table_json.getJSONArray(i);
-            List<String> values = new ArrayList<>();
-            for (int j = 0; j < row_json.length(); j++) {
-                values.add(row_json.get(j).toString());
+        try {
+            String sqlQuery = response.getString("sql");
+            JSONArray headerJson = response.getJSONArray("header");
+            JSONArray tableJson = response.getJSONArray("table");
+            if (isEmpty(sqlQuery)) {
+                Log.info("Sorry, query text could not be translated to SQL statement");
+                return null;
             }
-            table.add(new Row(values));
+            Log.info("Query text translated to SQL statement: {0}", sqlQuery);
+            List<String> header = new ArrayList<>();
+            for (int i = 0; i < headerJson.length(); i++) {
+                header.add(headerJson.getString(i));
+            }
+            List<Row> table = new ArrayList<>();
+            for (int i = 0; i < tableJson.length(); i++) {
+                JSONArray row_json = tableJson.getJSONArray(i);
+                List<String> values = new ArrayList<>();
+                for (int j = 0; j < row_json.length(); j++) {
+                    values.add(row_json.get(j).toString());
+                }
+                table.add(new Row(values));
+            }
+            return new ResultSet(header, table);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
-        return new ResultSet(header, table);
     }
 }

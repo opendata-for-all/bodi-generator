@@ -182,7 +182,7 @@ public final class Bot {
                 .body(context -> {
                     String question = context.getIntent().getMatchedInput();
                     ResultSet answer = defaultFallbackNLPClient.runTableQuery(question);
-                    if (isEmpty(answer)) {
+                    if (isEmpty(answer) || answer.getNumColumns() == 0) {
                         reactPlatform.reply(context, messages.getString("DefaultFallbackMessage"));
                     } else {
                         reactPlatform.reply(context, answer.printTable(0, answer.getNumRows()));
