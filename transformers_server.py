@@ -6,7 +6,7 @@ from io import StringIO
 
 logging.basicConfig(level=logging.INFO)
 ROOT_SECTION = 'root'
-CONFIG_FILE_PATH = 'Bot/src/main/resources/defaultFallback.properties'
+CONFIG_FILE_PATH = 'Bot/src/main/resources/bot.properties'
 
 def loadConfig():
     ini_str = '[' + ROOT_SECTION + ']\n' + open(CONFIG_FILE_PATH, 'r').read()
@@ -50,4 +50,3 @@ def runModelSQL():
 
 if __name__ == '__main__':
     app.run(debug=False)
-    
