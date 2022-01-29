@@ -8,12 +8,15 @@ import com.xatkit.intent.MappingEntityDefinitionEntry;
 import lombok.NonNull;
 
 import java.text.MessageFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import static fr.inria.atlanmod.commons.Preconditions.checkArgument;
@@ -90,6 +93,11 @@ public final class Utils {
      * @see DateTimeFormatter
      */
     public static boolean isDate(String text) {
+        try {
+            SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss a", Locale.ROOT);
+            format.parse(text);
+            return true;
+        } catch (ParseException ignored) { }
         try {
             LocalDate.parse(text, DateTimeFormatter.ISO_DATE);
             return true;
