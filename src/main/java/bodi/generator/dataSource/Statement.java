@@ -206,18 +206,48 @@ public class Statement {
                     LocalDateTime filterDate = LocalDateTime.parse(f.right, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
                     table.removeIf(row -> {
                         String rowDateString = row.getColumnValue(header.indexOf(f.left));
-                        LocalDateTime rowDate = LocalDateTime.parse(rowDateString,
-                                DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-                        return rowDate.isAfter(filterDate);
+                        if (isEmpty(rowDateString)) {
+                            return true;
+                        }
+                        try {
+                            LocalDateTime rowDate = LocalDateTime.parse(rowDateString,
+                                    DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+                            return rowDate.isAfter(filterDate);
+                        } catch (DateTimeParseException ignored) { }
+                        try {
+                            SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss a", Locale.ROOT);
+                            Date date = format.parse(rowDateString);
+                            format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
+                            String newDate = format.format(date);
+                            LocalDateTime rowDate = LocalDateTime.parse(newDate,
+                                    DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+                            return rowDate.isAfter(filterDate);
+                        } catch (Exception ignored) { }
+                        return true;
                     });
                     break;
                 case "after":
                     filterDate = LocalDateTime.parse(f.right, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
                     table.removeIf(row -> {
                         String rowDateString = row.getColumnValue(header.indexOf(f.left));
-                        LocalDateTime rowDate = LocalDateTime.parse(rowDateString,
-                                DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-                        return rowDate.isBefore(filterDate);
+                        if (isEmpty(rowDateString)) {
+                            return true;
+                        }
+                        try {
+                            LocalDateTime rowDate = LocalDateTime.parse(rowDateString,
+                                    DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+                            return rowDate.isBefore(filterDate);
+                        } catch (DateTimeParseException ignored) { }
+                        try { // 31/01/2021 12:00:00 AM
+                            SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss a", Locale.ROOT);
+                            Date date = format.parse(rowDateString);
+                            format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
+                            String newDate = format.format(date);
+                            LocalDateTime rowDate = LocalDateTime.parse(newDate,
+                                    DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+                            return rowDate.isBefore(filterDate);
+                        } catch (Exception ignored) { }
+                        return true;
                     });
                     break;
                 default:
