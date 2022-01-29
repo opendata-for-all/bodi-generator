@@ -1,4 +1,4 @@
-package com.xatkit.bot.defaultFallback;
+package com.xatkit.bot.languageModel;
 
 import bodi.generator.dataSource.Row;
 import com.xatkit.bot.Bot;
@@ -20,8 +20,10 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
  * <p>
  * This class is used when the language model loaded is of the type Text-to-SQL. That is, the input of the language
  * model must be a natural language query and the expected output is a SQL statement equivalent to the input.
+ *
+ * @see LanguageModelClient
  */
-public class TextToSQLClient extends DefaultFallbackNLPClient {
+public class TextToSQLClient extends LanguageModelClient {
 
     /**
      * The Statement used to execute SQL queries in a given database.

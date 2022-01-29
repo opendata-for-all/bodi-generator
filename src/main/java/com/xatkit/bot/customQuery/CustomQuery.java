@@ -37,6 +37,8 @@ public class CustomQuery {
      */
     public CustomQuery(ReactPlatform reactPlatform, StateProvider returnState) {
         CustomFilter customFilter = new CustomFilter(reactPlatform, returnState);
+        SQLQuery sqlQuery = new SQLQuery(reactPlatform, returnState);
+
         val awaitingCustomQueryState = state("AwaitingCustomQuery");
 
         awaitingCustomQueryState
@@ -47,7 +49,9 @@ public class CustomQuery {
                 .when(intentIs(Intents.customNumericFilterIntent)).moveTo(customFilter.getSaveNumericFilterState())
                 .when(intentIs(Intents.customDateFilterIntent)).moveTo(customFilter.getSaveDateFilterState())
                 .when(intentIs(Intents.customTextualFilterIntent)).moveTo(customFilter.getSaveTextualFilterState())
-                .when(intentIs(coreLibraryI18n.Quit)).moveTo(returnState);
+                .when(intentIs(coreLibraryI18n.Quit)).moveTo(returnState)
+                .when(intentIs(coreLibraryI18n.AnyValue)).moveTo(sqlQuery.getProcessQuery());
+
         this.awaitingCustomQueryState = awaitingCustomQueryState.getState();
     }
 }

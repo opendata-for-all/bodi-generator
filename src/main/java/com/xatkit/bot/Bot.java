@@ -1,9 +1,7 @@
 package com.xatkit.bot;
 
-import bodi.generator.dataSource.ResultSet;
 import bodi.generator.dataSource.TabularDataSource;
 import com.xatkit.bot.customQuery.CustomQuery;
-import com.xatkit.bot.defaultFallback.TextToTableClient;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Entities;
 import com.xatkit.bot.library.Intents;
@@ -33,7 +31,6 @@ import static com.xatkit.dsl.DSL.fallbackState;
 import static com.xatkit.dsl.DSL.intentIs;
 import static com.xatkit.dsl.DSL.model;
 import static com.xatkit.dsl.DSL.state;
-import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 
 /**
  * The entry point of the application.
@@ -134,7 +131,6 @@ public final class Bot {
         ShowData showData = new ShowData(reactPlatform, startState);
         SelectViewField selectViewField = new SelectViewField(reactPlatform, startState);
         CustomQuery customQuery = new CustomQuery(reactPlatform, startState);
-        TextToTableClient defaultFallbackNLPClient = new TextToTableClient();
 
         /*
          * Specify the content of the bot states (i.e. the behavior of the bot).
@@ -189,13 +185,7 @@ public final class Bot {
          */
         val defaultFallback = fallbackState()
                 .body(context -> {
-                    String question = context.getIntent().getMatchedInput();
-                    ResultSet answer = defaultFallbackNLPClient.runTableQuery(question);
-                    if (isEmpty(answer) || answer.getNumColumns() == 0) {
-                        reactPlatform.reply(context, messages.getString("DefaultFallbackMessage"));
-                    } else {
-                        reactPlatform.reply(context, answer.printTable(0, answer.getNumRows()));
-                    }
+                    reactPlatform.reply(context, messages.getString("DefaultFallbackMessage"));
                 });
 
         /*

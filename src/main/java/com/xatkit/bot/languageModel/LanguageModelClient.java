@@ -1,4 +1,4 @@
-package com.xatkit.bot.defaultFallback;
+package com.xatkit.bot.languageModel;
 
 import bodi.generator.dataSource.Statement;
 import com.mashape.unirest.http.HttpResponse;
@@ -17,8 +17,11 @@ import org.json.JSONObject;
  * The purpose of this class is to be used within the default fallback state of a Xatkit bot, when the bot is not
  * able to find an answer to a user input (i.e. when no intent is matched) and therefore, to empower the chatbot with
  * the ability of answering a wider range of questions related to its tabular data source.
+ *
+ * @see TextToSQLClient
+ * @see TextToTableClient
  */
-class DefaultFallbackNLPClient {
+class LanguageModelClient {
 
     /**
      * The URL of the server running the language model.
@@ -38,11 +41,11 @@ class DefaultFallbackNLPClient {
     private static final int HTTP_STATUS_OK = 200;
 
     /**
-     * Instantiates a new {@link DefaultFallbackNLPClient}.
+     * Instantiates a new {@link LanguageModelClient}.
      * <p>
      * The attributes of the instance are loaded from a resources file {@code defaultFallback.properties}
      */
-    DefaultFallbackNLPClient() {
+    LanguageModelClient() {
         Configuration configuration;
         Configurations configurations = new Configurations();
         try {

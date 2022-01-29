@@ -1,4 +1,4 @@
-package com.xatkit.bot.defaultFallback;
+package com.xatkit.bot.languageModel;
 
 import bodi.generator.dataSource.ResultSet;
 import bodi.generator.dataSource.Row;
@@ -17,8 +17,10 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
  * <p>
  * This class is used when the language model loaded is of the type Text-to-Table. That is, the input of the language
  * model must be a natural language query, and the expected output is a tabular result.
+ *
+ * @see LanguageModelClient
  */
-public class TextToTableClient extends DefaultFallbackNLPClient {
+public class TextToTableClient extends LanguageModelClient {
 
     /**
      * Instantiates a new {@link TextToTableClient}.
