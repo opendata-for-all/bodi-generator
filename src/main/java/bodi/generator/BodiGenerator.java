@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static bodi.generator.dataSchema.DataType.DATE;
+import static bodi.generator.dataSchema.DataType.EMPTY;
 import static bodi.generator.dataSchema.DataType.NUMBER;
 import static bodi.generator.dataSchema.DataType.TEXT;
 import static com.xatkit.bot.library.Utils.isDate;
