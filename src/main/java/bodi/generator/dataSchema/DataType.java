@@ -9,16 +9,24 @@ import bodi.generator.dataSource.TabularDataSource;
  * @see SchemaField
  */
 public enum DataType {
+
     /**
      * Number data type.
      */
     NUMBER,
+
     /**
      * Date data type.
      */
     DATE,
+
     /**
      * Text data type.
      */
-    TEXT
+    TEXT,
+
+    /**
+     * No data type.
+     */
+    EMPTY
 }

@@ -116,21 +116,28 @@ public final class BodiGenerator {
             dataTypes.put(NUMBER, true);
             dataTypes.put(DATE, true);
             dataTypes.put(TEXT, true);
+            dataTypes.put(EMPTY, true);
             int columnIndex = tds.getHeaderCopy().indexOf(fieldName);
             for (Row row : tds.getTableCopy()) {
                 String value = row.getColumnValue(columnIndex);
                 fieldValuesSet.add(value);
-                if (dataTypes.get(NUMBER) && !isNumeric(value)) {
+                if (dataTypes.get(NUMBER) && !isNumeric(value) && !isEmpty(value)) {
                     dataTypes.put(NUMBER, false);
                 }
-                if (dataTypes.get(DATE) && !isDate(value)) {
+                if (dataTypes.get(DATE) && !isDate(value) && !isEmpty(value)) {
                     dataTypes.put(DATE, false);
+                }
+                if (dataTypes.get(EMPTY) && !isEmpty(value)) {
+                    dataTypes.put(EMPTY, false);
                 }
             }
             SchemaField schemaField = new SchemaField();
             schemaField.setOriginalName(fieldName);
             schemaField.setReadableName(fieldName);
-            if (dataTypes.get(DATE)) {
+            if (dataTypes.get(EMPTY)) {
+                // TODO: Consider empty (unknown) type?
+                schemaField.setType(TEXT);
+            } else if (dataTypes.get(DATE)) {
                 schemaField.setType(DATE);
             } else if (dataTypes.get(NUMBER)) {
                 schemaField.setType(NUMBER);
