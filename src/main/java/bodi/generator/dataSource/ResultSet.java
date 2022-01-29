@@ -47,11 +47,12 @@ public class ResultSet {
      * @param table  the table
      */
     public ResultSet(List<String> header, List<Row> table) {
-        table.forEach(row -> {
-            if (row.getValues().size() != header.size()) {
-                throw new IllegalArgumentException("The header size is not equal to size of a row");
+        for (int i = 0; i < table.size() ; i++) {
+            if (table.get(i).getValues().size() != header.size()) {
+                throw new IllegalArgumentException("The header size (%s) is not equal to size of row %s (%s)"
+                        .formatted(header.size(), i, table.get(i).getValues().size()));
             }
-        });
+        }
         this.header = header;
         this.table = table;
         numColumns = header.size();
