@@ -67,13 +67,17 @@ public class Statement {
         this.ignoreCaseFilterValue = false;
     }
 
+    public boolean isIgnoreCaseFilterValue() {
+        return ignoreCaseFilterValue;
+    }
+
     /**
      * Sets {@code #ignoreCaseFilterValue}.
      *
      * @param ignoreCaseFilterValue the value
      * @return the statement
      */
-    public Statement ignoreCaseFilterValue(boolean ignoreCaseFilterValue) {
+    public Statement setIgnoreCaseFilterValue(boolean ignoreCaseFilterValue) {
         this.ignoreCaseFilterValue = ignoreCaseFilterValue;
         return this;
     }

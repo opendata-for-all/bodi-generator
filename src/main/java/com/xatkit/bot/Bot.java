@@ -157,7 +157,7 @@ public final class Bot {
                             (TabularDataSource) context.getSession().get(ContextKeys.TABULAR_DATA_SOURCE);
                     context.getSession().put(ContextKeys.STATEMENT, tds.createStatement());
                     // Uncomment to disable case-sensitivity in filter values
-                        //.ignoreCaseFilterValue(true));
+                        //.setIgnoreCaseFilterValue(true));
                     List<String> filterFieldOptions = new ArrayList<>(fields);
                     context.getSession().put(ContextKeys.FILTER_FIELD_OPTIONS, filterFieldOptions);
                     List<String> viewFieldOptions = new ArrayList<>(fields);
