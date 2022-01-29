@@ -51,10 +51,14 @@ public class TextToTableClient extends DefaultFallbackNLPClient {
             }
             List<Row> table = new ArrayList<>();
             for (int i = 0; i < tableJson.length(); i++) {
-                JSONArray row_json = tableJson.getJSONArray(i);
+                JSONArray rowJson = tableJson.getJSONArray(i);
                 List<String> values = new ArrayList<>();
-                for (int j = 0; j < row_json.length(); j++) {
-                    values.add(row_json.get(j).toString());
+                for (int j = 0; j < rowJson.length(); j++) {
+                    if (rowJson.isNull(j)) {
+                        values.add("");
+                    } else {
+                        values.add(rowJson.get(j).toString());
+                    }
                 }
                 table.add(new Row(values));
             }
