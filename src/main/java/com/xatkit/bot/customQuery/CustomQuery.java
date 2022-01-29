@@ -7,6 +7,7 @@ import com.xatkit.plugins.react.platform.ReactPlatform;
 import lombok.Getter;
 import lombok.val;
 
+import static com.xatkit.bot.Bot.coreLibraryI18n;
 import static com.xatkit.bot.Bot.messages;
 import static com.xatkit.dsl.DSL.intentIs;
 import static com.xatkit.dsl.DSL.state;
@@ -45,8 +46,8 @@ public class CustomQuery {
                 .next()
                 .when(intentIs(Intents.customNumericFilterIntent)).moveTo(customFilter.getSaveNumericFilterState())
                 .when(intentIs(Intents.customDateFilterIntent)).moveTo(customFilter.getSaveDateFilterState())
-                .when(intentIs(Intents.customTextualFilterIntent)).moveTo(customFilter.getSaveTextualFilterState());
-
+                .when(intentIs(Intents.customTextualFilterIntent)).moveTo(customFilter.getSaveTextualFilterState())
+                .when(intentIs(coreLibraryI18n.Quit)).moveTo(returnState);
         this.awaitingCustomQueryState = awaitingCustomQueryState.getState();
     }
 }

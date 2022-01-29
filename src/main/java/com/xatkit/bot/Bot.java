@@ -12,6 +12,7 @@ import com.xatkit.bot.showData.ShowData;
 import com.xatkit.bot.structuredQuery.SelectViewField;
 import com.xatkit.bot.structuredQuery.StructuredFilter;
 import com.xatkit.core.XatkitBot;
+import com.xatkit.plugins.core.library.CoreLibraryI18n;
 import com.xatkit.plugins.react.platform.ReactPlatform;
 import com.xatkit.plugins.react.platform.io.ReactEventProvider;
 import com.xatkit.plugins.react.platform.io.ReactIntentProvider;
@@ -79,7 +80,15 @@ public final class Bot {
      */
     public static String inputDoc = null;
 
-    // public static CoreLibraryI18n CoreLibrary = new CoreLibraryI18n(LOCALE);
+    /**
+     * This library contains useful objects to use within chatbots.
+     *
+     * For instance, it contains a collection of basic intents to use in a wide range oof chatbots (e.g. "Quit
+     * intent", "Greetings intent", etc).
+     *
+     * It supports different languages, such as English, Spanish and Catalan.
+     */
+    public static CoreLibraryI18n coreLibraryI18n;
 
     /**
      * The entry point of application.
@@ -106,7 +115,7 @@ public final class Bot {
         locale = new Locale(language);
         messages = ResourceBundle.getBundle("messages", locale);
         inputDoc = botConfiguration.getString("xls.importer.xls");
-
+        coreLibraryI18n = new CoreLibraryI18n(locale);
         /*
          * Instantiate the platform and providers we will use in the bot definition.
          */
