@@ -7,6 +7,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+
 /**
  * The object used for querying a {@link TabularDataSource} and returning the result. It contains information about
  * what to filter and query.
@@ -143,28 +145,40 @@ public class Statement {
             switch (f.middle) {
                 // Numeric Filters
                 case "=":
-                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left)))
-                            == Float.parseFloat(f.right)));
+                    table.removeIf(row ->
+                        isEmpty(row.getColumnValue(header.indexOf(f.left))) ||
+                        !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) == Float.parseFloat(f.right))
+                    );
                     break;
                 case "<":
-                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left)))
-                            < Float.parseFloat(f.right)));
+                    table.removeIf(row ->
+                        isEmpty(row.getColumnValue(header.indexOf(f.left))) ||
+                        !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) < Float.parseFloat(f.right))
+                    );
                     break;
                 case "<=":
-                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left)))
-                            <= Float.parseFloat(f.right)));
+                    table.removeIf(row ->
+                        isEmpty(row.getColumnValue(header.indexOf(f.left))) ||
+                        !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) <= Float.parseFloat(f.right))
+                    );
                     break;
                 case ">":
-                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left)))
-                            > Float.parseFloat(f.right)));
+                    table.removeIf(row ->
+                        isEmpty(row.getColumnValue(header.indexOf(f.left))) ||
+                        !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) > Float.parseFloat(f.right))
+                    );
                     break;
                 case ">=":
-                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left)))
-                            >= Float.parseFloat(f.right)));
+                    table.removeIf(row ->
+                        isEmpty(row.getColumnValue(header.indexOf(f.left))) ||
+                        !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) >= Float.parseFloat(f.right))
+                    );
                     break;
                 case "!=":
-                    table.removeIf(row -> !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left)))
-                            != Float.parseFloat(f.right)));
+                    table.removeIf(row ->
+                        isEmpty(row.getColumnValue(header.indexOf(f.left))) ||
+                        !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) != Float.parseFloat(f.right))
+                    );
                     break;
                 // Textual Filters
                 case "equals": // Also a date filter
