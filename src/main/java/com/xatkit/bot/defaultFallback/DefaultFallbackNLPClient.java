@@ -1,5 +1,6 @@
 package com.xatkit.bot.defaultFallback;
 
+import bodi.generator.dataSource.Statement;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
@@ -65,9 +66,12 @@ class DefaultFallbackNLPClient {
      * @param input the input of the language model
      * @return the output of the language model if it was successfully obtained, {@code null} otherwise
      */
-    protected JSONObject runQuery(String input) {
+    protected JSONObject runQuery(String input, Statement statement) {
         JSONObject request = new JSONObject();
         request.put("input", input);
+        request.put("fields", statement.getFieldsAsSqlVariables());
+        request.put("filters", statement.getFiltersAsSqlConditions());
+        request.put("ignoreCase", statement.isIgnoreCaseFilterValue());
         HttpResponse<JsonNode> response;
         try {
             response = Unirest.post(modelServerUrl + runModelEndpoint)

@@ -2,6 +2,7 @@ package com.xatkit.bot.defaultFallback;
 
 import bodi.generator.dataSource.ResultSet;
 import bodi.generator.dataSource.Row;
+import bodi.generator.dataSource.Statement;
 import fr.inria.atlanmod.commons.log.Log;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -33,8 +34,8 @@ public class TextToTableClient extends DefaultFallbackNLPClient {
      * @return if successful, the {@link bodi.generator.dataSource.ResultSet} containing the result of the language
      * model, otherwise {@code null}.
      */
-    public ResultSet runTableQuery(String input) {
-        JSONObject response = runQuery(input);
+    public ResultSet runTableQuery(String input, Statement statement) {
+        JSONObject response = runQuery(input, statement);
         try {
             String sqlQuery = response.getString("sql");
             JSONArray headerJson = response.getJSONArray("header");

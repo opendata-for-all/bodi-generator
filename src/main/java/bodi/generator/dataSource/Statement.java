@@ -1,5 +1,6 @@
 package bodi.generator.dataSource;
 
+import com.xatkit.bot.Bot;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import java.text.SimpleDateFormat;
@@ -290,6 +291,77 @@ public class Statement {
      */
     public int getNumFields() {
         return fields.size();
+    }
+
+    /**
+     * Gets the collection of filters as SQL conditions.
+     * <p>
+     * This is useful to add the statement filters as conditions in the WHERE clause of a SQL statement.
+     *
+     * @return the fields as sql variables
+     * @see #fields
+     */
+    public List<String> getFiltersAsSqlConditions() {
+        // The table name is used to refer to a table column in SQL queries (-4 subtracts the file extension)
+        String tableName = Bot.inputDoc.substring(0, Bot.inputDoc.length() - 4);
+        List<String> sqlFilters = new ArrayList<>();
+        for (ImmutableTriple<String, String, String> f : filters) {
+            switch (f.middle) {
+                // Numeric Filters
+                case "=":
+                case "<":
+                case "<=":
+                case ">":
+                case ">=":
+                case "!=":
+                    sqlFilters.add(tableName + "." + f.left + " " + f.middle + " " + f.right);
+                    break;
+                // Textual Filters
+                case "equals": // Also a date filter
+                    sqlFilters.add(tableName + "." + f.left + " = \"" + f.right + "\"");
+                    break;
+                case "different": // Also a date filter
+                    sqlFilters.add(tableName + "." + f.left + " != \"" + f.right + "\"");
+                    break;
+                case "contains":
+                    sqlFilters.add(tableName + "." + f.left + " LIKE \"%" + f.right + "%\"");
+                    break;
+                case "starts with":
+                    sqlFilters.add(tableName + "." + f.left + " LIKE \"" + f.right + "%\"");
+                    break;
+                case "ends with":
+                    sqlFilters.add(tableName + "." + f.left + " LIKE \"%" + f.right + "\"");
+                    break;
+                // Date Filters
+                case "before":
+                    sqlFilters.add("date(" + tableName + "." + f.left + ") < date(\"" + f.right + "\")");
+                    break;
+                case "after":
+                    sqlFilters.add("date(" + tableName + "." + f.left + ") > date(\"" + f.right + "\")");
+                    break;
+                default:
+                    break;
+            }
+        }
+        return sqlFilters;
+    }
+
+    /**
+     * Gets the collection of fields as SQL variables.
+     * <p>
+     * This is useful to add the collection of fields in the SELECT clause of a SQL query.
+     *
+     * @return the fields as sql variables
+     * @see #fields
+     */
+    public List<String> getFieldsAsSqlVariables() {
+        // The table name is used to refer to a table column in SQL queries (-4 subtracts the file extension)
+        String tableName = Bot.inputDoc.substring(0, Bot.inputDoc.length() - 4);
+        List<String> sqlFields = new ArrayList<>();
+        for (String field : fields) {
+            sqlFields.add(tableName + "." + field);
+        }
+        return sqlFields;
     }
 
 }
