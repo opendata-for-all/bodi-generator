@@ -18,7 +18,8 @@ class DataSourceTest{
 
     @BeforeEach
     public void setUp() {
-        this.tds = new TabularDataSource(Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResource("odata_poblacio_nacionalitat_genere.csv")).getPath());
+        this.tds = new TabularDataSource(Objects.requireNonNull(Thread.currentThread().getContextClassLoader()
+                .getResource("odata_poblacio_nacionalitat_genere.csv")).getPath(), ',');
         this.statement = tds.createStatement();
     }
 

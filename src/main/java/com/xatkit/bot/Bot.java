@@ -113,6 +113,8 @@ public final class Bot {
         messages = ResourceBundle.getBundle("messages", locale);
         inputDoc = botConfiguration.getString("xls.importer.xls");
         coreLibraryI18n = new CoreLibraryI18n(locale);
+        char delimiter = botConfiguration.getString("csv.delimiter").charAt(0);
+
         /*
          * Instantiate the platform and providers we will use in the bot definition.
          */
@@ -143,7 +145,7 @@ public final class Bot {
                     if (!context.getSession().containsKey(ContextKeys.TABULAR_DATA_SOURCE)) {
                         context.getSession().put(ContextKeys.TABULAR_DATA_SOURCE,
                                 new TabularDataSource(Objects.requireNonNull(Thread.currentThread()
-                                .getContextClassLoader().getResource(inputDoc)).getPath()));
+                                .getContextClassLoader().getResource(inputDoc)).getPath(), delimiter));
                     }
                     List<String> fields = new ArrayList<>();
                     fields.addAll(Utils.getEntityValues(Entities.numericFieldEntity));

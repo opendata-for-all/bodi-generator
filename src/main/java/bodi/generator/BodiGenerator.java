@@ -35,6 +35,8 @@ import static bodi.generator.dataSchema.DataType.TEXT;
 import static com.xatkit.bot.library.Utils.isDate;
 import static com.xatkit.bot.library.Utils.isNumeric;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+
 /**
  * The entry point of the bodi-generator application. It generates a complete chatbot application.
  */
@@ -89,11 +91,11 @@ public final class BodiGenerator {
      * @param inputDocName the file name
      * @return the Tabular Data Source
      */
-    private static TabularDataSource createTabularDataSource(String inputDocName) {
+    private static TabularDataSource createTabularDataSource(String inputDocName, char delimiter) {
         TabularDataSource tds = null;
         try {
             tds = new TabularDataSource(Objects.requireNonNull(BodiGenerator.class.getClassLoader()
-                    .getResource(inputDocName)).getPath());
+                    .getResource(inputDocName)).getPath(), delimiter);
         } catch (NullPointerException e) {
             e.printStackTrace();
             System.out.println("'" + inputDocName + "' file not found");
@@ -177,8 +179,9 @@ public final class BodiGenerator {
         String inputDocName = conf.getString("xls.importer.xls");
         String botName = conf.getString("xls.generator.bot.name");
         String outputFolder = conf.getString("xls.generator.output");
+        char delimiter = conf.getString("csv.delimiter").charAt(0);
 
-        TabularDataSource tds = createTabularDataSource(inputDocName);
+        TabularDataSource tds = createTabularDataSource(inputDocName, delimiter);
         DataSchema ds = tabularDataSourceToDataSchema(tds);
         BotProperties bp = dataSchemaToBotProperties(ds, botName, inputDocName);
 
@@ -246,11 +249,9 @@ public final class BodiGenerator {
         // Create new csv with deleted columns (if any)
         System.out.println("Creating the new " + inputDocName + " with deleted columns (if any)");
         try (PrintWriter out = new PrintWriter(outputFolder + "/src/main/resources/" + inputDocName)) {
-            out.println(tds.getHeaderCopy().stream().map(field -> "\"" + field + "\"")
-                    .collect(Collectors.joining(",")));
+            out.println(String.join(String.valueOf(delimiter), tds.getHeaderCopy()));
             for (int i = 0; i < tds.getNumRows(); ++i) {
-                out.println(tds.getRow(i).getValues().stream().map(field -> "\"" + field + "\"")
-                        .collect(Collectors.joining(",")));
+                out.println(String.join(String.valueOf(delimiter), tds.getRow(i).getValues()));
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();

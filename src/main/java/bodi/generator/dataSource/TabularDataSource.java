@@ -56,8 +56,10 @@ public class TabularDataSource {
      *
      * @param filePath absolute path of a csv file
      */
-    public TabularDataSource(String filePath) {
-        try (CSVReader reader = new CSVReader(new FileReader(filePath))) {
+    public TabularDataSource(String filePath, char delimiter) {
+        try {
+            CSVReader reader = new CSVReaderBuilder(new FileReader(filePath))
+                    .withCSVParser(new CSVParserBuilder().withSeparator(delimiter).build()).build();
             List<String[]> csv = reader.readAll();
             header = new ArrayList<>(Arrays.asList(csv.get(0)));
             csv.remove(0);
@@ -65,6 +67,12 @@ public class TabularDataSource {
             csv.forEach(row -> table.add(new Row(new ArrayList<>(Arrays.asList(row)))));
             numColumns = header.size();
             numRows = table.size();
+            for (int i = 0; i < table.size(); i++) {
+                if (table.get(i).getValues().size() != header.size()) {
+                    throw new IllegalArgumentException("The header size (%s) is not equal to size of row %s (%s)"
+                            .formatted(header.size(), i, table.get(i).getValues().size()));
+                }
+            }
         } catch (IOException | CsvException e) {
             e.printStackTrace();
         }
