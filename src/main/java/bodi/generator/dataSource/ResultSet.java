@@ -1,5 +1,6 @@
 package bodi.generator.dataSource;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -57,6 +58,13 @@ public class ResultSet {
         this.table = table;
         numColumns = header.size();
         numRows = table.size();
+    }
+
+    public ResultSet() {
+        this.header = new ArrayList<>();
+        this.table = new ArrayList<>();
+        numColumns = 0;
+        numRows = 0;
     }
 
     /**

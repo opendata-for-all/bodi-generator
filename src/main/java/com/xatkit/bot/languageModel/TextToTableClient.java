@@ -44,7 +44,7 @@ public class TextToTableClient extends LanguageModelClient {
             JSONArray tableJson = response.getJSONArray("table");
             if (isEmpty(sqlQuery)) {
                 Log.info("Sorry, query text could not be translated to SQL statement");
-                return null;
+                return new ResultSet();
             }
             Log.info("Query text translated to SQL statement: {0}", sqlQuery);
             List<String> header = new ArrayList<>();
@@ -66,8 +66,8 @@ public class TextToTableClient extends LanguageModelClient {
             }
             return new ResultSet(header, table);
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            Log.error(e, "An error occurred while getting the SQL result, see the attached exception");
+            return new ResultSet();
         }
     }
 }

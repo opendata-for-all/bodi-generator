@@ -56,12 +56,13 @@ public class TextToSQLClient extends LanguageModelClient {
     public bodi.generator.dataSource.ResultSet runSqlQuery(String input,
                                                            bodi.generator.dataSource.Statement botStatement) {
         String sqlQuery = runQuery(input, botStatement).getString("output");
-        if (isEmpty(sqlQuery)) {
-            return null;
-        }
-        sqlQuery = setTableName(sqlQuery);
-        Log.info("Trying to run the SQL query: {0}", sqlQuery);
         try {
+            if (isEmpty(sqlQuery)) {
+                Log.info("Sorry, query text could not be translated to SQL statement");
+                return new bodi.generator.dataSource.ResultSet();
+            }
+            sqlQuery = setTableName(sqlQuery);
+            Log.info("Trying to run the SQL query: {0}", sqlQuery);
             ResultSet resultSet = sqlStatement.executeQuery(sqlQuery);
             ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
             int numColumns = resultSetMetaData.getColumnCount();
@@ -80,8 +81,8 @@ public class TextToSQLClient extends LanguageModelClient {
            return new bodi.generator.dataSource.ResultSet(header, table);
         } catch (SQLException e) {
             Log.error(e, "An error occurred while running the SQL query {0}, see the attached exception", sqlQuery);
+            return new bodi.generator.dataSource.ResultSet();
         }
-        return null;
     }
 
     /**
