@@ -41,12 +41,6 @@ public final class Intents {
             .trainingSentences(BUNDLE.getStringArray("ShowNextPage"))
             .getIntentDefinition();
     /**
-     * The intent stopViewIntent.
-     */
-    public static final IntentDefinition stopViewIntent = intent("StopView")
-            .trainingSentences(BUNDLE.getStringArray("StopView"))
-            .getIntentDefinition();
-    /**
      * The intent addFilterIntent.
      */
     public static final IntentDefinition addFilterIntent = intent("AddFilter")

@@ -14,6 +14,7 @@ import lombok.val;
 
 import java.text.MessageFormat;
 
+import static com.xatkit.bot.Bot.coreLibraryI18n;
 import static com.xatkit.bot.Bot.messages;
 import static com.xatkit.dsl.DSL.intentIs;
 import static com.xatkit.dsl.DSL.state;
@@ -106,15 +107,15 @@ public class SQLQuery {
                                 messages.getString("PageCount"), pageCount, totalPages));
                         reactPlatform.reply(context, resultSetString, Utils.getFirstTrainingSentences(
                                 Intents.showNextPageIntent,
-                                Intents.stopViewIntent));
+                                coreLibraryI18n.Quit));
                     } else {
                         reactPlatform.reply(context, messages.getString("NothingFound"),
-                                Utils.getFirstTrainingSentences(Intents.stopViewIntent));
+                                Utils.getFirstTrainingSentences(coreLibraryI18n.Quit));
                     }
                 })
                 .next()
                 .when(intentIs(Intents.showNextPageIntent)).moveTo(showDataState)
-                .when(intentIs(Intents.stopViewIntent)).moveTo(returnState);
+                .when(intentIs(coreLibraryI18n.Quit)).moveTo(returnState);
 
         this.processQuery = processQuery.getState();
     }
