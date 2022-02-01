@@ -14,6 +14,7 @@ import lombok.val;
 import java.text.MessageFormat;
 import java.util.List;
 
+import static com.xatkit.bot.Bot.coreLibraryI18n;
 import static com.xatkit.bot.Bot.messages;
 import static com.xatkit.dsl.DSL.intentIs;
 import static com.xatkit.dsl.DSL.state;
@@ -113,21 +114,21 @@ public class StructuredFilter {
                     reactPlatform.reply(context, messages.getString("WriteTextualValue"));
                 })
                 .next()
-                .when(intentIs(Intents.textualValueIntent)).moveTo(saveFilterState);
+                .when(intentIs(coreLibraryI18n.AnyValue)).moveTo(saveFilterState);
 
         writeNumericValue
                 .body(context -> {
                     reactPlatform.reply(context, messages.getString("WriteNumericValue"));
                 })
                 .next()
-                .when(intentIs(Intents.numericValueIntent)).moveTo(saveFilterState);
+                .when(intentIs(coreLibraryI18n.NumberValue)).moveTo(saveFilterState);
 
         writeDateValue
                 .body(context -> {
                     reactPlatform.reply(context, messages.getString("WriteDateValue"));
                 })
                 .next()
-                .when(intentIs(Intents.dateValueIntent)).moveTo(saveFilterState);
+                .when(intentIs(coreLibraryI18n.DateValue)).moveTo(saveFilterState);
 
         saveFilterState
                 .body(context -> {

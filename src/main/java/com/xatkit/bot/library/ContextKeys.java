@@ -66,9 +66,9 @@ public final class ContextKeys {
      */
     public static final String DATE_OPERATOR_NAME = "DATE_OPERATOR_NAME";
     /**
-     * The constant VALUE.
+     * The constant value.
      */
-    public static final String VALUE = "VALUE";
+    public static final String VALUE = "value";
     /**
      * The constant NUMERIC_VALUE.
      */

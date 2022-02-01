@@ -103,25 +103,4 @@ public final class Intents {
             .parameter(ContextKeys.TEXTUAL_OPERATOR_NAME).fromFragment("TEXTUAL_OPERATOR").entity(Entities.textualOperatorEntity)
             .parameter(ContextKeys.DATE_OPERATOR_NAME).fromFragment("DATE_OPERATOR").entity(Entities.dateOperatorEntity)
             .getIntentDefinition();
-    /**
-     * The intent numericValueIntent.
-     */
-    public static final IntentDefinition numericValueIntent = intent("NumericValue")
-            .trainingSentences(BUNDLE.getStringArray("NumericValue"))
-            .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(number())
-            .getIntentDefinition();
-    /**
-     * The intent dateValueIntent.
-     */
-    public static final IntentDefinition dateValueIntent = intent("DateValue")
-            .trainingSentences(BUNDLE.getStringArray("DateValue"))
-            .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(date())
-            .getIntentDefinition();
-    /**
-     * The intent textualValueIntent.
-     */
-    public static final IntentDefinition textualValueIntent = intent("TextualValue")
-            .trainingSentences(BUNDLE.getStringArray("TextualValue"))
-            .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(any())
-            .getIntentDefinition();
 }
