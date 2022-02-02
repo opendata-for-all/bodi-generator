@@ -10,13 +10,8 @@ import lombok.NonNull;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.Collectors;
 
 import static fr.inria.atlanmod.commons.Preconditions.checkArgument;
@@ -27,6 +22,20 @@ import static java.util.Objects.nonNull;
  * A set of methods that provide useful functionalities to be used in a chatbot system.
  */
 public final class Utils {
+
+    /**
+     * A collection of date formats or patterns that will be considered when parsing dates, i.e. to recognize date
+     * strings using these formats. That is, a String will be considered a date iff it matches with one of these
+     * formats.
+     * <p>
+     * A legend of the characters used in the formats can be found at {@link SimpleDateFormat}
+     *
+     * @see #isDate(String)
+     */
+    public static final List<String> dateFormats = Arrays.asList(
+            "dd/MM/yyyy hh:mm:ss a",   // e.g. "16/11/1997 12:00:00 AM"
+            "yyyy-MM-dd'T'HH:mm:ssXXX" // e.g. "1995-08-24T12:00:00+01:00"
+    );
 
     private Utils() {
     }
@@ -82,38 +91,23 @@ public final class Utils {
         return true;
     }
 
-
     /**
-     * Checks if a given text is a date
+     * Checks if a given text is a date.
      * <p>
-     * It supports ISO-8601 and RFC-1123 standards.
+     * Date formats are stored in {@link #dateFormats}
      *
      * @param text the text to be parsed to a date
      * @return {@code true} if the text can be parsed as a date, {@code false} otherwise
-     * @see DateTimeFormatter
+     * @see SimpleDateFormat
      */
     public static boolean isDate(String text) {
-        try {
-            SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss a", Locale.ROOT);
-            format.parse(text);
-            return true;
-        } catch (ParseException ignored) { }
-        try {
-            LocalDate.parse(text, DateTimeFormatter.ISO_DATE);
-            return true;
-        } catch (DateTimeParseException ignored) { }
-        try {
-            LocalDateTime.parse(text, DateTimeFormatter.ISO_DATE_TIME);
-            return true;
-        } catch (DateTimeParseException ignored) { }
-        try {
-            LocalDateTime.parse(text, DateTimeFormatter.ISO_INSTANT);
-            return true;
-        } catch (DateTimeParseException ignored) { }
-        try {
-            LocalDateTime.parse(text, DateTimeFormatter.RFC_1123_DATE_TIME);
-            return true;
-        } catch (DateTimeParseException ignored) { }
+        for (String dateFormat : dateFormats) {
+            try {
+                SimpleDateFormat format = new SimpleDateFormat(dateFormat);
+                format.parse(text);
+                return true;
+            } catch (ParseException ignored) { }
+        }
         return false;
     }
 }
