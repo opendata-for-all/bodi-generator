@@ -1,7 +1,8 @@
-package com.xatkit.bot.showData;
+package com.xatkit.bot.getResult;
 
 import bodi.generator.dataSource.ResultSet;
 import bodi.generator.dataSource.Statement;
+import com.xatkit.bot.languageModel.TextToTableClient;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Intents;
 import com.xatkit.bot.library.Utils;
@@ -19,21 +20,46 @@ import static com.xatkit.dsl.DSL.intentIs;
 import static com.xatkit.dsl.DSL.state;
 
 /**
- * The Show Data workflow of a chatbot.
+ * The Get Result workflow of a chatbot.
  * <p>
- * It prints the processed table on which the chatbot serves. That is, it applies the necessary filters or operations
- * in the table (previously specified by the user) and shows it to the user.
+ * It prints the processed table on which the chatbot serves. It can be done through 2 different ways:
+ * <ul>
+ *     <li>{@link #generateResultSet}</li>
+ *
+ *     <li>{@link #generateResultSetFromQuery}</li>
+ * </ul>
+ * After one of these states is executed, the generated result is printed in the chatbot interface.
  * <p>
  * If the resulting table is too long to display it in the chatbot chat box, it is divided by pages of a maximum
  * length so the user can navigate through the pages in a more friendly way.
  */
-public class ShowData {
+public class GetResult {
 
     /**
-     * The entry point for the Show Data workflow.
+     * One of the entry points for the Get Result workflow.
+     * <p>
+     * This state applies the necessary filters or operations in the table (previously specified by the user) and
+     * gets the resulting table.
      */
     @Getter
-    private final State showDataState;
+    private final State generateResultSet;
+
+    /**
+     * One of the entry points for the Get Result workflow.
+     * <p>
+     * When no intent is recognized from a user question, this state is executed to try to obtain a tabular answer to
+     * that question, using {@link #textToTableClient}.
+     * <p>
+     * The filters previously applied by the user are also added to
+     * the SQL query (see {@link com.xatkit.bot.languageModel.LanguageModelClient#runQuery(String, Statement)}
+     */
+    @Getter
+    private final State generateResultSetFromQuery;
+
+    /**
+     * The client that interacts with the server that deploys the language model to answer the questions.
+     */
+    TextToTableClient textToTableClient = new TextToTableClient();
 
     /**
      * The maximum number of entries of a table that are displayed at once in the chatbot chat box (i.e. the page size).
@@ -41,18 +67,44 @@ public class ShowData {
     private final int pageLimit = 10;
 
     /**
-     * Instantiates a new Show Data workflow.
+     * This {@link ResultSet} stores the result to be printed.
+     */
+    private ResultSet resultSet;
+
+    /**
+     * Instantiates a new Get Result workflow.
      *
      * @param reactPlatform the react platform of a chatbot
      * @param returnState   the state where the chatbot ends up arriving once the workflow is finished
      */
-    public ShowData(ReactPlatform reactPlatform, StateProvider returnState) {
+    public GetResult(ReactPlatform reactPlatform, StateProvider returnState) {
+        val generateResultSet = state("GenerateResultSet");
+        val generateResultSetFromQuery = state("GenerateResultSetFromQuery");
         val showDataState = state("ShowData");
+
+        generateResultSet
+                .body(context -> {
+                    Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
+                    resultSet = statement.executeQuery();
+                })
+                .next()
+                .moveTo(showDataState);
+
+        this.generateResultSet = generateResultSet.getState();
+
+        generateResultSetFromQuery
+                .body(context -> {
+                    Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
+                    String query = context.getIntent().getMatchedInput();
+                    resultSet = textToTableClient.runTableQuery(query, statement);
+                })
+                .next()
+                .moveTo(showDataState);
+
+        this.generateResultSetFromQuery = generateResultSetFromQuery.getState();
 
         showDataState
                 .body(context -> {
-                    Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
-                    ResultSet resultSet = statement.executeQuery();
                     int pageCount = 1;
                     if (context.getIntent().getMatchedInput()
                             .equals(Intents.showNextPageIntent.getTrainingSentences().get(0))) {
@@ -89,7 +141,5 @@ public class ShowData {
                 .next()
                 .when(intentIs(Intents.showNextPageIntent)).moveTo(showDataState)
                 .when(intentIs(coreLibraryI18n.Quit)).moveTo(returnState);
-
-        this.showDataState = showDataState.getState();
     }
 }

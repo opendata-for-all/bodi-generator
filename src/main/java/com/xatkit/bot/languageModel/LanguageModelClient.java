@@ -14,9 +14,9 @@ import org.json.JSONObject;
 /**
  * This class is a client to make requests to a language model running in a server.
  * <p>
- * The purpose of this class is to be used within the default fallback state of a Xatkit bot, when the bot is not
- * able to find an answer to a user input (i.e. when no intent is matched) and therefore, to empower the chatbot with
- * the ability of answering a wider range of questions related to its tabular data source.
+ * The purpose of this class is to be used when the bot is not able to find an answer to a user input (i.e. when no
+ * intent is matched) and therefore, to empower the chatbot with the ability of answering a wider range of questions
+ * related to its tabular data source.
  *
  * @see TextToSQLClient
  * @see TextToTableClient

@@ -6,7 +6,7 @@ import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Entities;
 import com.xatkit.bot.library.Intents;
 import com.xatkit.bot.library.Utils;
-import com.xatkit.bot.showData.ShowData;
+import com.xatkit.bot.getResult.GetResult;
 import com.xatkit.bot.structuredQuery.SelectViewField;
 import com.xatkit.bot.structuredQuery.StructuredFilter;
 import com.xatkit.core.XatkitBot;
@@ -130,9 +130,9 @@ public final class Bot {
         val startState = state("StartState");
 
         StructuredFilter structuredFilter = new StructuredFilter(reactPlatform, startState);
-        ShowData showData = new ShowData(reactPlatform, startState);
+        GetResult getResult = new GetResult(reactPlatform, startState);
         SelectViewField selectViewField = new SelectViewField(reactPlatform, startState);
-        CustomQuery customQuery = new CustomQuery(reactPlatform, startState);
+        CustomQuery customQuery = new CustomQuery(reactPlatform, startState, getResult);
 
         /*
          * Specify the content of the bot states (i.e. the behavior of the bot).
@@ -177,7 +177,7 @@ public final class Bot {
                 .next()
                 .when(intentIs(Intents.addFilterIntent)).moveTo(structuredFilter.getSelectFilterFieldState())
                 .when(intentIs(Intents.addFieldToViewIntent)).moveTo(selectViewField.getSelectViewFieldState())
-                .when(intentIs(Intents.showDataIntent)).moveTo(showData.getShowDataState())
+                .when(intentIs(Intents.showDataIntent)).moveTo(getResult.getGenerateResultSet())
                 .when(intentIs(Intents.customQueryIntent)).moveTo(customQuery.getAwaitingCustomQueryState())
                 .when(intentIs(Intents.restartIntent)).moveTo(awaitingInput);
 

@@ -1,6 +1,7 @@
 package com.xatkit.bot.customQuery;
 
 import com.xatkit.bot.library.Intents;
+import com.xatkit.bot.getResult.GetResult;
 import com.xatkit.dsl.state.StateProvider;
 import com.xatkit.execution.State;
 import com.xatkit.plugins.react.platform.ReactPlatform;
@@ -35,9 +36,8 @@ public class CustomQuery {
      * @param reactPlatform the react platform of a chatbot
      * @param returnState   the state where the chatbot ends up arriving once the workflow is finished
      */
-    public CustomQuery(ReactPlatform reactPlatform, StateProvider returnState) {
+    public CustomQuery(ReactPlatform reactPlatform, StateProvider returnState, GetResult getResult) {
         CustomFilter customFilter = new CustomFilter(reactPlatform, returnState);
-        SQLQuery sqlQuery = new SQLQuery(reactPlatform, returnState);
 
         val awaitingCustomQueryState = state("AwaitingCustomQuery");
 
@@ -50,7 +50,7 @@ public class CustomQuery {
                 .when(intentIs(Intents.customDateFilterIntent)).moveTo(customFilter.getSaveDateFilterState())
                 .when(intentIs(Intents.customTextualFilterIntent)).moveTo(customFilter.getSaveTextualFilterState())
                 .when(intentIs(coreLibraryI18n.Quit)).moveTo(returnState)
-                .when(intentIs(coreLibraryI18n.AnyValue)).moveTo(sqlQuery.getProcessQuery());
+                .when(intentIs(coreLibraryI18n.AnyValue)).moveTo(getResult.getGenerateResultSetFromQuery());
 
         this.awaitingCustomQueryState = awaitingCustomQueryState.getState();
     }
