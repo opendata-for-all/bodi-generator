@@ -21,6 +21,7 @@ import static com.xatkit.dsl.DSL.state;
  * <ul>
  *     <li>{@link CustomFilter}</li>
  * </ul>
+ * When no pre-defined query is matched, it is executed {@link GetResult#generateResultSetFromQuery}
  */
 public class CustomQuery {
 
@@ -46,9 +47,9 @@ public class CustomQuery {
                     reactPlatform.reply(context, messages.getString("WriteYourQuery"));
                 })
                 .next()
-                .when(intentIs(Intents.customNumericFilterIntent)).moveTo(customFilter.getSaveNumericFilterState())
-                .when(intentIs(Intents.customDateFilterIntent)).moveTo(customFilter.getSaveDateFilterState())
-                .when(intentIs(Intents.customTextualFilterIntent)).moveTo(customFilter.getSaveTextualFilterState())
+                .when(intentIs(Intents.customNumericFilterIntent)).moveTo(customFilter.getSaveFilterState())
+                .when(intentIs(Intents.customDateFilterIntent)).moveTo(customFilter.getSaveFilterState())
+                .when(intentIs(Intents.customTextualFilterIntent)).moveTo(customFilter.getSaveFilterState())
                 .when(intentIs(coreLibraryI18n.Quit)).moveTo(returnState)
                 .when(intentIs(coreLibraryI18n.AnyValue)).moveTo(getResult.getGenerateResultSetFromQuery());
 

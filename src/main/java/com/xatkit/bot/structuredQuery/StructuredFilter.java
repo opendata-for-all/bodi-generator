@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.val;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.xatkit.bot.Bot.coreLibraryI18n;
@@ -37,7 +38,7 @@ public class StructuredFilter {
      * The entry point for the Structured Filter workflow.
      */
     @Getter
-    private final State selectFilterFieldState;
+    private final State selectFieldState;
 
     /**
      * Instantiates a new Structured Filter workflow.
@@ -46,68 +47,78 @@ public class StructuredFilter {
      * @param returnState   the state where the chatbot ends up arriving once the workflow is finished
      */
     public StructuredFilter(ReactPlatform reactPlatform, StateProvider returnState) {
-        val selectFilterFieldState = state("SelectFilterField");
-        val selectOperatorNameState = state("SelectOperatorName");
-        val saveOperatorType = state("SaveOperatorType");
+        val selectFieldState = state("SelectField");
+        val saveFieldState = state("SaveField");
+
+        val writeOperator = state("WriteOperator");
+        val saveOperator = state("SaveOperator");
+
         val writeDateValue = state("WriteDateValue");
         val writeTextualValue = state("WriteTextualValue");
         val writeNumericValue = state("WriteNumericValue");
-        val saveFilterState = state("saveFilterState");
-        final String[] expectedValueIntent = new String[1];
 
-        selectFilterFieldState
+        val saveFilterState = state("saveFilter");
+
+        // Used to store the field data type when selecting the field. Later, in SaveOperator, it is used to
+        // transition to the datatype-dependant proper state.
+        final String[] fieldIntentName = new String[1];
+
+        // Input the FIELD name
+
+        selectFieldState
                 .body(context -> {
                     reactPlatform.reply(context, messages.getString("SelectField"),
                             (List<String>) context.getSession().get(ContextKeys.FILTER_FIELD_OPTIONS));
                 })
                 .next()
-                .when(intentIs(Intents.fieldNameIntent)).moveTo(selectOperatorNameState);
+                .when(intentIs(Intents.numericFieldIntent)).moveTo(saveFieldState)
+                .when(intentIs(Intents.textualFieldIntent)).moveTo(saveFieldState)
+                .when(intentIs(Intents.dateFieldIntent)).moveTo(saveFieldState);
 
-        selectOperatorNameState
+        // Save the FIELD name
+
+        saveFieldState
                 .body(context -> {
-                    String textualFieldName = (String) context.getIntent().getValue(ContextKeys.TEXTUAL_FIELD_NAME);
-                    String numericFieldName = (String) context.getIntent().getValue(ContextKeys.NUMERIC_FIELD_NAME);
-                    String dateFieldName = (String) context.getIntent().getValue(ContextKeys.DATE_FIELD_NAME);
-                    if (!isEmpty(textualFieldName)) {
-                        context.getSession().put(ContextKeys.LAST_FIELD_NAME, textualFieldName);
-                        reactPlatform.reply(context, messages.getString("SelectOperator"),
-                                Utils.getEntityValues(Entities.textualOperatorEntity));
-                    } else if (!isEmpty(numericFieldName)) {
-                        context.getSession().put(ContextKeys.LAST_FIELD_NAME, numericFieldName);
-                        reactPlatform.reply(context, messages.getString("SelectOperator"),
-                                Utils.getEntityValues(Entities.numericOperatorEntity));
-                    } else if (!isEmpty(dateFieldName)) {
-                        context.getSession().put(ContextKeys.LAST_FIELD_NAME, dateFieldName);
-                        reactPlatform.reply(context, messages.getString("SelectOperator"),
-                                Utils.getEntityValues(Entities.dateOperatorEntity));
-                    }
+                    String fieldName = (String) context.getIntent().getValue(ContextKeys.VALUE);
+                    context.getSession().put(ContextKeys.LAST_FIELD, fieldName);
+                    fieldIntentName[0] = context.getIntent().getDefinition().getName();
                 })
                 .next()
-                .when(intentIs(Intents.operatorNameIntent)).moveTo(saveOperatorType);
+                .moveTo(writeOperator);
 
-        saveOperatorType
+        // Input the OPERATOR name
+
+        writeOperator
                 .body(context -> {
-                    String textualOperatorName =
-                            (String) context.getIntent().getValue(ContextKeys.TEXTUAL_OPERATOR_NAME);
-                    String numericOperatorName =
-                            (String) context.getIntent().getValue(ContextKeys.NUMERIC_OPERATOR_NAME);
-                    String dateOperatorName =
-                            (String) context.getIntent().getValue(ContextKeys.DATE_OPERATOR_NAME);
-                    if (!isEmpty(textualOperatorName)) {
-                        context.getSession().put(ContextKeys.LAST_OPERATOR_NAME, textualOperatorName);
-                        expectedValueIntent[0] = "textual";
-                    } else if (!isEmpty(numericOperatorName)) {
-                        context.getSession().put(ContextKeys.LAST_OPERATOR_NAME, numericOperatorName);
-                        expectedValueIntent[0] = "numeric";
-                    } else if (!isEmpty(dateOperatorName)) {
-                        context.getSession().put(ContextKeys.LAST_OPERATOR_NAME, dateOperatorName);
-                        expectedValueIntent[0] = "date";
+                    List<String> operators = new ArrayList<>();
+                    if (fieldIntentName[0].equals(Intents.textualFieldIntent.getName())) {
+                        operators = Utils.getEntityValues(Entities.textualOperatorEntity);
+                    } else if (fieldIntentName[0].equals(Intents.numericFieldIntent.getName())) {
+                        operators = Utils.getEntityValues(Entities.numericOperatorEntity);
+                    } else if (fieldIntentName[0].equals(Intents.dateFieldIntent.getName())) {
+                        operators = Utils.getEntityValues(Entities.dateOperatorEntity);
                     }
+                    reactPlatform.reply(context, messages.getString("SelectOperator"), operators);
                 })
                 .next()
-                .when(context -> expectedValueIntent[0].equals("textual")).moveTo(writeTextualValue)
-                .when(context -> expectedValueIntent[0].equals("numeric")).moveTo(writeNumericValue)
-                .when(context -> expectedValueIntent[0].equals("date")).moveTo(writeDateValue);
+                .when(intentIs(Intents.textualOperatorIntent)).moveTo(saveOperator)
+                .when(intentIs(Intents.numericOperatorIntent)).moveTo(saveOperator)
+                .when(intentIs(Intents.dateOperatorIntent)).moveTo(saveOperator);
+
+        // Save the OPERATOR name
+
+        saveOperator
+                .body(context -> {
+                    String operatorName = (String) context.getIntent().getValue(ContextKeys.VALUE);
+                    context.getSession().put(ContextKeys.LAST_OPERATOR, operatorName);
+                })
+                .next()
+                .when(context -> fieldIntentName[0].equals(Intents.textualFieldIntent.getName())).moveTo(writeTextualValue)
+                .when(context -> fieldIntentName[0].equals(Intents.numericFieldIntent.getName())).moveTo(writeNumericValue)
+                .when(context -> fieldIntentName[0].equals(Intents.dateFieldIntent.getName())).moveTo(writeDateValue);
+
+        // Input the VALUE
+        // Divided by data types for safety (e.g. a date may be recognized as a text if we don't separate data types)
 
         writeTextualValue
                 .body(context -> {
@@ -130,10 +141,12 @@ public class StructuredFilter {
                 .next()
                 .when(intentIs(coreLibraryI18n.DateValue)).moveTo(saveFilterState);
 
+        // Finally, save the filter, composed by a FIELD, an OPERATOR, and a VALUE
+
         saveFilterState
                 .body(context -> {
-                    String fieldName = (String) context.getSession().get(ContextKeys.LAST_FIELD_NAME);
-                    String operatorName = (String) context.getSession().get(ContextKeys.LAST_OPERATOR_NAME);
+                    String fieldName = (String) context.getSession().get(ContextKeys.LAST_FIELD);
+                    String operatorName = (String) context.getSession().get(ContextKeys.LAST_OPERATOR);
                     String value = (String) context.getIntent().getValue(ContextKeys.VALUE);
 
                     if (!isEmpty(value)) {
@@ -146,6 +159,6 @@ public class StructuredFilter {
                 .next()
                 .moveTo(returnState);
 
-        this.selectFilterFieldState = selectFilterFieldState.getState();
+        this.selectFieldState = selectFieldState.getState();
     }
 }

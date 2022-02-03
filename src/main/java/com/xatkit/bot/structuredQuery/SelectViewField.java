@@ -15,7 +15,6 @@ import java.util.List;
 import static com.xatkit.bot.Bot.messages;
 import static com.xatkit.dsl.DSL.intentIs;
 import static com.xatkit.dsl.DSL.state;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * The Select View Field workflow of a chatbot.
@@ -47,17 +46,13 @@ public class SelectViewField {
                             (List<String>) context.getSession().get(ContextKeys.VIEW_FIELD_OPTIONS));
                 })
                 .next()
-                .when(intentIs(Intents.fieldNameIntent)).moveTo(saveViewFieldState);
+                .when(intentIs(Intents.textualFieldIntent)).moveTo(saveViewFieldState)
+                .when(intentIs(Intents.numericFieldIntent)).moveTo(saveViewFieldState)
+                .when(intentIs(Intents.dateFieldIntent)).moveTo(saveViewFieldState);
 
         saveViewFieldState
                 .body(context -> {
-                    String textualFieldName = (String) context.getIntent().getValue(ContextKeys.TEXTUAL_FIELD_NAME);
-                    String numericFieldName = (String) context.getIntent().getValue(ContextKeys.NUMERIC_FIELD_NAME);
-                    String dateFieldName = (String) context.getIntent().getValue(ContextKeys.DATE_FIELD_NAME);
-                    String fieldName = null;
-                    fieldName = (!isEmpty(textualFieldName) ? textualFieldName : fieldName);
-                    fieldName = (!isEmpty(numericFieldName) ? numericFieldName : fieldName);
-                    fieldName = (!isEmpty(dateFieldName) ? dateFieldName : fieldName);
+                    String fieldName = (String) context.getIntent().getValue(ContextKeys.FIELD);
                     Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
                     statement.addField(fieldName);
                     List<String> viewFieldOptions =

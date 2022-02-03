@@ -127,7 +127,7 @@ public final class Bot {
          */
         val init = state("Init");
         val awaitingInput = state("AwaitingInput");
-        val startState = state("StartState");
+        val startState = state("Start");
 
         StructuredFilter structuredFilter = new StructuredFilter(reactPlatform, startState);
         GetResult getResult = new GetResult(reactPlatform, startState);
@@ -175,7 +175,7 @@ public final class Bot {
                                     Intents.restartIntent));
                 })
                 .next()
-                .when(intentIs(Intents.addFilterIntent)).moveTo(structuredFilter.getSelectFilterFieldState())
+                .when(intentIs(Intents.addFilterIntent)).moveTo(structuredFilter.getSelectFieldState())
                 .when(intentIs(Intents.addFieldToViewIntent)).moveTo(selectViewField.getSelectViewFieldState())
                 .when(intentIs(Intents.showDataIntent)).moveTo(getResult.getGenerateResultSet())
                 .when(intentIs(Intents.customQueryIntent)).moveTo(customQuery.getAwaitingCustomQueryState())
