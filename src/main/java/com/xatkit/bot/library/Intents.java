@@ -109,21 +109,21 @@ public final class Intents {
     /**
      * The intent numericOperatorIntent.
      */
-    public static final IntentDefinition numericOperatorIntent = intent("NumericOperatorIntent")
+    public static final IntentDefinition numericOperatorIntent = intent("NumericOperator")
             .trainingSentences(BUNDLE.getStringArray("Value"))
             .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(Entities.numericOperatorEntity)
             .getIntentDefinition();
     /**
      * The intent textualOperatorIntent.
      */
-    public static final IntentDefinition textualOperatorIntent = intent("TextualOperatorIntent")
+    public static final IntentDefinition textualOperatorIntent = intent("TextualOperator")
             .trainingSentences(BUNDLE.getStringArray("Value"))
             .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(Entities.textualOperatorEntity)
             .getIntentDefinition();
     /**
      * The intent dateOperatorIntent.
      */
-    public static final IntentDefinition dateOperatorIntent = intent("DateOperatorIntent")
+    public static final IntentDefinition dateOperatorIntent = intent("DateOperator")
             .trainingSentences(BUNDLE.getStringArray("Value"))
             .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(Entities.dateOperatorEntity)
             .getIntentDefinition();
