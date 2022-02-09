@@ -229,20 +229,30 @@ public final class BodiGenerator {
             File intentsDest = new File(outputFolder + "/src/main/resources/intents.properties");
             FileUtils.copyFile(intentsSource, intentsDest);
 
-            System.out.println("Creating resource intents_cat.properties");
-            File intentsCatSource = new File("src/main/resources/intents_cat.properties");
-            File intentsCatDest = new File(outputFolder + "/src/main/resources/intents_cat.properties");
-            FileUtils.copyFile(intentsCatSource, intentsCatDest);
+            System.out.println("Creating resource intents_ca.properties");
+            File intentsCaSource = new File("src/main/resources/intents_ca.properties");
+            File intentsCaDest = new File(outputFolder + "/src/main/resources/intents_ca.properties");
+            FileUtils.copyFile(intentsCaSource, intentsCaDest);
+
+            System.out.println("Creating resource intents_es.properties");
+            File intentsEsSource = new File("src/main/resources/intents_es.properties");
+            File intentsEsDest = new File(outputFolder + "/src/main/resources/intents_es.properties");
+            FileUtils.copyFile(intentsEsSource, intentsEsDest);
 
             System.out.println("Creating resource messages.properties");
             File messagesSource = new File("src/main/resources/messages.properties");
             File messagesDest = new File(outputFolder + "/src/main/resources/messages.properties");
             FileUtils.copyFile(messagesSource, messagesDest);
 
-            System.out.println("Creating resource messages_cat.properties");
-            File messagesCatSource = new File("src/main/resources/messages_cat.properties");
-            File messagesCatDest = new File(outputFolder + "/src/main/resources/messages_cat.properties");
-            FileUtils.copyFile(messagesCatSource, messagesCatDest);
+            System.out.println("Creating resource messages_ca.properties");
+            File messagesCaSource = new File("src/main/resources/messages_ca.properties");
+            File messagesCaDest = new File(outputFolder + "/src/main/resources/messages_ca.properties");
+            FileUtils.copyFile(messagesCaSource, messagesCaDest);
+
+            System.out.println("Creating resource messages_es.properties");
+            File messagesEsSource = new File("src/main/resources/messages_es.properties");
+            File messagesEsDest = new File(outputFolder + "/src/main/resources/messages_es.properties");
+            FileUtils.copyFile(messagesEsSource, messagesEsDest);
         } catch (IOException e) {
             e.printStackTrace();
         }
