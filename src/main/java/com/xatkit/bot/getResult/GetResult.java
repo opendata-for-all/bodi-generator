@@ -2,7 +2,7 @@ package com.xatkit.bot.getResult;
 
 import bodi.generator.dataSource.ResultSet;
 import bodi.generator.dataSource.Statement;
-import com.xatkit.bot.languageModel.TextToTableClient;
+import com.xatkit.bot.nlp.NLPServerClient;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Intents;
 import com.xatkit.bot.library.Utils;
@@ -48,18 +48,18 @@ public class GetResult {
      * One of the entry points for the Get Result workflow.
      * <p>
      * When no intent is recognized from a user question, this state is executed to try to obtain a tabular answer to
-     * that question, using {@link #textToTableClient}.
+     * that question, using {@link #nlpServerClient}.
      * <p>
      * The filters previously applied by the user are also added to
-     * the SQL query (see {@link com.xatkit.bot.languageModel.LanguageModelClient#runQuery(String, Statement)}
+     * the query (see {@link com.xatkit.bot.nlp.NLPServerClient#runQuery(String, Statement)}
      */
     @Getter
     private final State generateResultSetFromQuery;
 
     /**
-     * The client that interacts with the server that deploys the language model to answer the questions.
+     * The client that interacts with the server that deploys the NLP models to answer the questions.
      */
-    TextToTableClient textToTableClient = new TextToTableClient();
+    NLPServerClient nlpServerClient = new NLPServerClient();
 
     /**
      * The maximum number of entries of a table that are displayed at once in the chatbot chat box (i.e. the page size).
@@ -96,7 +96,7 @@ public class GetResult {
                 .body(context -> {
                     Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
                     String query = context.getIntent().getMatchedInput();
-                    resultSet = textToTableClient.runTableQuery(query, statement);
+                    resultSet = nlpServerClient.runQuery(query, statement);
                 })
                 .next()
                 .moveTo(showDataState);
