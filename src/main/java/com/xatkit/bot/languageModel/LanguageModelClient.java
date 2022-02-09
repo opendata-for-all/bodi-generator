@@ -53,9 +53,9 @@ class LanguageModelClient {
                     .getResource(Bot.botPropertiesFile));
             this.modelServerUrl = "http://" + configuration.getString("SERVER_URL") + "/";
             if (this instanceof TextToSQLClient) {
-                this.runModelEndpoint = configuration.getString("RUN_MODEL_ENDPOINT_SQL");
+                this.runModelEndpoint = configuration.getString("EN_TO_SQL_ENDPOINT");
             } else if (this instanceof TextToTableClient) {
-                this.runModelEndpoint = configuration.getString("RUN_MODEL_ENDPOINT_TABLE");
+                this.runModelEndpoint = configuration.getString("EN_TO_TABLE_ENDPOINT");
             }
         } catch (ConfigurationException e) {
             e.printStackTrace();
