@@ -30,15 +30,10 @@ mvn clean compile
 mvn exec:java -Dexec.mainClass="bodi.generator.BodiGenerator"
 ```
 
-8 - If you want to empower your chatbot with the default fallback state (recommended), you have to deploy a server
-running a language model (see [DefaultFallback Configuration](#defaultfallback-configuration)). Currently, 2
-solutions are available:
-
-- Text-to-SQL language model:
-  ```bash
-  python3 transformers_server.py
-  ```
-- Text-to-Table language model: [mgv99/TabularSemanticParsing](https://github.com/mgv99/TabularSemanticParsing)
+8 - If you want to empower your chatbot with NLP functionalities (to provide answers to questions not implemented in 
+the chatbot), you have to deploy a server that runs language models to perform NLP tasks. This server can be found 
+at [opendata-for-all/bodi-nlp-server](https://github.com/opendata-for-all/bodi-nlp-server)
+(see [NLP Server Configuration](#nlp-server-configuration)).
 
 9 - Once the chatbot is generated, you can run it:
 ```bash
@@ -54,47 +49,33 @@ mvn exec:java -Dexec.mainClass="com.xatkit.bot.Bot"
 You can customize your generated chatbots according to your objectives. Here are described the properties you can 
 set in [bot.properties](src/main/resources/bot.properties)
 
-| Name                     | Description                                                                                                                                                                  |
-|--------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `xls.generator.bot.name` | The name of the generated chatbot                                                                                                                                            |
-| `xls.generator.output`   | The path where the chatbot will be stored                                                                                                                                    |
-| `xls.importer.xls`       | The name of the tabular data file the chatbot will have access to, stored in the [resources](src/main/resources) folder (currently only `csv` files are supported)           |
-| `xatkit.server.port`     | The port where the chatbot will be running                                                                                                                                   |
-| `bot.language`           | The language of the bot (users must talk to the chatbot in this language, and it also replies in this language). Available languages: **Catalan** (`ca`), **English** (`en`) |
-| `xatkit.nlpjs.*`         | All the properties related to [NLP.js](https://github.com/xatkit-bot-platform/xatkit/wiki/Using-NLP.js) engine                                                               |
-| `xatkit.dialogflow.*`    | All the properties related to [DialogFlow](https://github.com/xatkit-bot-platform/xatkit/wiki/Integrating-DialogFlow) engine                                                 |
+| Name                     | Description                                                                                                                                                                                       |
+|--------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `xls.generator.bot.name` | The name of the generated chatbot                                                                                                                                                                 |
+| `xls.generator.output`   | The path where the chatbot will be stored                                                                                                                                                         |
+| `xls.importer.xls`       | The name of the tabular data file the chatbot will have access to, stored in the [resources](src/main/resources) folder (currently only `csv` files are supported)                                |
+| `csv.delimiter`          | The delimiter or separator of the tabular data file cells (e.g. `,`, `\t` (tab))                                                                                                                  |
+| `xatkit.server.port`     | The port where the chatbot will be running                                                                                                                                                        |
+| `bot.language`           | The language of the bot (users must talk to the chatbot in this language, and it also replies in this language). Available languages: **Spanish** (`es`),  **Catalan** (`ca`), **English** (`en`) |
+| `xatkit.nlpjs.*`         | All the properties related to [NLP.js](https://github.com/xatkit-bot-platform/xatkit/wiki/Using-NLP.js) engine                                                                                    |
+| `xatkit.dialogflow.*`    | All the properties related to [DialogFlow](https://github.com/xatkit-bot-platform/xatkit/wiki/Integrating-DialogFlow) engine                                                                      |
 
 > 📚 It is highly recommended to use an NLP engine supported in Xatkit (DialogFlow or NLP.js). Do not include 
 > properties for both NLP engines.
 
 There are a lot of other properties you can add to your bot, check them out [here](https://github.com/xatkit-bot-platform/xatkit/wiki/Xatkit-Options).
 
-### DefaultFallback Configuration
+### NLP Server Configuration
 
-When a user utterance is not matched with a bot intent, the DefaultFallback state is executed. We provide a 
-technique to empower the chatbot with language models able to find answers to a wide range of inputs. A server 
-running a language model can be deployed and then, from the DefaultFallback state, a request to this server is sent 
-and a response is received. We consider 2 kinds of language models: 
-- **Text-to-SQL**: The input of the language model is a natural language utterance. The output is a SQL statement 
-  equivalent to the utterance. This SQL statement is then executed within the tabular data file of the chatbot to 
-  obtain a result to the original utterance.
-
-  See this example model: [mrm8488/t5-base-finetuned-wikiSQL](https://huggingface.co/mrm8488/t5-base-finetuned-wikiSQL)
-
-- **Text-to-Table**: The input of the language model is a natural language utterance (together 
-  with a tabular data source such as a `.csv` table). The output is the answer to the utterance (that is, a tabular 
-  data result obtained from the original tabular data provided).
-
-  See this example model: [google/tapas-base-finetuned-wtq](https://huggingface.co/google/tapas-base-finetuned-wtq) and
-  **our current favourite solution**: [Bridging Textual and Tabular Data for Cross-Domain Text-to-SQL Semantic
-  Parsing](https://github.com/mgv99/TabularSemanticParsing):
+We provide a solution for when a user utterance is not matched with a bot intent. The objective is to empower the 
+chatbot with language models able to find answers to a wide range of inputs. A server running these models can be 
+deployed and then, when no intent is matched, a request to this server is sent and a response is received. Our 
+solution is implemented in [opendata-for-all/bodi-nlp-server](https://github.com/opendata-for-all/bodi-nlp-server).
 
 Here are described the properties you can
-set in [bot.properties](src/main/resources/bot.properties) related to the default fallback state:
+set in [bot.properties](src/main/resources/bot.properties) related to the NLP Server:
 
-| Name                       | Description                                                                                                                                   |
-|----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
-| `MODEL_NAME_SQL`           | The name of the Text-to-SQL language model (a [Huggingface endpoint](https://huggingface.co/models), e.g. `mrm8488/t5-base-finetuned-wikiSQL` |
-| `SERVER_URL`               | The URL where the server is hosted (e.g. `127.0.0.1:5002`)                                                                                    |
-| `RUN_MODEL_ENDPOINT_SQL`   | The server endpoint that runs a query in the Text-to-SQL language model                                                                       |
-| `RUN_MODEL_ENDPOINT_TABLE` | The server endpoint that runs a query in the Text-to-Table language model                                                                     |
+| Name                     | Description                                                               |
+|--------------------------|---------------------------------------------------------------------------|
+| `SERVER_URL`             | The URL where the server is hosted (e.g. `127.0.0.1:5002`)                |
+| `TEXT_TO_TABLE_ENDPOINT` | The server endpoint that runs a query in the Text-to-Table language model |
