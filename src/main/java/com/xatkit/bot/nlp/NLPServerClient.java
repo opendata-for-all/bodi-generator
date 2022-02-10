@@ -73,7 +73,6 @@ public class NLPServerClient {
     public ResultSet runQuery(String input, Statement statement) {
         JSONObject request = new JSONObject();
         request.put("input", input);
-        System.out.println("BOT LANGUAGE ====" + Bot.language);
         request.put("language", Bot.language);
         request.put("fields", statement.getFieldsAsSqlVariables());
         request.put("filters", statement.getFiltersAsSqlConditions());
