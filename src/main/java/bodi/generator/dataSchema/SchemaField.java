@@ -91,6 +91,24 @@ public class SchemaField {
     }
 
     /**
+     * Adds a synonym of the field.
+     *
+     * @param synonym the synonym
+     */
+    public void addSynonym(String synonym) {
+        synonyms.add(synonym);
+    }
+
+    /**
+     * Gets the list of synonyms of the field.
+     *
+     * @return the synonyms
+     */
+    public List<String> getSynonyms() {
+        return synonyms;
+    }
+
+    /**
      * Gets the type of the field.
      *
      * @return the type
