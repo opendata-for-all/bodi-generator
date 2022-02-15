@@ -52,7 +52,7 @@ public class SelectViewField {
 
         saveViewFieldState
                 .body(context -> {
-                    String fieldName = (String) context.getIntent().getValue(ContextKeys.FIELD);
+                    String fieldName = (String) context.getIntent().getValue(ContextKeys.VALUE);
                     Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
                     statement.addField(fieldName);
                     List<String> viewFieldOptions =
