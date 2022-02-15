@@ -1,0 +1,94 @@
+{
+  "numericOperatorEntity": {
+    "=": {
+      "synonyms": [
+        "equals"
+      ]
+    },
+    "<": {
+      "synonyms": [
+        "less than",
+        "lower than"
+      ]
+    },
+    "<=": {
+      "synonyms": [
+        "less than or equals",
+        "lower than or equals"
+      ]
+    },
+    ">": {
+      "synonyms": [
+        "greater than",
+        "higher than"
+      ]
+    },
+    ">=": {
+      "synonyms": [
+        "greater than or equals",
+        "higher than or equals"
+      ]
+    },
+    "!=": {
+      "synonyms": [
+        "not equals",
+        "different"
+      ]
+    }
+  },
+  "dateOperatorEntity": {
+    "equals": {
+      "synonyms": [
+
+      ]
+    },
+    "different": {
+      "synonyms": [
+
+      ]
+    },
+    "before": {
+      "synonyms": [
+
+      ]
+    },
+    "after": {
+      "synonyms": [
+
+      ]
+    }
+  },
+  "textualOperatorEntity": {
+    "equals": {
+      "synonyms": [
+
+      ]
+    },
+    "different": {
+      "synonyms": [
+
+      ]
+    },
+    "contains": {
+      "synonyms":  [
+
+      ]
+    },
+    "starts with": {
+      "synonyms":  [
+
+      ]
+    },
+    "ends with": {
+      "synonyms":  [
+
+      ]
+    }
+  },
+  "numericFieldEntity": {
+  },
+  "dateFieldEntity": {
+  },
+  "textualFieldEntity": {
+  }
+}

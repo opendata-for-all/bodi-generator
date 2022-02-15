@@ -1,0 +1,125 @@
+{
+  "numericOperatorEntity": {
+    "=": {
+      "synonyms": [
+        "igual",
+        "igual que",
+        "igual a"
+      ]
+    },
+    "<": {
+      "synonyms": [
+        "más pequeño que",
+        "más bajo que",
+        "menos que",
+        "menor que"
+      ]
+    },
+    "<=": {
+      "synonyms": [
+        "más pequeño o igual que",
+        "más bajo o igual que",
+        "menos o igual que",
+        "menor o igual que"
+      ]
+    },
+    ">": {
+      "synonyms": [
+        "más grande que",
+        "más alto que",
+        "más que",
+        "mayor que"
+      ]
+    },
+    ">=": {
+      "synonyms": [
+        "más grande o igual que",
+        "más alto o igual que",
+        "más o igual que",
+        "mayor o igual que"
+      ]
+    },
+    "!=": {
+      "synonyms": [
+        "diferente",
+        "diferente que",
+        "diferente a",
+        "no igual que",
+        "no igual a"
+      ]
+    }
+  },
+  "dateOperatorEntity": {
+    "equals": {
+      "synonyms": [
+        "igual",
+        "igual que",
+        "igual a"
+      ]
+    },
+    "different": {
+      "synonyms": [
+        "diferente",
+        "diferente que",
+        "diferente a",
+        "no igual que",
+        "no igual a"
+      ]
+    },
+    "before": {
+      "synonyms": [
+        "antes",
+        "antes que",
+        "anterior a"
+      ]
+    },
+    "after": {
+      "synonyms": [
+        "después",
+        "después que",
+        "posterior a"
+      ]
+    }
+  },
+  "textualOperatorEntity": {
+    "equals": {
+      "synonyms": [
+        "igual",
+        "igual que",
+        "igual a"
+      ]
+    },
+    "different": {
+      "synonyms": [
+        "diferente",
+        "diferente que",
+        "diferente a",
+        "no igual que",
+        "no igual a"
+      ]
+    },
+    "contains": {
+      "synonyms":  [
+        "contiene"
+      ]
+    },
+    "starts with": {
+      "synonyms":  [
+        "comienza con",
+        "comienza por"
+      ]
+    },
+    "ends with": {
+      "synonyms":  [
+        "acaba con",
+        "acaba por"
+      ]
+    }
+  },
+  "numericFieldEntity": {
+  },
+  "dateFieldEntity": {
+  },
+  "textualFieldEntity": {
+  }
+}

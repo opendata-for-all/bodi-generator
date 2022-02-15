@@ -220,9 +220,20 @@ public final class BodiGenerator {
             File botDest = new File(outputFolder + "/src/main/java/com/xatkit/bot/");
             FileUtils.copyDirectory(botSource, botDest);
 
-            System.out.println("Overwriting Entities.java");
-            Path entitiesFile = Paths.get(outputFolder + "/src/main/java/com/xatkit/bot/library/Entities.java");
-            Files.write(entitiesFile, bp.getEntitiesFile().getBytes());
+            System.out.println("Creating resource entities.json");
+            File entitiesSource = new File("src/main/resources/entities.json");
+            File entitiesDest = new File(outputFolder + "/src/main/resources/entities.json");
+            FileUtils.copyFile(entitiesSource, entitiesDest);
+
+            System.out.println("Creating resource entities_ca.json");
+            File entitiesCaSource = new File("src/main/resources/entities_ca.json");
+            File entitiesCaDest = new File(outputFolder + "/src/main/resources/entities_ca.json");
+            FileUtils.copyFile(entitiesCaSource, entitiesCaDest);
+
+            System.out.println("Creating resource entities_es.json");
+            File entitiesEsSource = new File("src/main/resources/entities_es.json");
+            File entitiesEsDest = new File(outputFolder + "/src/main/resources/entities_es.json");
+            FileUtils.copyFile(entitiesEsSource, entitiesEsDest);
 
             System.out.println("Creating resource intents.properties");
             File intentsSource = new File("src/main/resources/intents.properties");

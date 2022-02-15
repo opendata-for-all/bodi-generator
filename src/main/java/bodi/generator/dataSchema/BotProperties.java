@@ -122,15 +122,6 @@ public class BotProperties {
     }
 
     /**
-     * Generates and gets the entities file corresponding to the {@link BotProperties}.
-     *
-     * @return the entities file
-     */
-    public String getEntitiesFile() {
-        return CodeGenerator.generateEntitiesFile(this.getTypes());
-    }
-
-    /**
      * Creates the elements that will be part of the bot.
      */
     public void createBotStructure() {
