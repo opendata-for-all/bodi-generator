@@ -1,4 +1,5 @@
 {
+  "_comment": "This is an example json file containing the fields of some table",
   "age": {
     "en": {
       "readable_name": "age",
