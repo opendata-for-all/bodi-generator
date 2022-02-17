@@ -1,9 +1,13 @@
 package bodi.generator.dataSchema;
 
 import bodi.generator.dataSource.TabularDataSource;
+import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -14,6 +18,11 @@ import java.util.List;
 public class SchemaField {
 
     /**
+     * A set containing all the possible languages of the fields.
+     */
+    public static final Set<String> languages = new HashSet<>(Set.of("en", "ca", "es"));
+
+    /**
      * The name of the field as it was in the {@link TabularDataSource} from which it was inferred.
      */
     private String originalName;
@@ -21,16 +30,22 @@ public class SchemaField {
     /**
      * A secondary, more human-friendly, name. It may be used instead of {@link #originalName} if is a complex or
      * difficult-to-read name.
+     * <p>
+     * It is defined in all the languages stored in {@link #languages}. The keys are the languages and the values are
+     * the actual names in that language.
      */
-    private String readableName;
+    private Map<String, String> readableName;
 
     /**
      * Collection of synonyms of the field name.
      * <p>
-     * In a chatbot, they are useful for the user to be able to refer to a
-     * field in different ways. For instance, {@code location} could be a synonym of {@code address}
+     * In a chatbot, they are useful for the user to be able to refer to a field in different ways. For instance,
+     * {@code location} could be a synonym of {@code address}.
+     * <p>
+     * They are defined in all the languages stored in {@link #languages}. The keys are the languages and the
+     * values are the actual synonym collections in that language.
      */
-    private List<String> synonyms;
+    private Map<String, Set<String>> synonyms;
 
     /**
      * The data type of the field.
@@ -51,7 +66,12 @@ public class SchemaField {
      * Instantiates a new empty {@link SchemaField}.
      */
     public SchemaField() {
-        synonyms = new ArrayList<>();
+        readableName = new HashMap<>();
+        synonyms = new HashMap<>();
+        for (String language : languages) {
+            readableName.put(language, null);
+            synonyms.put(language, new HashSet<>());
+        }
     }
 
     /**
@@ -73,39 +93,39 @@ public class SchemaField {
     }
 
     /**
-     * Gets the readable name of the field.
+     * Gets the readable name of the field in a specific language.
      *
      * @return the readable name
      */
-    public String getReadableName() {
-        return readableName;
+    public String getReadableName(String language) {
+        return readableName.get(language);
     }
 
     /**
-     * Sets the readable name of the field.
+     * Sets the readable name of the field in a specific language.
      *
      * @param readableName the readable name
      */
-    public void setReadableName(String readableName) {
-        this.readableName = readableName;
+    public void setReadableName(String language, String readableName) {
+        this.readableName.put(language, readableName);
     }
 
     /**
-     * Adds a synonym of the field.
+     * Adds a set of synonyms of the field, in a specific language.
      *
-     * @param synonym the synonym
+     * @param newSynonyms the synonyms to add
      */
-    public void addSynonym(String synonym) {
-        synonyms.add(synonym);
+    public void addSynonyms(String language, Collection<String> newSynonyms) {
+        synonyms.get(language).addAll(newSynonyms);
     }
 
     /**
-     * Gets the list of synonyms of the field.
+     * Gets the list of synonyms of the field, in a specific language.
      *
      * @return the synonyms
      */
-    public List<String> getSynonyms() {
-        return synonyms;
+    public Set<String> getSynonyms(String language) {
+        return synonyms.get(language);
     }
 
     /**
@@ -145,4 +165,20 @@ public class SchemaField {
         this.numDifferentValues = numDifferentValues;
     }
 
+    /**
+     * Generates a JSON object containing all the information of the SchemaField.
+     *
+     * @return the json object containing the SchemaField information
+     */
+    public JSONObject generateFieldJson() {
+        JSONObject entity = new JSONObject();
+        for (String language : languages) {
+            JSONObject languageEntity = new JSONObject();
+            languageEntity.put("readableName", this.getReadableName(language));
+            languageEntity.put("synonyms", this.getSynonyms(language));
+            entity.put(language, languageEntity);
+        }
+        entity.put("numDifferentValues", this.numDifferentValues);
+        return entity;
+    }
 }

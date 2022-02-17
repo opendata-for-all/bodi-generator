@@ -1,5 +1,6 @@
 package bodi.generator.dataSchema;
 import bodi.generator.dataSource.TabularDataSource;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,6 +63,34 @@ public class SchemaType {
      */
     public void addSchemaField(SchemaField schemaField) {
         schemaFields.add(schemaField);
+    }
+
+    /**
+     * Generates a JSON object containing all the fields of the SchemaType, classified by types.
+     *
+     * @return the json object containing all the fields of the SchemaType
+     */
+    public JSONObject generateFieldsJson() {
+        JSONObject entities = new JSONObject();
+        entities.put("numericFieldEntity", new JSONObject());
+        entities.put("dateFieldEntity", new JSONObject());
+        entities.put("textualFieldEntity", new JSONObject());
+        for (SchemaField schemaField : schemaFields) {
+            JSONObject entity = schemaField.generateFieldJson();
+            switch (schemaField.getType()) {
+                case NUMBER:
+                    entities.getJSONObject("numericFieldEntity").put(schemaField.getOriginalName(), entity);
+                    break;
+                case DATE:
+                    entities.getJSONObject("dateFieldEntity").put(schemaField.getOriginalName(), entity);
+                    break;
+                case TEXT:
+                case EMPTY:
+                    entities.getJSONObject("textualFieldEntity").put(schemaField.getOriginalName(), entity);
+                    break;
+            }
+        }
+        return entities;
     }
 
 }

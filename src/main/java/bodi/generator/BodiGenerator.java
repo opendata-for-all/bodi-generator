@@ -13,10 +13,13 @@ import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.io.FileUtils;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -81,6 +84,7 @@ public final class BodiGenerator {
         } catch (ConfigurationException e) {
             e.printStackTrace();
             System.out.println("'" + fileName + "' file not found");
+            System.exit(1);
         }
         return botConfiguration;
     }
@@ -110,7 +114,12 @@ public final class BodiGenerator {
      * @param tds the Tabular Data Source
      * @return the Data Schema
      */
-    private static DataSchema tabularDataSourceToDataSchema(TabularDataSource tds) {
+    private static DataSchema tabularDataSourceToDataSchema(TabularDataSource tds, String fieldsFile) {
+        InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(fieldsFile);
+        if (is == null) {
+            throw new NullPointerException("Cannot find the fields file \"" + fieldsFile + "\"");
+        }
+        JSONObject fieldsJson = new JSONObject(new JSONTokener(is));
         DataSchema ds = new DataSchema();
         SchemaType schemaType = new SchemaType("mainSchemaType");
         for (String fieldName : tds.getHeaderCopy()) {
@@ -135,8 +144,6 @@ public final class BodiGenerator {
                 }
             }
             SchemaField schemaField = new SchemaField();
-            schemaField.setOriginalName(fieldName);
-            schemaField.setReadableName(fieldName);
             if (dataTypes.get(EMPTY)) {
                 // TODO: Consider empty (unknown) type?
                 schemaField.setType(TEXT);
@@ -147,7 +154,15 @@ public final class BodiGenerator {
             } else {
                 schemaField.setType(TEXT);
             }
+            schemaField.setOriginalName(fieldName);
             schemaField.setNumDifferentValues(fieldValuesSet.size());
+            for (String language : SchemaField.languages) {
+                JSONObject fieldJson = fieldsJson.getJSONObject(fieldName).getJSONObject(language);
+                schemaField.setReadableName(language, fieldJson.getString("readable_name"));
+                Set<String> synonyms = fieldJson.getJSONArray("synonyms").toList().stream()
+                        .map(object -> Objects.toString(object, null)).collect(Collectors.toSet());
+                schemaField.addSynonyms(language, synonyms);
+            }
             schemaType.addSchemaField(schemaField);
         }
         ds.addSchemaType(schemaType);
@@ -182,7 +197,7 @@ public final class BodiGenerator {
         char delimiter = conf.getString("csv.delimiter").charAt(0);
 
         TabularDataSource tds = createTabularDataSource(inputDocName, delimiter);
-        DataSchema ds = tabularDataSourceToDataSchema(tds);
+        DataSchema ds = tabularDataSourceToDataSchema(tds, "fields.json");
         BotProperties bp = dataSchemaToBotProperties(ds, botName, inputDocName);
 
         System.out.println("Attempting to create the bot " + botName + " in " + outputFolder);
@@ -220,20 +235,16 @@ public final class BodiGenerator {
             File botDest = new File(outputFolder + "/src/main/java/com/xatkit/bot/");
             FileUtils.copyDirectory(botSource, botDest);
 
-            System.out.println("Creating resource entities.json");
-            File entitiesSource = new File("src/main/resources/entities.json");
-            File entitiesDest = new File(outputFolder + "/src/main/resources/entities.json");
-            FileUtils.copyFile(entitiesSource, entitiesDest);
+            // TODO: Simplify: copy all resources folder??? (is there anything that must not be copied?)
 
-            System.out.println("Creating resource entities_ca.json");
-            File entitiesCaSource = new File("src/main/resources/entities_ca.json");
-            File entitiesCaDest = new File(outputFolder + "/src/main/resources/entities_ca.json");
-            FileUtils.copyFile(entitiesCaSource, entitiesCaDest);
+            System.out.println("Creating resource fields.json");
+            Path entitiesFile = Paths.get(outputFolder + "/src/main/resources/fields.json");
+            Files.write(entitiesFile, ds.getSchemaType("mainSchemaType").generateFieldsJson().toString().getBytes());
 
-            System.out.println("Creating resource entities_es.json");
-            File entitiesEsSource = new File("src/main/resources/entities_es.json");
-            File entitiesEsDest = new File(outputFolder + "/src/main/resources/entities_es.json");
-            FileUtils.copyFile(entitiesEsSource, entitiesEsDest);
+            System.out.println("Creating resource fieldOperators.json");
+            File fieldOperatorsSource = new File("src/main/resources/fieldOperators.json");
+            File fieldOperatorsDest = new File(outputFolder + "/src/main/resources/fieldOperators.json");
+            FileUtils.copyFile(fieldOperatorsSource, fieldOperatorsDest);
 
             System.out.println("Creating resource intents.properties");
             File intentsSource = new File("src/main/resources/intents.properties");

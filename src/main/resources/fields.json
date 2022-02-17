@@ -1,0 +1,129 @@
+{
+  "age": {
+    "en": {
+      "readable_name": "age",
+      "synonyms": [
+      ]
+    },
+    "ca": {
+      "readable_name": "edat",
+      "synonyms": [
+        "edat"
+      ]
+    },
+    "es": {
+      "readable_name": "edad",
+      "synonyms": [
+        "edad"
+      ]
+    }
+  },
+  "id": {
+    "en": {
+      "readable_name": "id",
+      "synonyms": [
+        "code"
+      ]
+    },
+    "ca": {
+      "readable_name": "id",
+      "synonyms": [
+        "código"
+      ]
+    },
+    "es": {
+      "readable_name": "id",
+      "synonyms": [
+        "codi"
+      ]
+    }
+  },
+  "birth": {
+    "en": {
+      "readable_name": "birth",
+      "synonyms": [
+      ]
+    },
+    "ca": {
+      "readable_name": "aniversari",
+      "synonyms": [
+        "aniversari",
+        "data d'aniversari",
+        "naixement"
+      ]
+    },
+    "es": {
+      "readable_name": "cumpleaños",
+      "synonyms": [
+        "cumpleaños",
+        "fecha de cumpleaños",
+        "nacimiento"
+      ]
+    }
+  },
+  "name": {
+    "en": {
+      "readable_name": "name",
+      "synonyms": [
+      ]
+    },
+    "ca": {
+      "readable_name": "nom",
+      "synonyms": [
+        "nom"
+      ]
+    },
+    "es": {
+      "readable_name": "nombre",
+      "synonyms": [
+        "nom"
+      ]
+    }
+  },
+  "city": {
+    "en": {
+      "readable_name": "city",
+      "synonyms": [
+        "town"
+      ]
+    },
+    "ca": {
+      "readable_name": "ciutat",
+      "synonyms": [
+        "ciutat",
+        "poble",
+        "població"
+      ]
+    },
+    "es": {
+      "readable_name": "ciudad",
+      "synonyms": [
+        "ciudad",
+        "pueblo",
+        "población"
+      ]
+    }
+  },
+  "nationality": {
+    "en": {
+      "readable_name": "nationality",
+      "synonyms": [
+        "country"
+      ]
+    },
+    "ca": {
+      "readable_name": "nacionalitat",
+      "synonyms": [
+        "nacionalitat",
+        "país"
+      ]
+    },
+    "es": {
+      "readable_name": "nacionalidad",
+      "synonyms": [
+        "nacionalidad",
+        "país"
+      ]
+    }
+  }
+}
