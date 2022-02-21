@@ -11,31 +11,29 @@ development platform.
 
 1 - [Build the latest version of Xatkit](https://github.com/xatkit-bot-platform/xatkit/wiki/Build-Xatkit)
 
-2 - [Install xatkit-metamodel-simple](https://github.com/xatkit-bot-platform/xatkit-metamodel-simple)
+2 - Clone this repository
 
-3 - Clone this repository
-
-4 - Edit the [bot.properties](src/main/resources/bot.properties) file according to your purposes (see [Bot 
+3 - Edit the [bot.properties](src/main/resources/bot.properties) file according to your purposes (see [Bot 
 Configuration](#bot-configuration))
 
-5 - Navigate to the root directory and build the project:
+4 - Navigate to the root directory and build the project:
 
 ```bash
 mvn clean compile
 ```
 
-6 - You can run the bot generator!
+5 - You can run the bot generator!
 
 ```bash
 mvn exec:java -Dexec.mainClass="bodi.generator.BodiGenerator"
 ```
 
-8 - If you want to empower your chatbot with NLP functionalities (to provide answers to questions not implemented in 
+6 - If you want to empower your chatbot with NLP functionalities (to provide answers to questions not implemented in 
 the chatbot), you have to deploy a server that runs language models to perform NLP tasks. This server can be found 
 at [opendata-for-all/bodi-nlp-server](https://github.com/opendata-for-all/bodi-nlp-server)
 (see [NLP Server Configuration](#nlp-server-configuration)).
 
-9 - Once the chatbot is generated, you can run it:
+7 - Once the chatbot is generated, you can run it:
 ```bash
 cd <bot-folder>
 mvn clean compile
