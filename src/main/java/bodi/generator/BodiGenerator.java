@@ -162,6 +162,7 @@ public final class BodiGenerator {
                 Set<String> synonyms = fieldJson.getJSONArray("synonyms").toList().stream()
                         .map(object -> Objects.toString(object, null)).collect(Collectors.toSet());
                 schemaField.addSynonyms(language, synonyms);
+                schemaField.addSynonyms(language, Collections.singleton(schemaField.getReadableName(language)));
             }
             schemaType.addSchemaField(schemaField);
         }
