@@ -157,10 +157,10 @@ public final class CodeGenerator {
                                         </descriptorRefs>
                                         <archive>
                                             <manifest>
-                                                <mainClass>MetaBot</mainClass>
+                                                <mainClass>Bot</mainClass>
                                             </manifest>
                                         </archive>
-                                        <finalName>meta-bot</finalName>
+                                        <finalName>bot</finalName>
                                     </configuration>
                                 </plugin>
                             </plugins>
