@@ -71,8 +71,8 @@ public class TabularDataSource {
             numRows = table.size();
             for (int i = 0; i < table.size(); i++) {
                 if (table.get(i).getValues().size() != header.size()) {
-                    throw new IllegalArgumentException("The header size (%s) is not equal to size of row %s (%s)"
-                            .formatted(header.size(), i, table.get(i).getValues().size()));
+                    throw new IllegalArgumentException("The header size (" + header.size() + ") is not equal to size of "
+                            + "row " + i + " (" + table.get(i).getValues().size() + ")");
                 }
             }
         } catch (IOException | CsvException e) {
