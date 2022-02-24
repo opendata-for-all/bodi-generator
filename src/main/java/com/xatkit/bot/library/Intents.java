@@ -47,6 +47,12 @@ public final class Intents {
             .trainingSentences(BUNDLE.getStringArray("AddFilter"))
             .getIntentDefinition();
     /**
+     * The intent removeFilterIntent.
+     */
+    public static final IntentDefinition removeFilterIntent = intent("RemoveFilter")
+            .trainingSentences(BUNDLE.getStringArray("RemoveFilter"))
+            .getIntentDefinition();
+    /**
      * The intent addFieldToViewIntent.
      */
     public static final IntentDefinition addFieldToViewIntent = intent("AddFieldToView")

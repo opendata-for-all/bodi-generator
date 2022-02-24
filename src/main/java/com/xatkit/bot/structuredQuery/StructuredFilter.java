@@ -1,5 +1,6 @@
 package com.xatkit.bot.structuredQuery;
 
+import bodi.generator.dataSource.ResultSet;
 import bodi.generator.dataSource.Statement;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Entities;
@@ -39,6 +40,9 @@ public class StructuredFilter {
     @Getter
     private final State selectFieldState;
 
+    @Getter
+    private final State selectFilterToRemoveState;
+
     /**
      * Instantiates a new Structured Filter workflow.
      *
@@ -56,7 +60,7 @@ public class StructuredFilter {
         val writeTextualValue = state("WriteTextualValue");
         val writeNumericValue = state("WriteNumericValue");
 
-        val saveFilterState = state("saveFilter");
+        val saveFilterState = state("SaveFilter");
 
         // Used to store the field data type when selecting the field. Later, in SaveOperator, it is used to
         // transition to the datatype-dependant proper state.
@@ -144,20 +148,67 @@ public class StructuredFilter {
 
         saveFilterState
                 .body(context -> {
-                    String fieldName = (String) context.getSession().get(ContextKeys.LAST_FIELD);
-                    String operatorName = (String) context.getSession().get(ContextKeys.LAST_OPERATOR);
+                    String field = (String) context.getSession().get(ContextKeys.LAST_FIELD);
+                    String operator = (String) context.getSession().get(ContextKeys.LAST_OPERATOR);
                     String value = (String) context.getIntent().getValue(ContextKeys.VALUE);
-
-                    if (!isEmpty(value)) {
+                    if (!isEmpty(field) && !isEmpty(operator) && !isEmpty(value)) {
                         Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
-                        statement.addFilter(fieldName, operatorName, value);
+                        statement.addFilter(field, operator, value);
+                        ResultSet resultSet = statement.executeQuery();
+                        context.getSession().put(ContextKeys.RESULT_SET, resultSet);
                         reactPlatform.reply(context, MessageFormat.format(messages.getString("FilterAdded"),
-                                fieldName, operatorName, value));
+                                field, operator, value, resultSet.getNumRows()));
+                    } else {
+                        reactPlatform.reply(context, messages.getString("SomethingWentWrong"));
                     }
                 })
                 .next()
                 .moveTo(returnState);
 
         this.selectFieldState = selectFieldState.getState();
+
+        // The Remove Filter workflow
+
+        val selectFilterToRemoveState = state("SelectFilterToRemove");
+        val removeFilterState = state("RemoveFilter");
+
+        selectFilterToRemoveState
+                .body(context -> {
+                    Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
+                    List<String> currentFilters = statement.getFiltersAsStrings();
+                    if (currentFilters.isEmpty()) {
+                        reactPlatform.reply(context, messages.getString("NoFilters"),
+                                Utils.getFirstTrainingSentences(coreLibraryI18n.Quit));
+                    } else {
+                        currentFilters.add(Utils.getFirstTrainingSentences(coreLibraryI18n.Quit).get(0));
+                        reactPlatform.reply(context, messages.getString("SelectFilter"), currentFilters);
+                    }
+                })
+                .next()
+                .when(intentIs(Intents.customNumericFilterIntent)).moveTo(removeFilterState)
+                .when(intentIs(Intents.customDateFilterIntent)).moveTo(removeFilterState)
+                .when(intentIs(Intents.customTextualFilterIntent)).moveTo(removeFilterState)
+                .when(intentIs(coreLibraryI18n.Quit)).moveTo(returnState);
+
+        removeFilterState
+                .body(context -> {
+                    String field = (String) context.getIntent().getValue(ContextKeys.FIELD);
+                    String operator = (String) context.getIntent().getValue(ContextKeys.OPERATOR);
+                    String value = (String) context.getIntent().getValue(ContextKeys.VALUE);
+                    if (!isEmpty(field) && !isEmpty(operator) && !isEmpty(value)) {
+                        Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
+                        statement.removeFilter(field, operator, value);
+                        ResultSet resultSet = statement.executeQuery();
+                        context.getSession().put(ContextKeys.RESULT_SET, resultSet);
+                        reactPlatform.reply(context, MessageFormat.format(messages.getString("FilterRemoved"),
+                                field, operator, value, resultSet.getNumRows()));
+                    } else {
+                        reactPlatform.reply(context, messages.getString("SomethingWentWrong"));
+                    }
+                })
+                .next()
+                .moveTo(returnState);
+
+        this.selectFilterToRemoveState = selectFilterToRemoveState.getState();
     }
 }

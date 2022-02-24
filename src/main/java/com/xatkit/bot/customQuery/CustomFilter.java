@@ -1,5 +1,6 @@
 package com.xatkit.bot.customQuery;
 
+import bodi.generator.dataSource.ResultSet;
 import bodi.generator.dataSource.Statement;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Intents;
@@ -53,8 +54,10 @@ public class CustomFilter {
                     if (!isEmpty(field) && !isEmpty(operator) && !isEmpty(value)) {
                         Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
                         statement.addFilter(field, operator, value);
+                        ResultSet resultSet = statement.executeQuery();
+                        context.getSession().put(ContextKeys.RESULT_SET, resultSet);
                         reactPlatform.reply(context, MessageFormat.format(messages.getString("FilterAdded"),
-                                field, operator, value));
+                                field, operator, value, resultSet.getNumRows()));
                     } else {
                         reactPlatform.reply(context, messages.getString("SomethingWentWrong"));
                     }

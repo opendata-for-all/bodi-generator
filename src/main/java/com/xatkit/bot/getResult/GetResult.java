@@ -83,8 +83,7 @@ public class GetResult {
 
         generateResultSet
                 .body(context -> {
-                    Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
-                    resultSet = statement.executeQuery();
+                    resultSet = (ResultSet) context.getSession().get(ContextKeys.RESULT_SET);
                 })
                 .next()
                 .moveTo(showDataState);

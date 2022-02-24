@@ -15,6 +15,10 @@ public final class ContextKeys {
      */
     public static final String TABULAR_DATA_SOURCE = "TABULAR_DATA_SOURCE";
     /**
+     * The constant RESULT_SET.
+     */
+    public static final String RESULT_SET = "RESULT_SET";
+    /**
      * The constant STATEMENT.
      */
     public static final String STATEMENT = "STATEMENT";

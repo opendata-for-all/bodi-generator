@@ -110,8 +110,18 @@ public class Statement {
         return this;
     }
 
-    // TODO: removeFilter Method
-    // TODO: removeField Method
+    /**
+     * Remove a filter in {@link #filters}.
+     *
+     * @param field    the filter's field
+     * @param operator the filter's operator
+     * @param value    the filter's value
+     * @return the statement
+     */
+    public Statement removeFilter(String field, String operator, String value) {
+        filters.remove(new ImmutableTriple<>(field, operator, value));
+        return this;
+    }
 
     /**
      * Add a new field to {@link #fields}.
@@ -123,6 +133,17 @@ public class Statement {
         if (!fields.contains(field)) {
             fields.add(field);
         }
+        return this;
+    }
+
+    /**
+     * Remove a field in {@link #fields}.
+     *
+     * @param field the field
+     * @return the statement
+     */
+    public Statement removeField(String field) {
+        fields.remove(field);
         return this;
     }
 
@@ -267,11 +288,25 @@ public class Statement {
     }
 
     /**
+     * Gets the collection of filters as Strings.
+     *
+     * @return the fields as strings
+     * @see #fields
+     */
+    public List<String> getFiltersAsStrings() {
+        List<String> stringFilters = new ArrayList<>();
+        for (ImmutableTriple<String, String, String> f : filters) {
+            stringFilters.add(f.left + " " + f.middle + " " + f.right);
+        }
+        return stringFilters;
+    }
+
+    /**
      * Gets the collection of filters as SQL conditions.
      * <p>
      * This is useful to add the statement filters as conditions in the WHERE clause of a SQL statement.
      *
-     * @return the fields as sql variables
+     * @return the filters as sql conditions
      * @see #fields
      */
     public List<String> getFiltersAsSqlConditions() {
