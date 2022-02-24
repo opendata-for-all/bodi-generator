@@ -3,7 +3,6 @@ package com.xatkit.bot.structuredQuery;
 import bodi.generator.dataSource.Statement;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Intents;
-import com.xatkit.dsl.state.StateProvider;
 import com.xatkit.execution.State;
 import com.xatkit.plugins.react.platform.ReactPlatform;
 import lombok.Getter;
@@ -36,7 +35,7 @@ public class SelectViewField {
      * @param reactPlatform the react platform of a chatbot
      * @param returnState   the state where the chatbot ends up arriving once the workflow is finished
      */
-    public SelectViewField(ReactPlatform reactPlatform, StateProvider returnState) {
+    public SelectViewField(ReactPlatform reactPlatform, State returnState) {
         val selectViewFieldState = state("SelectViewField");
         val saveViewFieldState = state("SaveViewField");
 

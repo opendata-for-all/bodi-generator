@@ -1,14 +1,16 @@
 package com.xatkit.bot;
 
 import bodi.generator.dataSource.TabularDataSource;
+import com.xatkit.bot.customQuery.CustomFilter;
 import com.xatkit.bot.customQuery.CustomQuery;
+import com.xatkit.bot.getResult.GetResult;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Entities;
 import com.xatkit.bot.library.Intents;
 import com.xatkit.bot.library.Utils;
-import com.xatkit.bot.getResult.GetResult;
 import com.xatkit.bot.structuredQuery.SelectViewField;
 import com.xatkit.bot.structuredQuery.StructuredFilter;
+import com.xatkit.bot.structuredQuery.StructuredQuery;
 import com.xatkit.core.XatkitBot;
 import com.xatkit.plugins.core.library.CoreLibraryI18n;
 import com.xatkit.plugins.react.platform.ReactPlatform;
@@ -31,6 +33,7 @@ import static com.xatkit.dsl.DSL.fallbackState;
 import static com.xatkit.dsl.DSL.intentIs;
 import static com.xatkit.dsl.DSL.model;
 import static com.xatkit.dsl.DSL.state;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * The entry point of the application.
@@ -88,6 +91,36 @@ public final class Bot {
     public static CoreLibraryI18n coreLibraryI18n;
 
     /**
+     * The Get Result workflow.
+     */
+    public static GetResult getResult;
+
+    /**
+     * The Structured Filter workflow.
+     */
+    public static StructuredFilter structuredFilter;
+
+    /**
+     * The Select View Field workflow.
+     */
+    public static SelectViewField selectViewField;
+
+    /**
+     * The Custom Filter workflow.
+     */
+    public static CustomFilter customFilter;
+
+    /**
+     * The Structured Query workflow.
+     */
+    public static StructuredQuery structuredQuery;
+
+    /**
+     * The Custom Query workflow.
+     */
+    public static CustomQuery customQuery;
+
+    /**
      * The entry point of application.
      *
      * @param args the input arguments
@@ -114,6 +147,8 @@ public final class Bot {
         inputDoc = botConfiguration.getString("xls.importer.xls");
         coreLibraryI18n = new CoreLibraryI18n(locale);
         char delimiter = botConfiguration.getString("csv.delimiter").charAt(0);
+        String odataTitle = botConfiguration.getString("bot.odata.title." + language, null);
+        String odataUrl = botConfiguration.getString("bot.odata.url." + language, null);
 
         /*
          * Instantiate the platform and providers we will use in the bot definition.
@@ -129,10 +164,15 @@ public final class Bot {
         val awaitingInput = state("AwaitingInput");
         val startState = state("Start");
 
-        StructuredFilter structuredFilter = new StructuredFilter(reactPlatform, startState);
-        GetResult getResult = new GetResult(reactPlatform, startState);
-        SelectViewField selectViewField = new SelectViewField(reactPlatform, startState);
-        CustomQuery customQuery = new CustomQuery(reactPlatform, startState, getResult);
+        /*
+         * Initialize the chatbot workflows.
+         */
+        getResult = new GetResult(reactPlatform, startState.getState());
+        structuredFilter = new StructuredFilter(reactPlatform, startState.getState());
+        selectViewField = new SelectViewField(reactPlatform, startState.getState());
+        customFilter = new CustomFilter(reactPlatform, startState.getState());
+        structuredQuery = new StructuredQuery(reactPlatform, startState.getState());
+        customQuery = new CustomQuery(reactPlatform, startState.getState());
 
         /*
          * Specify the content of the bot states (i.e. the behavior of the bot).
@@ -160,26 +200,27 @@ public final class Bot {
                     context.getSession().put(ContextKeys.FILTER_FIELD_OPTIONS, filterFieldOptions);
                     List<String> viewFieldOptions = new ArrayList<>(fields);
                     context.getSession().put(ContextKeys.VIEW_FIELD_OPTIONS, viewFieldOptions);
-                    reactPlatform.reply(context, messages.getString("DataStructuresInitialized"));
+                    reactPlatform.reply(context, messages.getString("Greetings"));
+                    if (!isEmpty(odataTitle) && !isEmpty(odataUrl)) {
+                        reactPlatform.reply(context, "[" + odataTitle + "](" + odataUrl + ")");
+                    }  else if (!isEmpty(odataTitle)) {
+                        reactPlatform.reply(context, odataTitle);
+                    } else if (!isEmpty(odataUrl)) {
+                        reactPlatform.reply(context, "[" + odataUrl + "](" + odataUrl + ")");
+                    }
                 })
                 .next()
                 .moveTo(startState);
         startState
                 .body(context -> {
-                    reactPlatform.reply(context, messages.getString("SelectOperation"),
+                    reactPlatform.reply(context, messages.getString("SelectAction"),
                             Utils.getFirstTrainingSentences(
-                                    Intents.addFilterIntent,
-                                    Intents.addFieldToViewIntent,
-                                    Intents.showDataIntent,
-                                    Intents.customQueryIntent,
-                                    Intents.restartIntent));
+                                    Intents.structuredQueryIntent,
+                                    Intents.customQueryIntent));
                 })
                 .next()
-                .when(intentIs(Intents.addFilterIntent)).moveTo(structuredFilter.getSelectFieldState())
-                .when(intentIs(Intents.addFieldToViewIntent)).moveTo(selectViewField.getSelectViewFieldState())
-                .when(intentIs(Intents.showDataIntent)).moveTo(getResult.getGenerateResultSet())
-                .when(intentIs(Intents.customQueryIntent)).moveTo(customQuery.getAwaitingCustomQueryState())
-                .when(intentIs(Intents.restartIntent)).moveTo(awaitingInput);
+                .when(intentIs(Intents.structuredQueryIntent)).moveTo(structuredQuery.getAwaitingStructuredQueryState())
+                .when(intentIs(Intents.customQueryIntent)).moveTo(customQuery.getAwaitingCustomQueryState());
 
         /*
          * The state that is executed if the engine doesn't find any navigable transition in a state and the state

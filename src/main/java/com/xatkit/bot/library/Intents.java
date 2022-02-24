@@ -53,10 +53,22 @@ public final class Intents {
             .trainingSentences(BUNDLE.getStringArray("AddFieldToView"))
             .getIntentDefinition();
     /**
+     * The intent structuredQueryIntent.
+     */
+    public static final IntentDefinition structuredQueryIntent = intent("StructuredQuery")
+            .trainingSentences(BUNDLE.getStringArray("StructuredQuery"))
+            .getIntentDefinition();
+    /**
      * The intent customQueryIntent.
      */
     public static final IntentDefinition customQueryIntent = intent("CustomQuery")
             .trainingSentences(BUNDLE.getStringArray("CustomQuery"))
+            .getIntentDefinition();
+    /**
+     * The intent anotherQueryIntent.
+     */
+    public static final IntentDefinition anotherQueryIntent = intent("AnotherQuery")
+            .trainingSentences(BUNDLE.getStringArray("AnotherQuery"))
             .getIntentDefinition();
     /**
      * The intent customNumericFilterIntent.

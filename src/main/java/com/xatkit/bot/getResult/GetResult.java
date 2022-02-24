@@ -2,11 +2,10 @@ package com.xatkit.bot.getResult;
 
 import bodi.generator.dataSource.ResultSet;
 import bodi.generator.dataSource.Statement;
-import com.xatkit.bot.nlp.NLPServerClient;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Intents;
 import com.xatkit.bot.library.Utils;
-import com.xatkit.dsl.state.StateProvider;
+import com.xatkit.bot.nlp.NLPServerClient;
 import com.xatkit.execution.State;
 import com.xatkit.plugins.react.platform.ReactPlatform;
 import lombok.Getter;
@@ -77,7 +76,7 @@ public class GetResult {
      * @param reactPlatform the react platform of a chatbot
      * @param returnState   the state where the chatbot ends up arriving once the workflow is finished
      */
-    public GetResult(ReactPlatform reactPlatform, StateProvider returnState) {
+    public GetResult(ReactPlatform reactPlatform, State returnState) {
         val generateResultSet = state("GenerateResultSet");
         val generateResultSetFromQuery = state("GenerateResultSetFromQuery");
         val showDataState = state("ShowData");

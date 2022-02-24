@@ -5,7 +5,6 @@ import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Entities;
 import com.xatkit.bot.library.Intents;
 import com.xatkit.bot.library.Utils;
-import com.xatkit.dsl.state.StateProvider;
 import com.xatkit.execution.State;
 import com.xatkit.plugins.react.platform.ReactPlatform;
 import lombok.Getter;
@@ -46,7 +45,7 @@ public class StructuredFilter {
      * @param reactPlatform the react platform of a chatbot
      * @param returnState   the state where the chatbot ends up arriving once the workflow is finished
      */
-    public StructuredFilter(ReactPlatform reactPlatform, StateProvider returnState) {
+    public StructuredFilter(ReactPlatform reactPlatform, State returnState) {
         val selectFieldState = state("SelectField");
         val saveFieldState = state("SaveField");
 

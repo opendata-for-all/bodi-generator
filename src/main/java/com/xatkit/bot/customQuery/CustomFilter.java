@@ -2,7 +2,8 @@ package com.xatkit.bot.customQuery;
 
 import bodi.generator.dataSource.Statement;
 import com.xatkit.bot.library.ContextKeys;
-import com.xatkit.dsl.state.StateProvider;
+import com.xatkit.bot.library.Intents;
+import com.xatkit.bot.library.Utils;
 import com.xatkit.execution.State;
 import com.xatkit.plugins.react.platform.ReactPlatform;
 import lombok.Getter;
@@ -10,7 +11,10 @@ import lombok.val;
 
 import java.text.MessageFormat;
 
+import static com.xatkit.bot.Bot.coreLibraryI18n;
+import static com.xatkit.bot.Bot.getResult;
 import static com.xatkit.bot.Bot.messages;
+import static com.xatkit.dsl.DSL.intentIs;
 import static com.xatkit.dsl.DSL.state;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -37,8 +41,9 @@ public class CustomFilter {
      * @param reactPlatform the react platform of a chatbot
      * @param returnState   the state where the chatbot ends up arriving once the workflow is finished
      */
-    public CustomFilter(ReactPlatform reactPlatform, StateProvider returnState) {
+    public CustomFilter(ReactPlatform reactPlatform, State returnState) {
         val saveFilterState = state("SaveFilter");
+        val selectNextActionState = state("SelectNextAction");
 
         saveFilterState
                 .body(context -> {
@@ -55,7 +60,20 @@ public class CustomFilter {
                     }
                 })
                 .next()
-                .moveTo(returnState);
+                .moveTo(selectNextActionState);
+
+        selectNextActionState
+                .body(context -> {
+                    reactPlatform.reply(context, messages.getString("SelectNextAction"),
+                            Utils.getFirstTrainingSentences(
+                                    Intents.anotherQueryIntent,
+                                    Intents.showDataIntent,
+                                    coreLibraryI18n.Quit));
+                })
+                .next()
+                .when(intentIs(Intents.anotherQueryIntent)).moveTo(returnState)
+                .when(intentIs(Intents.showDataIntent)).moveTo(getResult.getGenerateResultSet())
+                .when(intentIs(coreLibraryI18n.Quit)).moveTo(returnState);
 
         this.saveFilterState = saveFilterState.getState();
     }

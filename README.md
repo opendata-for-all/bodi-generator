@@ -57,6 +57,8 @@ set in [bot.properties](src/main/resources/bot.properties)
 | `bot.language`           | The language of the bot (users must talk to the chatbot in this language, and it also replies in this language). Available languages: **Spanish** (`es`),  **Catalan** (`ca`), **English** (`en`) |
 | `xatkit.nlpjs.*`         | All the properties related to [NLP.js](https://github.com/xatkit-bot-platform/xatkit/wiki/Using-NLP.js) engine                                                                                    |
 | `xatkit.dialogflow.*`    | All the properties related to [DialogFlow](https://github.com/xatkit-bot-platform/xatkit/wiki/Integrating-DialogFlow) engine                                                                      |
+| `bot.odata.title.*`      | (Optional) The title of the open data resource used by the bot, in different languages (e.g. `bot.odata.title.es`). The bot will read the one matching with `bot.language`                        |
+| `bot.odata.url.*`        | (Optional) The url of the open data resource used by the bot, in different languages (e.g. `bot.odata.url.es`). The bot will read the one matching with `bot.language`                            |
 
 > 📚 It is highly recommended to use an NLP engine supported in Xatkit (DialogFlow or NLP.js). Do not include 
 > properties for both NLP engines.

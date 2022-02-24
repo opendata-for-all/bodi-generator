@@ -1,14 +1,15 @@
 package com.xatkit.bot.customQuery;
 
-import com.xatkit.bot.library.Intents;
 import com.xatkit.bot.getResult.GetResult;
-import com.xatkit.dsl.state.StateProvider;
+import com.xatkit.bot.library.Intents;
 import com.xatkit.execution.State;
 import com.xatkit.plugins.react.platform.ReactPlatform;
 import lombok.Getter;
 import lombok.val;
 
 import static com.xatkit.bot.Bot.coreLibraryI18n;
+import static com.xatkit.bot.Bot.customFilter;
+import static com.xatkit.bot.Bot.getResult;
 import static com.xatkit.bot.Bot.messages;
 import static com.xatkit.dsl.DSL.intentIs;
 import static com.xatkit.dsl.DSL.state;
@@ -37,9 +38,7 @@ public class CustomQuery {
      * @param reactPlatform the react platform of a chatbot
      * @param returnState   the state where the chatbot ends up arriving once the workflow is finished
      */
-    public CustomQuery(ReactPlatform reactPlatform, StateProvider returnState, GetResult getResult) {
-        CustomFilter customFilter = new CustomFilter(reactPlatform, returnState);
-
+    public CustomQuery(ReactPlatform reactPlatform, State returnState) {
         val awaitingCustomQueryState = state("AwaitingCustomQuery");
 
         awaitingCustomQueryState
@@ -50,6 +49,7 @@ public class CustomQuery {
                 .when(intentIs(Intents.customNumericFilterIntent)).moveTo(customFilter.getSaveFilterState())
                 .when(intentIs(Intents.customDateFilterIntent)).moveTo(customFilter.getSaveFilterState())
                 .when(intentIs(Intents.customTextualFilterIntent)).moveTo(customFilter.getSaveFilterState())
+                .when(intentIs(Intents.showDataIntent)).moveTo(getResult.getGenerateResultSet())
                 .when(intentIs(coreLibraryI18n.Quit)).moveTo(returnState)
                 .when(intentIs(coreLibraryI18n.AnyValue)).moveTo(getResult.getGenerateResultSetFromQuery());
 
