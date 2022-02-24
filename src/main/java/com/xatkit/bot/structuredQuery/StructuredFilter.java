@@ -24,10 +24,20 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 /**
  * The Structured Filter workflow of a chatbot.
  * <p>
- * It recognizes a filter query and processes the given filter, storing it in the chatbot memory.
- * <p>
- * This process is done in steps. First, the user inputs the field that wants to be filtered. Second, he/she inputs
- * the operator of the filter. Finally, he/she inputs the value of the filter operation.
+ * These are the different entry points in this workflow:
+ * <ul>
+ *     <li>
+ *         {@link #selectFieldState} It recognizes a filter query and processes the given filter, storing it in the
+ *         chatbot memory.
+ *         <p>
+ *         This process is done in steps. First, the user inputs the field that wants to be filtered. Second, he/she
+ *         inputs the operator of the filter. Finally, he/she inputs the value of the filter operation.
+ *     </li>
+ *
+ *     <li>
+ *         {@link #selectFilterToRemoveState} It allows the user to select a currently applied filter to remove it.
+ *     </li>
+ * </ul>
  * <p>
  * This workflow is helpful in cases where there is no knowledge about, for instance, the data type of some field,
  * the available operators for some data type or the field names.
@@ -35,11 +45,14 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 public class StructuredFilter {
 
     /**
-     * The entry point for the Structured Filter workflow.
+     * The entry point to apply a filter.
      */
     @Getter
     private final State selectFieldState;
 
+    /**
+     * The entry point to remove a (previously applied) filter.
+     */
     @Getter
     private final State selectFilterToRemoveState;
 
