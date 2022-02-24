@@ -127,11 +127,16 @@ public class GetResult {
                         int selectedEntries = (offset + pageLimit > totalEntries ? totalEntries - offset : pageLimit);
                         reactPlatform.reply(context, MessageFormat.format(
                                 messages.getString("ShowingRecords"), selectedEntries, totalEntries));
-                        reactPlatform.reply(context, MessageFormat.format(
-                                messages.getString("PageCount"), pageCount, totalPages));
-                        reactPlatform.reply(context, resultSetString, Utils.getFirstTrainingSentences(
-                                Intents.showNextPageIntent,
-                                coreLibraryI18n.Quit));
+                        if (totalPages > 1) {
+                            reactPlatform.reply(context, MessageFormat.format(
+                                    messages.getString("PageCount"), pageCount, totalPages));
+                            reactPlatform.reply(context, resultSetString, Utils.getFirstTrainingSentences(
+                                    Intents.showNextPageIntent,
+                                    coreLibraryI18n.Quit));
+                        } else {
+                            reactPlatform.reply(context, resultSetString, Utils.getFirstTrainingSentences(
+                                    coreLibraryI18n.Quit));
+                        }
                     } else {
                         reactPlatform.reply(context, messages.getString("NothingFound"),
                                 Utils.getFirstTrainingSentences(coreLibraryI18n.Quit));
