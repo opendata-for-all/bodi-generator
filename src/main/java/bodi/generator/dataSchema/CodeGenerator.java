@@ -73,6 +73,11 @@ public final class CodeGenerator {
                             <artifactId>core-library-i18n</artifactId>
                             <version>0.0.1-SNAPSHOT</version>
                         </dependency>
+                        <dependency>
+                            <groupId>com.xatkit</groupId>
+                            <artifactId>xatkit-dialogflow</artifactId>
+                            <version>0.0.1-SNAPSHOT</version>
+                        </dependency>
                         <!-- Utils -->
                         <dependency>
                             <groupId>org.projectlombok</groupId>

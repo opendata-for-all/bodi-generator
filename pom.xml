@@ -48,6 +48,14 @@
         </dependency>
 
         <dependency>
+            <groupId>com.xatkit</groupId>
+            <artifactId>xatkit-dialogflow</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+        <!-- Utilities -->
+
+        <dependency>
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
             <version>5.5.2</version>
