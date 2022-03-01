@@ -17,13 +17,13 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -37,7 +37,6 @@ import static bodi.generator.dataSchema.DataType.NUMBER;
 import static bodi.generator.dataSchema.DataType.TEXT;
 import static com.xatkit.bot.library.Utils.isDate;
 import static com.xatkit.bot.library.Utils.isNumeric;
-
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
@@ -71,12 +70,12 @@ public final class BodiGenerator {
     }
 
     /**
-     * Loads the bot configuration properties from a given properties file.
+     * Loads the bodi-generator configuration properties from a given properties file.
      *
      * @param fileName the properties file name
      * @return the configuration
      */
-    private static Configuration loadBotConfProperties(String fileName) {
+    private static Configuration loadBodiConfigurationProperties(String fileName) {
         Configurations configurations = new Configurations();
         Configuration botConfiguration = new BaseConfiguration();
         try {
@@ -122,6 +121,7 @@ public final class BodiGenerator {
         JSONObject fieldsJson = new JSONObject(new JSONTokener(is));
         DataSchema ds = new DataSchema();
         SchemaType schemaType = new SchemaType("mainSchemaType");
+        // TODO: Test dataType inference
         for (String fieldName : tds.getHeaderCopy()) {
             Set<String> fieldValuesSet = new HashSet<>();
             Map<DataType, Boolean> dataTypes = new HashMap<>();
@@ -185,29 +185,22 @@ public final class BodiGenerator {
     }
 
     /**
-     * The entry point of application.
+     * Creates the bot files.
      *
-     * @param args the input arguments
+     * @param conf the bodi-generator configuration properties
+     * @param ds   the Data Schema
      */
-    public static void main(String[] args) {
-        // Load bot properties
-        Configuration conf = loadBotConfProperties("bot.properties");
-        String inputDocName = conf.getString("xls.importer.xls");
+    private static void createBot(Configuration conf, DataSchema ds) {
         String botName = conf.getString("xls.generator.bot.name");
+        String inputDocName = conf.getString("xls.importer.xls");
         String outputFolder = conf.getString("xls.generator.output");
-        char delimiter = conf.getString("csv.delimiter").charAt(0);
-
-        TabularDataSource tds = createTabularDataSource(inputDocName, delimiter);
-        DataSchema ds = tabularDataSourceToDataSchema(tds, "fields.json");
-        BotProperties bp = dataSchemaToBotProperties(ds, botName, inputDocName);
-
         System.out.println("Attempting to create the bot " + botName + " in " + outputFolder);
         try {
             File outputFolderFile = new File(outputFolder);
             deleteFolder(outputFolderFile);
         } catch (NullPointerException e) {
-            System.out.println("Error deleting the existing content of the " + outputFolder
-                    + " folder. Maybe it does not exist?");
+            System.out.println("Error deleting the existing content of the " + outputFolder + " folder. Maybe it does"
+                    + " not exist?");
         }
         System.out.println("Creating the project structure");
         try {
@@ -221,11 +214,6 @@ public final class BodiGenerator {
             Path pomFile = Files.createFile(Paths.get(outputFolder + "/pom.xml"));
             Files.write(pomFile, CodeGenerator.generatePomFile(botName).getBytes());
 
-            System.out.println("Creating the bot configuration file");
-            File botConfSource = new File("src/main/resources/bot.properties");
-            File botConfDest = new File(outputFolder + "/src/main/resources/bot.properties");
-            FileUtils.copyFile(botConfSource, botConfDest);
-
             System.out.println("Copying the bodi.generator.dataSource package");
             File dsSource = new File("src/main/java/bodi/generator/dataSource/");
             File dsDest = new File(outputFolder + "/src/main/java/bodi/generator/dataSource/");
@@ -236,7 +224,10 @@ public final class BodiGenerator {
             File botDest = new File(outputFolder + "/src/main/java/com/xatkit/bot/");
             FileUtils.copyDirectory(botSource, botDest);
 
-            // TODO: Simplify: copy all resources folder??? (is there anything that must not be copied?)
+            System.out.println("Creating csv");
+            File csvSource = new File("src/main/resources/" + inputDocName);
+            File csvDest = new File(outputFolder + "/src/main/resources/" + inputDocName);
+            FileUtils.copyFile(csvSource, csvDest);
 
             System.out.println("Creating resource fields.json");
             Path entitiesFile = Paths.get(outputFolder + "/src/main/resources/fields.json");
@@ -276,18 +267,78 @@ public final class BodiGenerator {
             File messagesEsSource = new File("src/main/resources/messages_es.properties");
             File messagesEsDest = new File(outputFolder + "/src/main/resources/messages_es.properties");
             FileUtils.copyFile(messagesEsSource, messagesEsDest);
+
+            createBotPropertiesFile(conf);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        // Create new csv with deleted columns (if any)
-        System.out.println("Creating the new " + inputDocName + " with deleted columns (if any)");
-        try (PrintWriter out = new PrintWriter(outputFolder + "/src/main/resources/" + inputDocName)) {
-            out.println(String.join(String.valueOf(delimiter), tds.getHeaderCopy()));
-            for (int i = 0; i < tds.getNumRows(); ++i) {
-                out.println(String.join(String.valueOf(delimiter), tds.getRow(i).getValues()));
+    }
+
+    /**
+     * Creates the default {@code bot.properties} configuration file of the generated bot.
+     *
+     * @param conf the bodi-generator configuration properties
+     */
+    private static void createBotPropertiesFile(Configuration conf) {
+        String outputFolder = conf.getString("xls.generator.output");
+        try {
+            FileWriter fw = new FileWriter(outputFolder + "/src/main/resources/bot.properties");
+
+            fw.write("# Bot\n\n");
+            fw.write("xls.importer.xls" + " = " + conf.getString("xls.importer.xls") + "\n");
+            fw.write("csv.delimiter" + " = " + conf.getString("csv.delimiter") + "\n");
+            fw.write("xatkit.server.port" + " = " + "5000" + "\n");
+            fw.write("xatkit.recognition.enable_monitoring" + " = " + "true" + "\n");
+            fw.write("bot.language" + " = " + "en" + "\n");
+
+            fw.write("\n# Intent provider\n\n");
+            if (conf.getString("xatkit.intent.provider")
+                    .equals("com.xatkit.core.recognition.dialogflow.DialogFlowIntentRecognitionProvider")) {
+                fw.write("xatkit.intent.provider" + " = " + conf.getString("xatkit.intent.provider") + "\n");
+                fw.write("xatkit.dialogflow.projectId" + " = " + "your-project-id" + "\n");
+                fw.write("xatkit.dialogflow.credentials.path" + " = " + "path-to-your-credentials-file" + "\n");
+                fw.write("xatkit.dialogflow.language" + " = " + "en" + "\n");
+                fw.write("xatkit.dialogflow.clean_on_startup" + " = " + "true" + "\n");
+            } else if (conf.getString("xatkit.intent.provider")
+                    .equals("com.xatkit.core.recognition.nlpjs.NlpjsIntentRecognitionProvider")) {
+                fw.write("xatkit.intent.provider" + " = " + conf.getString("xatkit.intent.provider") + "\n");
+                fw.write("xatkit.nlpjs.agentId" + " = " + "default" + "\n");
+                fw.write("xatkit.nlpjs.language" + " = " + "en" + "\n");
+                fw.write("xatkit.nlpjs.server" + " = " + "http://localhost:8080" + "\n");
+
             }
-        } catch (FileNotFoundException e) {
+
+            fw.write("\n# NLP Server properties\n\n");
+            fw.write("SERVER_URL" + " = " + "127.0.0.1:5001" + "\n");
+            fw.write("TEXT_TO_TABLE_ENDPOINT" + " = " + "text-to-table" + "\n");
+
+            fw.write("\n# Open data resource information\n\n");
+            fw.write("bot.odata.title.en" + " = " + "title-in-english" + "\n");
+            fw.write("bot.odata.title.ca" + " = " + "title-in-catalan" + "\n");
+            fw.write("bot.odata.title.es" + " = " + "title-in-spanish" + "\n");
+            fw.write("bot.odata.url.en" + " = " + "url-english-source" + "\n");
+            fw.write("bot.odata.url.ca" + " = " + "url-catalan-source" + "\n");
+            fw.write("bot.odata.url.es" + " = " + "url-spanish-source" + "\n");
+            fw.close();
+        } catch (IOException e) {
             e.printStackTrace();
         }
+        System.out.println("bot.properties file created");
+    }
+
+    /**
+     * The entry point of application.
+     *
+     * @param args the input arguments
+     */
+    public static void main(String[] args) {
+        // Load bot properties
+        Configuration conf = loadBodiConfigurationProperties("bodi-generator.properties");
+        String inputDocName = conf.getString("xls.importer.xls");
+        char delimiter = conf.getString("csv.delimiter").charAt(0);
+
+        TabularDataSource tds = createTabularDataSource(inputDocName, delimiter);
+        DataSchema ds = tabularDataSourceToDataSchema(tds, "fields.json");
+        createBot(conf, ds);
     }
 }
