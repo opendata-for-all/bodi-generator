@@ -47,12 +47,6 @@
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.xatkit</groupId>
-            <artifactId>xatkit-dialogflow</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-
         <!-- Utilities -->
 
         <dependency>
@@ -70,12 +64,6 @@
             <artifactId>junit-jupiter</artifactId>
             <version>RELEASE</version>
             <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>net.sourceforge.csvjdbc</groupId>
-            <artifactId>csvjdbc</artifactId>
-            <version>1.0.37</version>
         </dependency>
 
         <dependency>
