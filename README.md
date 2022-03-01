@@ -13,8 +13,8 @@ development platform.
 
 2 - Clone this repository
 
-3 - Edit the [bot.properties](src/main/resources/bot.properties) file according to your purposes (see [Bot 
-Configuration](#bot-configuration))
+3 - Edit the [bodi-generator.properties](src/main/resources/bodi-generator.properties) file according to your purposes 
+(see [Bot Configuration](#bot-configuration))
 
 4 - Navigate to the root directory and build the project:
 
@@ -44,23 +44,36 @@ mvn exec:java -Dexec.mainClass="com.xatkit.bot.Bot"
 
 ## Bot Configuration
 
+### bodi-generator.properties
+
 You can customize your generated chatbots according to your objectives. Here are described the properties you can 
-set in [bot.properties](src/main/resources/bot.properties)
+set in [bodi-generator.properties](src/main/resources/bodi-generator.properties)
 
-| Name                     | Description                                                                                                                                                                                       |
-|--------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `xls.generator.bot.name` | The name of the generated chatbot                                                                                                                                                                 |
-| `xls.generator.output`   | The path where the chatbot will be stored                                                                                                                                                         |
-| `xls.importer.xls`       | The name of the tabular data file the chatbot will have access to, stored in the [resources](src/main/resources) folder (currently only `csv` files are supported)                                |
-| `csv.delimiter`          | The delimiter or separator of the tabular data file cells (e.g. `,`, `\t` (tab))                                                                                                                  |
-| `xatkit.server.port`     | The port where the chatbot will be running                                                                                                                                                        |
-| `bot.language`           | The language of the bot (users must talk to the chatbot in this language, and it also replies in this language). Available languages: **Spanish** (`es`),  **Catalan** (`ca`), **English** (`en`) |
-| `xatkit.nlpjs.*`         | All the properties related to [NLP.js](https://github.com/xatkit-bot-platform/xatkit/wiki/Using-NLP.js) engine                                                                                    |
-| `xatkit.dialogflow.*`    | All the properties related to [DialogFlow](https://github.com/xatkit-bot-platform/xatkit/wiki/Integrating-DialogFlow) engine                                                                      |
-| `bot.odata.title.*`      | (Optional) The title of the open data resource used by the bot, in different languages (e.g. `bot.odata.title.es`). The bot will read the one matching with `bot.language`                        |
-| `bot.odata.url.*`        | (Optional) The url of the open data resource used by the bot, in different languages (e.g. `bot.odata.url.es`). The bot will read the one matching with `bot.language`                            |
+| Name                     | Description                                                                                                                                                                                                                                                                  |
+|--------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `xls.generator.bot.name` | The name of the generated chatbot                                                                                                                                                                                                                                            |
+| `xls.generator.output`   | The path where the chatbot will be stored                                                                                                                                                                                                                                    |
+| `xls.importer.xls`       | The name of the tabular data file the chatbot will have access to, stored in the [resources](src/main/resources) folder (currently only `csv` files are supported)                                                                                                           |
+| `csv.delimiter`          | The delimiter or separator of the tabular data file cells (e.g. `,`, `\t` (tab))                                                                                                                                                                                             |
+| `xatkit.intent.provider` | The intent provider the generated chatbot will use. The currently available intent providers are: Dialogflow (`com.xatkit.core.recognition.dialogflow.DialogFlowIntentRecognitionProvider`) and  NLP.js (`com.xatkit.core.recognition.nlpjs.NlpjsIntentRecognitionProvider`) |
 
-> 📚 It is highly recommended to use an NLP engine supported in Xatkit (DialogFlow or NLP.js). Do not include 
+### bot.properties
+
+Once the chatbot is generated, it will contain a file named `src/main/resources/bot.properties`, containing some 
+duplicated properties from [bodi-generator.properties](src/main/resources/bodi-generator.properties) and also new 
+properties. These will contain default values, so they should be set according to the chatbot purpose.
+
+| Name                                   | Description                                                                                                                                                                                       |
+|----------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `xatkit.server.port`                   | The port where the chatbot will be running                                                                                                                                                        |
+| `xatkit.recognition.enable_monitoring` | If `true`, enables chatbot monitoring, if `false`, not                                                                                                                                            |
+| `bot.language`                         | The language of the bot (users must talk to the chatbot in this language, and it also replies in this language). Available languages: **Spanish** (`es`),  **Catalan** (`ca`), **English** (`en`) |
+| `xatkit.nlpjs.*`                       | All the properties related to [NLP.js](https://github.com/xatkit-bot-platform/xatkit/wiki/Using-NLP.js) engine (if used)                                                                          |
+| `xatkit.dialogflow.*`                  | All the properties related to [DialogFlow](https://github.com/xatkit-bot-platform/xatkit/wiki/Integrating-DialogFlow) engine (if used)                                                            |
+| `bot.odata.title.*`                    | (Optional) The title of the open data resource used by the bot, in different languages (e.g. `bot.odata.title.es`). The bot will read the one matching with `bot.language`                        |
+| `bot.odata.url.*`                      | (Optional) The url of the open data resource used by the bot, in different languages (e.g. `bot.odata.url.es`). The bot will read the one matching with `bot.language`                            |
+
+> 📚 It is highly recommended using an NLP engine supported in Xatkit (DialogFlow or NLP.js). Do not include 
 > properties for both NLP engines.
 
 There are a lot of other properties you can add to your bot, check them out [here](https://github.com/xatkit-bot-platform/xatkit/wiki/Xatkit-Options).
@@ -73,7 +86,7 @@ deployed and then, when no intent is matched, a request to this server is sent a
 solution is implemented in [opendata-for-all/bodi-nlp-server](https://github.com/opendata-for-all/bodi-nlp-server).
 
 Here are described the properties you can
-set in [bot.properties](src/main/resources/bot.properties) related to the NLP Server:
+set in `bot.properties` related to the NLP Server:
 
 | Name                     | Description                                                               |
 |--------------------------|---------------------------------------------------------------------------|
