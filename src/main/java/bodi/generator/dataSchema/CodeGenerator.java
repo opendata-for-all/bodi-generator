@@ -45,7 +45,6 @@ public final class CodeGenerator {
                         <mockito.version>3.3.3</mockito.version>
                         <lombok.version>LATEST</lombok.version>
                         <opencsv.version>5.5.2</opencsv.version>
-                        <csvjdbc.version>1.0.37</csvjdbc.version>
                     </properties>
                     <dependencies>
                         <dependency>
@@ -78,6 +77,11 @@ public final class CodeGenerator {
                             <artifactId>xatkit-dialogflow</artifactId>
                             <version>0.0.1-SNAPSHOT</version>
                         </dependency>
+                        <dependency>
+                            <groupId>com.xatkit</groupId>
+                            <artifactId>xatkit-nlpjs</artifactId>
+                            <version>0.0.1-SNAPSHOT</version>
+                        </dependency>
                         <!-- Utils -->
                         <dependency>
                             <groupId>org.projectlombok</groupId>
@@ -95,10 +99,6 @@ public final class CodeGenerator {
                         <dependency>
                             <groupId>org.mockito</groupId>
                             <artifactId>mockito-core</artifactId>
-                        </dependency>
-                        <dependency>
-                            <groupId>net.sourceforge.csvjdbc</groupId>
-                            <artifactId>csvjdbc</artifactId>
                         </dependency>
                     </dependencies>
                     <dependencyManagement>
@@ -133,11 +133,6 @@ public final class CodeGenerator {
                                 <artifactId>mockito-core</artifactId>
                                 <version>${mockito.version}</version>
                                 <scope>test</scope>
-                            </dependency>
-                            <dependency>
-                                <groupId>net.sourceforge.csvjdbc</groupId>
-                                <artifactId>csvjdbc</artifactId>
-                                <version>${csvjdbc.version}</version>
                             </dependency>
                         </dependencies>
                     </dependencyManagement>
