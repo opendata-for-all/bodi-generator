@@ -17,6 +17,7 @@ import static com.xatkit.bot.Bot.coreLibraryI18n;
 import static com.xatkit.bot.Bot.messages;
 import static com.xatkit.dsl.DSL.intentIs;
 import static com.xatkit.dsl.DSL.state;
+import static java.util.Objects.isNull;
 
 /**
  * The Get Result workflow of a chatbot.
@@ -77,20 +78,26 @@ public class GetResult {
      * @param returnState   the state where the chatbot ends up arriving once the workflow is finished
      */
     public GetResult(ReactPlatform reactPlatform, State returnState) {
-        val generateResultSet = state("GenerateResultSet");
-        val generateResultSetFromQuery = state("GenerateResultSetFromQuery");
+        val generateResultSetState = state("GenerateResultSet");
+        val generateResultSetFromQueryState = state("GenerateResultSetFromQuery");
         val showDataState = state("ShowData");
 
-        generateResultSet
+        generateResultSetState
                 .body(context -> {
                     resultSet = (ResultSet) context.getSession().get(ContextKeys.RESULT_SET);
+                    if (isNull(resultSet)) {
+                        Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
+                        ResultSet newResultSet = statement.executeQuery();
+                        context.getSession().put(ContextKeys.RESULT_SET, newResultSet);
+                        resultSet = (ResultSet) context.getSession().get(ContextKeys.RESULT_SET);
+                    }
                 })
                 .next()
                 .moveTo(showDataState);
 
-        this.generateResultSet = generateResultSet.getState();
+        this.generateResultSet = generateResultSetState.getState();
 
-        generateResultSetFromQuery
+        generateResultSetFromQueryState
                 .body(context -> {
                     Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
                     String query = context.getIntent().getMatchedInput();
@@ -99,7 +106,7 @@ public class GetResult {
                 .next()
                 .moveTo(showDataState);
 
-        this.generateResultSetFromQuery = generateResultSetFromQuery.getState();
+        this.generateResultSetFromQuery = generateResultSetFromQueryState.getState();
 
         showDataState
                 .body(context -> {
