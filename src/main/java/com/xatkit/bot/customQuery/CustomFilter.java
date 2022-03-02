@@ -34,7 +34,7 @@ public class CustomFilter {
      * The entry point for the Custom Filter workflow.
      */
     @Getter
-    private final State saveFilterState;
+    private final State saveCustomFilterState;
 
     /**
      * Instantiates a new Custom Filter workflow.
@@ -43,10 +43,10 @@ public class CustomFilter {
      * @param returnState   the state where the chatbot ends up arriving once the workflow is finished
      */
     public CustomFilter(ReactPlatform reactPlatform, State returnState) {
-        val saveFilterState = state("SaveFilter");
+        val saveCustomFilterState = state("SaveCustomFilter");
         val selectNextActionState = state("SelectNextAction");
 
-        saveFilterState
+        saveCustomFilterState
                 .body(context -> {
                     String field = (String) context.getIntent().getValue(ContextKeys.FIELD);
                     String operator = (String) context.getIntent().getValue(ContextKeys.OPERATOR);
@@ -78,6 +78,6 @@ public class CustomFilter {
                 .when(intentIs(Intents.showDataIntent)).moveTo(getResult.getGenerateResultSet())
                 .when(intentIs(coreLibraryI18n.Quit)).moveTo(returnState);
 
-        this.saveFilterState = saveFilterState.getState();
+        this.saveCustomFilterState = saveCustomFilterState.getState();
     }
 }

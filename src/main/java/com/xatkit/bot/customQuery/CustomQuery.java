@@ -46,9 +46,9 @@ public class CustomQuery {
                     reactPlatform.reply(context, messages.getString("WriteYourQuery"));
                 })
                 .next()
-                .when(intentIs(Intents.customNumericFilterIntent)).moveTo(customFilter.getSaveFilterState())
-                .when(intentIs(Intents.customDateFilterIntent)).moveTo(customFilter.getSaveFilterState())
-                .when(intentIs(Intents.customTextualFilterIntent)).moveTo(customFilter.getSaveFilterState())
+                .when(intentIs(Intents.customNumericFilterIntent)).moveTo(customFilter.getSaveCustomFilterState())
+                .when(intentIs(Intents.customDateFilterIntent)).moveTo(customFilter.getSaveCustomFilterState())
+                .when(intentIs(Intents.customTextualFilterIntent)).moveTo(customFilter.getSaveCustomFilterState())
                 .when(intentIs(Intents.showDataIntent)).moveTo(getResult.getGenerateResultSet())
                 .when(intentIs(coreLibraryI18n.Quit)).moveTo(returnState)
                 .when(intentIs(coreLibraryI18n.AnyValue)).moveTo(getResult.getGenerateResultSetFromQuery());

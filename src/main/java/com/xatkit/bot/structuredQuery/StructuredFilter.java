@@ -73,7 +73,7 @@ public class StructuredFilter {
         val writeTextualValue = state("WriteTextualValue");
         val writeNumericValue = state("WriteNumericValue");
 
-        val saveFilterState = state("SaveFilter");
+        val saveStructuredFilterState = state("SaveStructuredFilter");
 
         // Used to store the field data type when selecting the field. Later, in SaveOperator, it is used to
         // transition to the datatype-dependant proper state.
@@ -141,25 +141,25 @@ public class StructuredFilter {
                     reactPlatform.reply(context, messages.getString("WriteTextualValue"));
                 })
                 .next()
-                .when(intentIs(coreLibraryI18n.AnyValue)).moveTo(saveFilterState);
+                .when(intentIs(coreLibraryI18n.AnyValue)).moveTo(saveStructuredFilterState);
 
         writeNumericValue
                 .body(context -> {
                     reactPlatform.reply(context, messages.getString("WriteNumericValue"));
                 })
                 .next()
-                .when(intentIs(coreLibraryI18n.NumberValue)).moveTo(saveFilterState);
+                .when(intentIs(coreLibraryI18n.NumberValue)).moveTo(saveStructuredFilterState);
 
         writeDateValue
                 .body(context -> {
                     reactPlatform.reply(context, messages.getString("WriteDateValue"));
                 })
                 .next()
-                .when(intentIs(coreLibraryI18n.DateValue)).moveTo(saveFilterState);
+                .when(intentIs(coreLibraryI18n.DateValue)).moveTo(saveStructuredFilterState);
 
         // Finally, save the filter, composed by a FIELD, an OPERATOR, and a VALUE
 
-        saveFilterState
+        saveStructuredFilterState
                 .body(context -> {
                     String field = (String) context.getSession().get(ContextKeys.LAST_FIELD);
                     String operator = (String) context.getSession().get(ContextKeys.LAST_OPERATOR);
