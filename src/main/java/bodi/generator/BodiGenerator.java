@@ -23,14 +23,17 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static bodi.generator.dataSchema.BotToGraph.generateGraph;
 import static bodi.generator.dataSchema.DataType.DATE;
 import static bodi.generator.dataSchema.DataType.EMPTY;
 import static bodi.generator.dataSchema.DataType.NUMBER;
@@ -268,7 +271,21 @@ public final class BodiGenerator {
             File messagesEsDest = new File(outputFolder + "/src/main/resources/messages_es.properties");
             FileUtils.copyFile(messagesEsSource, messagesEsDest);
 
+            System.out.println("Creating resource bot.properties");
             createBotPropertiesFile(conf);
+
+            List<String> botFiles = new ArrayList<>();
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/Bot.java");
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomQuery.java");
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomFilter.java");
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/structuredQuery/StructuredQuery.java");
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/structuredQuery/SelectViewField.java");
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/structuredQuery/StructuredFilter.java");
+
+            System.out.println("Creating transitionGraph.dot file");
+            Path dotFile = Paths.get(outputFolder + "/src/main/resources/transitionGraph.dot");
+            Files.write(dotFile, generateGraph(botFiles).getBytes());
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -323,7 +340,6 @@ public final class BodiGenerator {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println("bot.properties file created");
     }
 
     /**
