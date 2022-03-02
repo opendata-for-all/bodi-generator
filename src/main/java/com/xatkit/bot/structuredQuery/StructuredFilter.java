@@ -66,12 +66,12 @@ public class StructuredFilter {
         val selectFieldState = state("SelectField");
         val saveFieldState = state("SaveField");
 
-        val writeOperator = state("WriteOperator");
-        val saveOperator = state("SaveOperator");
+        val writeOperatorState = state("WriteOperator");
+        val saveOperatorState = state("SaveOperator");
 
-        val writeDateValue = state("WriteDateValue");
-        val writeTextualValue = state("WriteTextualValue");
-        val writeNumericValue = state("WriteNumericValue");
+        val writeDateValueState = state("WriteDateValue");
+        val writeTextualValueState = state("WriteTextualValue");
+        val writeNumericValueState = state("WriteNumericValue");
 
         val saveStructuredFilterState = state("SaveStructuredFilter");
 
@@ -100,11 +100,11 @@ public class StructuredFilter {
                     fieldIntentName[0] = context.getIntent().getDefinition().getName();
                 })
                 .next()
-                .moveTo(writeOperator);
+                .moveTo(writeOperatorState);
 
         // Input the OPERATOR name
 
-        writeOperator
+        writeOperatorState
                 .body(context -> {
                     List<String> operators = new ArrayList<>();
                     if (fieldIntentName[0].equals(Intents.textualFieldIntent.getName())) {
@@ -117,40 +117,40 @@ public class StructuredFilter {
                     reactPlatform.reply(context, messages.getString("SelectOperator"), operators);
                 })
                 .next()
-                .when(intentIs(Intents.textualOperatorIntent)).moveTo(saveOperator)
-                .when(intentIs(Intents.numericOperatorIntent)).moveTo(saveOperator)
-                .when(intentIs(Intents.dateOperatorIntent)).moveTo(saveOperator);
+                .when(intentIs(Intents.textualOperatorIntent)).moveTo(saveOperatorState)
+                .when(intentIs(Intents.numericOperatorIntent)).moveTo(saveOperatorState)
+                .when(intentIs(Intents.dateOperatorIntent)).moveTo(saveOperatorState);
 
         // Save the OPERATOR name
 
-        saveOperator
+        saveOperatorState
                 .body(context -> {
                     String operatorName = (String) context.getIntent().getValue(ContextKeys.VALUE);
                     context.getSession().put(ContextKeys.LAST_OPERATOR, operatorName);
                 })
                 .next()
-                .when(context -> fieldIntentName[0].equals(Intents.textualFieldIntent.getName())).moveTo(writeTextualValue)
-                .when(context -> fieldIntentName[0].equals(Intents.numericFieldIntent.getName())).moveTo(writeNumericValue)
-                .when(context -> fieldIntentName[0].equals(Intents.dateFieldIntent.getName())).moveTo(writeDateValue);
+                .when(context -> fieldIntentName[0].equals(Intents.textualFieldIntent.getName())).moveTo(writeTextualValueState)
+                .when(context -> fieldIntentName[0].equals(Intents.numericFieldIntent.getName())).moveTo(writeNumericValueState)
+                .when(context -> fieldIntentName[0].equals(Intents.dateFieldIntent.getName())).moveTo(writeDateValueState);
 
         // Input the VALUE
         // Divided by data types for safety (e.g. a date may be recognized as a text if we don't separate data types)
 
-        writeTextualValue
+        writeTextualValueState
                 .body(context -> {
                     reactPlatform.reply(context, messages.getString("WriteTextualValue"));
                 })
                 .next()
                 .when(intentIs(coreLibraryI18n.AnyValue)).moveTo(saveStructuredFilterState);
 
-        writeNumericValue
+        writeNumericValueState
                 .body(context -> {
                     reactPlatform.reply(context, messages.getString("WriteNumericValue"));
                 })
                 .next()
                 .when(intentIs(coreLibraryI18n.NumberValue)).moveTo(saveStructuredFilterState);
 
-        writeDateValue
+        writeDateValueState
                 .body(context -> {
                     reactPlatform.reply(context, messages.getString("WriteDateValue"));
                 })

@@ -24,9 +24,9 @@ import static java.util.Objects.isNull;
  * <p>
  * It prints the processed table on which the chatbot serves. It can be done through 2 different ways:
  * <ul>
- *     <li>{@link #generateResultSet}</li>
+ *     <li>{@link #generateResultSetState}</li>
  *
- *     <li>{@link #generateResultSetFromQuery}</li>
+ *     <li>{@link #generateResultSetFromQueryState}</li>
  * </ul>
  * After one of these states is executed, the generated result is printed in the chatbot interface.
  * <p>
@@ -42,7 +42,7 @@ public class GetResult {
      * gets the resulting table.
      */
     @Getter
-    private final State generateResultSet;
+    private final State generateResultSetState;
 
     /**
      * One of the entry points for the Get Result workflow.
@@ -54,7 +54,7 @@ public class GetResult {
      * the query (see {@link com.xatkit.bot.nlp.NLPServerClient#runQuery(String, Statement)}
      */
     @Getter
-    private final State generateResultSetFromQuery;
+    private final State generateResultSetFromQueryState;
 
     /**
      * The client that interacts with the server that deploys the NLP models to answer the questions.
@@ -95,7 +95,7 @@ public class GetResult {
                 .next()
                 .moveTo(showDataState);
 
-        this.generateResultSet = generateResultSetState.getState();
+        this.generateResultSetState = generateResultSetState.getState();
 
         generateResultSetFromQueryState
                 .body(context -> {
@@ -106,7 +106,7 @@ public class GetResult {
                 .next()
                 .moveTo(showDataState);
 
-        this.generateResultSetFromQuery = generateResultSetFromQueryState.getState();
+        this.generateResultSetFromQueryState = generateResultSetFromQueryState.getState();
 
         showDataState
                 .body(context -> {

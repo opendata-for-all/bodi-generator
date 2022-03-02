@@ -75,7 +75,7 @@ public class CustomFilter {
                 })
                 .next()
                 .when(intentIs(Intents.anotherQueryIntent)).moveTo(returnState)
-                .when(intentIs(Intents.showDataIntent)).moveTo(getResult.getGenerateResultSet())
+                .when(intentIs(Intents.showDataIntent)).moveTo(getResult.getGenerateResultSetState())
                 .when(intentIs(coreLibraryI18n.Quit)).moveTo(returnState);
 
         this.saveCustomFilterState = saveCustomFilterState.getState();

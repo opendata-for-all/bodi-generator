@@ -57,7 +57,7 @@ public class StructuredQuery {
                 .when(intentIs(Intents.addFilterIntent)).moveTo(structuredFilter.getSelectFieldState())
                 .when(intentIs(Intents.removeFilterIntent)).moveTo(structuredFilter.getSelectFilterToRemoveState())
                 .when(intentIs(Intents.addFieldToViewIntent)).moveTo(selectViewField.getSelectViewFieldState())
-                .when(intentIs(Intents.showDataIntent)).moveTo(getResult.getGenerateResultSet())
+                .when(intentIs(Intents.showDataIntent)).moveTo(getResult.getGenerateResultSetState())
                 .when(intentIs(coreLibraryI18n.Quit)).moveTo(returnState);
 
 

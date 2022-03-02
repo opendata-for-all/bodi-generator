@@ -49,9 +49,9 @@ public class CustomQuery {
                 .when(intentIs(Intents.customNumericFilterIntent)).moveTo(customFilter.getSaveCustomFilterState())
                 .when(intentIs(Intents.customDateFilterIntent)).moveTo(customFilter.getSaveCustomFilterState())
                 .when(intentIs(Intents.customTextualFilterIntent)).moveTo(customFilter.getSaveCustomFilterState())
-                .when(intentIs(Intents.showDataIntent)).moveTo(getResult.getGenerateResultSet())
+                .when(intentIs(Intents.showDataIntent)).moveTo(getResult.getGenerateResultSetState())
                 .when(intentIs(coreLibraryI18n.Quit)).moveTo(returnState)
-                .when(intentIs(coreLibraryI18n.AnyValue)).moveTo(getResult.getGenerateResultSetFromQuery());
+                .when(intentIs(coreLibraryI18n.AnyValue)).moveTo(getResult.getGenerateResultSetFromQueryState());
 
         this.awaitingCustomQueryState = awaitingCustomQueryState.getState();
     }
