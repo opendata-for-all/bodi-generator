@@ -140,15 +140,14 @@ public class GetResult {
                                     Intents.showNextPageIntent,
                                     coreLibraryI18n.Quit));
                         } else {
-                            reactPlatform.reply(context, resultSetString, Utils.getFirstTrainingSentences(
-                                    coreLibraryI18n.Quit));
+                            reactPlatform.reply(context, resultSetString);
                         }
                     } else {
-                        reactPlatform.reply(context, messages.getString("NothingFound"),
-                                Utils.getFirstTrainingSentences(coreLibraryI18n.Quit));
+                        reactPlatform.reply(context, messages.getString("NothingFound"));
                     }
                 })
                 .next()
+                .when(context -> ((ResultSet) context.getSession().get(ContextKeys.RESULT_SET)).getNumRows() <= pageLimit).moveTo(returnState)
                 .when(intentIs(Intents.showNextPageIntent)).moveTo(showDataState)
                 .when(intentIs(coreLibraryI18n.Quit)).moveTo(returnState);
     }
