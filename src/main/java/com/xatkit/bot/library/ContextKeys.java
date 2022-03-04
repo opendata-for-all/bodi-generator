@@ -49,12 +49,10 @@ public final class ContextKeys {
      * The constant field.
      */
     public static final String FIELD = "field";
-
     /**
      * The constant operator.
      */
     public static final String OPERATOR = "operator";
-
     /**
      * The constant value.
      */

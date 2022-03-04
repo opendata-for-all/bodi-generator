@@ -44,25 +44,16 @@ public final class Bot {
     }
 
     /**
-     * The chatbot language
-     * <p>
-     * It must be set within the main method, after the bot properties file is loaded.
-     */
-    public static String language = null;
-
-    /**
      * The name of the bot properties file.
      */
     public static String botPropertiesFile = "bot.properties";
 
     /**
-     * The container of the chatbot messages.
+     * The chatbot language
      * <p>
      * It must be set within the main method, after the bot properties file is loaded.
-     * <p>
-     * The messages' language is specified by the {@link #locale}
      */
-    public static ResourceBundle messages = null;
+    public static String language = null;
 
     /**
      * The chatbot locale, which is used to define the chatbot language.
@@ -74,11 +65,31 @@ public final class Bot {
     public static Locale locale = null;
 
     /**
+     * The container of the chatbot messages.
+     * <p>
+     * It must be set within the main method, after the bot properties file is loaded.
+     * <p>
+     * The messages' language is specified by the {@link #locale}
+     */
+    public static ResourceBundle messages = null;
+
+    /**
      * The name of the chatbot input document, which must be a tabular data file (a {@code .csv}).
      * <p>
      * It must be set within the main method, after the bot properties file is loaded.
      */
     public static String inputDoc = null;
+
+    /**
+     * The maximum number of entries of a table that are displayed at once in the chatbot chat box (i.e. the page size).
+     */
+    public static int pageLimit;
+
+    /**
+     * If the number of entries of a result set generated after a chatbot query is less or equal than this number,
+     * the result set is displayed immediately afterwards.
+     */
+    public static int maxEntriesToDisplay;
 
     /**
      * This library contains useful objects to use within chatbots.
@@ -145,6 +156,8 @@ public final class Bot {
         locale = new Locale(language);
         messages = ResourceBundle.getBundle("messages", locale);
         inputDoc = botConfiguration.getString("xls.importer.xls");
+        pageLimit = botConfiguration.getInt("bot.pageLimit");
+        maxEntriesToDisplay = botConfiguration.getInt("bot.maxEntriesToDisplay");
         coreLibraryI18n = new CoreLibraryI18n(locale);
         char delimiter = botConfiguration.getString("csv.delimiter").charAt(0);
         String odataTitle = botConfiguration.getString("bot.odata.title." + language, null);

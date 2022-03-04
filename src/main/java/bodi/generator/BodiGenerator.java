@@ -307,6 +307,8 @@ public final class BodiGenerator {
             fw.write("xatkit.server.port" + " = " + "5000" + "\n");
             fw.write("xatkit.recognition.enable_monitoring" + " = " + "true" + "\n");
             fw.write("bot.language" + " = " + "en" + "\n");
+            fw.write("bot.pageLimit" + " = " + "10" + "\n");
+            fw.write("bot.maxEntriesToDisplay" + " = " + "5" + "\n");
 
             fw.write("\n# Intent provider\n\n");
             if (conf.getString("xatkit.intent.provider")

@@ -15,6 +15,7 @@ import java.text.MessageFormat;
 
 import static com.xatkit.bot.Bot.coreLibraryI18n;
 import static com.xatkit.bot.Bot.messages;
+import static com.xatkit.bot.Bot.pageLimit;
 import static com.xatkit.dsl.DSL.intentIs;
 import static com.xatkit.dsl.DSL.state;
 import static java.util.Objects.isNull;
@@ -60,11 +61,6 @@ public class GetResult {
      * The client that interacts with the server that deploys the NLP models to answer the questions.
      */
     NLPServerClient nlpServerClient = new NLPServerClient();
-
-    /**
-     * The maximum number of entries of a table that are displayed at once in the chatbot chat box (i.e. the page size).
-     */
-    private final int pageLimit = 10;
 
     /**
      * This {@link ResultSet} stores the result to be printed.

@@ -14,6 +14,7 @@ import java.text.MessageFormat;
 
 import static com.xatkit.bot.Bot.coreLibraryI18n;
 import static com.xatkit.bot.Bot.getResult;
+import static com.xatkit.bot.Bot.maxEntriesToDisplay;
 import static com.xatkit.bot.Bot.messages;
 import static com.xatkit.dsl.DSL.intentIs;
 import static com.xatkit.dsl.DSL.state;
@@ -63,7 +64,8 @@ public class CustomFilter {
                     }
                 })
                 .next()
-                .moveTo(selectNextActionState);
+                .when(context -> ((ResultSet) context.getSession().get(ContextKeys.RESULT_SET)).getNumRows() <= maxEntriesToDisplay).moveTo(getResult.getGenerateResultSetState())
+                .when(context -> ((ResultSet) context.getSession().get(ContextKeys.RESULT_SET)).getNumRows() > maxEntriesToDisplay).moveTo(selectNextActionState);
 
         selectNextActionState
                 .body(context -> {
