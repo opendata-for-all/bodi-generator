@@ -83,9 +83,8 @@ public class GetResult {
                     resultSet = (ResultSet) context.getSession().get(ContextKeys.RESULT_SET);
                     if (isNull(resultSet)) {
                         Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
-                        ResultSet newResultSet = statement.executeQuery();
-                        context.getSession().put(ContextKeys.RESULT_SET, newResultSet);
-                        resultSet = (ResultSet) context.getSession().get(ContextKeys.RESULT_SET);
+                        resultSet = statement.executeQuery();
+                        context.getSession().put(ContextKeys.RESULT_SET, resultSet);
                     }
                 })
                 .next()
@@ -143,7 +142,7 @@ public class GetResult {
                     }
                 })
                 .next()
-                .when(context -> ((ResultSet) context.getSession().get(ContextKeys.RESULT_SET)).getNumRows() <= pageLimit).moveTo(returnState)
+                .when(context -> (resultSet.getNumRows() <= pageLimit)).moveTo(returnState)
                 .when(intentIs(Intents.showNextPageIntent)).moveTo(showDataState)
                 .when(intentIs(coreLibraryI18n.Quit)).moveTo(returnState);
     }
