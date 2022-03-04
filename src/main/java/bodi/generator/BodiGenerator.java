@@ -305,7 +305,6 @@ public final class BodiGenerator {
             fw.write("xls.importer.xls" + " = " + conf.getString("xls.importer.xls") + "\n");
             fw.write("csv.delimiter" + " = " + conf.getString("csv.delimiter") + "\n");
             fw.write("xatkit.server.port" + " = " + "5000" + "\n");
-            fw.write("xatkit.recognition.enable_monitoring" + " = " + "true" + "\n");
             fw.write("bot.language" + " = " + "en" + "\n");
             fw.write("bot.pageLimit" + " = " + "10" + "\n");
             fw.write("bot.maxEntriesToDisplay" + " = " + "5" + "\n");
@@ -325,6 +324,17 @@ public final class BodiGenerator {
                 fw.write("xatkit.nlpjs.language" + " = " + "en" + "\n");
                 fw.write("xatkit.nlpjs.server" + " = " + "http://localhost:8080" + "\n");
 
+            }
+
+            if (conf.getString("xatkit.logs.database")
+                    .equals("com.xatkit.core.recognition.RecognitionMonitorPostgreSQL")) {
+                fw.write("\n# PostgreSQL\n\n");
+                fw.write("xatkit.logs.database" + " = " + conf.getString("xatkit.logs.database") + "\n");
+                fw.write("xatkit.recognition.enable_monitoring" + " = " + "true" + "\n");
+                fw.write("xatkit.postgres.url" + " = " + "your-url" + "\n");
+                fw.write("xatkit.postgresql.user" + " = " + "your-user" + "\n");
+                fw.write("xatkit.postgresql.password" + " = " + "your-password" + "\n");
+                fw.write("xatkit.postgresql.bot_id" + " = " + "your-bot-id" + "\n");
             }
 
             fw.write("\n# NLP Server properties\n\n");

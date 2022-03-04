@@ -82,6 +82,11 @@ public final class CodeGenerator {
                             <artifactId>xatkit-nlpjs</artifactId>
                             <version>0.0.1-SNAPSHOT</version>
                         </dependency>
+                        <dependency>
+                            <groupId>com.xatkit</groupId>
+                            <artifactId>xatkit-logs-postgres</artifactId>
+                            <version>0.0.1-SNAPSHOT</version>
+                        </dependency>
                         <!-- Utils -->
                         <dependency>
                             <groupId>org.projectlombok</groupId>
