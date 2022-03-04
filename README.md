@@ -56,6 +56,7 @@ set in [bodi-generator.properties](src/main/resources/bodi-generator.properties)
 | `xls.importer.xls`       | The name of the tabular data file the chatbot will have access to, stored in the [resources](src/main/resources) folder (currently only `csv` files are supported)                                                                                                           |
 | `csv.delimiter`          | The delimiter or separator of the tabular data file cells (e.g. `,`, `\t` (tab))                                                                                                                                                                                             |
 | `xatkit.intent.provider` | The intent provider the generated chatbot will use. The currently available intent providers are: Dialogflow (`com.xatkit.core.recognition.dialogflow.DialogFlowIntentRecognitionProvider`) and  NLP.js (`com.xatkit.core.recognition.nlpjs.NlpjsIntentRecognitionProvider`) |
+| `xatkit.logs.database`   | The database used to store the chatbot tracing: `com.xatkit.core.recognition.RecognitionMonitorPostgreSQL`. If there is no database, leave this property empty.                                                                                                              |
 
 ### bot.properties
 
@@ -66,10 +67,11 @@ properties. These will contain default values, so they should be set according t
 | Name                                   | Description                                                                                                                                                                                       |
 |----------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `xatkit.server.port`                   | The port where the chatbot will be running                                                                                                                                                        |
-| `xatkit.recognition.enable_monitoring` | If `true`, enables chatbot monitoring, if `false`, not                                                                                                                                            |
 | `bot.language`                         | The language of the bot (users must talk to the chatbot in this language, and it also replies in this language). Available languages: **Spanish** (`es`),  **Catalan** (`ca`), **English** (`en`) |
 | `xatkit.nlpjs.*`                       | All the properties related to [NLP.js](https://github.com/xatkit-bot-platform/xatkit/wiki/Using-NLP.js) engine (if used)                                                                          |
 | `xatkit.dialogflow.*`                  | All the properties related to [DialogFlow](https://github.com/xatkit-bot-platform/xatkit/wiki/Integrating-DialogFlow) engine (if used)                                                            |
+| `xatkit.recognition.enable_monitoring` | If `true`, enables chatbot monitoring, if `false`, not                                                                                                                                            |
+| `xatkit.postgresql*`                   | All the properties related to [PostgreSQL](https://github.com/xatkit-bot-platform/xatkit/wiki/Using-PostgreSQL) database (if used)                                                                |
 | `bot.odata.title.*`                    | (Optional) The title of the open data resource used by the bot, in different languages (e.g. `bot.odata.title.es`). The bot will read the one matching with `bot.language`                        |
 | `bot.odata.url.*`                      | (Optional) The url of the open data resource used by the bot, in different languages (e.g. `bot.odata.url.es`). The bot will read the one matching with `bot.language`                            |
 
