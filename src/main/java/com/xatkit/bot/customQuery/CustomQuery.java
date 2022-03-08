@@ -20,8 +20,9 @@ import static com.xatkit.dsl.DSL.state;
  * this workflow are:
  * <ul>
  *     <li>{@link CustomFilter}</li>
+ *     <li>{@link CustomShowFieldDistinct}</li>
  * </ul>
- * When no pre-defined query is matched, it is executed {@link GetResult#generateResultSetFromQuery}
+ * When no pre-defined query is matched, it is executed {@link GetResult#getGenerateResultSetFromQueryState()}
  */
 public class CustomQuery {
 
