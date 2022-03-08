@@ -18,7 +18,6 @@ import static com.xatkit.bot.Bot.messages;
 import static com.xatkit.bot.Bot.pageLimit;
 import static com.xatkit.dsl.DSL.intentIs;
 import static com.xatkit.dsl.DSL.state;
-import static java.util.Objects.isNull;
 
 /**
  * The Get Result workflow of a chatbot.
@@ -81,11 +80,6 @@ public class GetResult {
         generateResultSetState
                 .body(context -> {
                     resultSet = (ResultSet) context.getSession().get(ContextKeys.RESULT_SET);
-                    if (isNull(resultSet)) {
-                        Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
-                        resultSet = statement.executeQuery();
-                        context.getSession().put(ContextKeys.RESULT_SET, resultSet);
-                    }
                 })
                 .next()
                 .moveTo(showDataState);
