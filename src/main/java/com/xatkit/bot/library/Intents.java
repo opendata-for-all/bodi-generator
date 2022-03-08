@@ -22,6 +22,7 @@ public final class Intents {
      */
     private static final XatkitI18nHelper BUNDLE = new XatkitI18nHelper("intents", Bot.locale);
 
+
     /**
      * The intent restartIntent.
      */
@@ -76,6 +77,54 @@ public final class Intents {
     public static final IntentDefinition anotherQueryIntent = intent("AnotherQuery")
             .trainingSentences(BUNDLE.getStringArray("AnotherQuery"))
             .getIntentDefinition();
+
+
+    /**
+     * The intent numericFieldIntent.
+     */
+    public static final IntentDefinition numericFieldIntent = intent("NumericField")
+            .trainingSentences(BUNDLE.getStringArray("Value"))
+            .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(Entities.numericFieldEntity)
+            .getIntentDefinition();
+    /**
+     * The intent textualFieldIntent.
+     */
+    public static final IntentDefinition textualFieldIntent = intent("TextualField")
+            .trainingSentences(BUNDLE.getStringArray("Value"))
+            .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(Entities.textualFieldEntity)
+            .getIntentDefinition();
+    /**
+     * The intent dateFieldIntent.
+     */
+    public static final IntentDefinition dateFieldIntent = intent("DateField")
+            .trainingSentences(BUNDLE.getStringArray("Value"))
+            .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(Entities.dateFieldEntity)
+            .getIntentDefinition();
+
+
+    /**
+     * The intent numericOperatorIntent.
+     */
+    public static final IntentDefinition numericOperatorIntent = intent("NumericOperator")
+            .trainingSentences(BUNDLE.getStringArray("Value"))
+            .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(Entities.numericOperatorEntity)
+            .getIntentDefinition();
+    /**
+     * The intent textualOperatorIntent.
+     */
+    public static final IntentDefinition textualOperatorIntent = intent("TextualOperator")
+            .trainingSentences(BUNDLE.getStringArray("Value"))
+            .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(Entities.textualOperatorEntity)
+            .getIntentDefinition();
+    /**
+     * The intent dateOperatorIntent.
+     */
+    public static final IntentDefinition dateOperatorIntent = intent("DateOperator")
+            .trainingSentences(BUNDLE.getStringArray("Value"))
+            .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(Entities.dateOperatorEntity)
+            .getIntentDefinition();
+
+
     /**
      * The intent customNumericFilterIntent.
      */
@@ -103,46 +152,11 @@ public final class Intents {
             .parameter(ContextKeys.OPERATOR).fromFragment("OPERATOR").entity(Entities.textualOperatorEntity)
             .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(any())
             .getIntentDefinition();
-    /**
-     * The intent numericFieldIntent.
-     */
-    public static final IntentDefinition numericFieldIntent = intent("NumericField")
-            .trainingSentences(BUNDLE.getStringArray("Value"))
-            .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(Entities.numericFieldEntity)
+
+
+    public static final IntentDefinition customShowFieldDistinctIntent = intent("CustomShowFieldDistinct")
+            .trainingSentences(BUNDLE.getStringArray("CustomShowFieldDistinct"))
+            .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(Entities.fieldEntity)
             .getIntentDefinition();
-    /**
-     * The intent textualFieldIntent.
-     */
-    public static final IntentDefinition textualFieldIntent = intent("TextualField")
-            .trainingSentences(BUNDLE.getStringArray("Value"))
-            .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(Entities.textualFieldEntity)
-            .getIntentDefinition();
-    /**
-     * The intent dateFieldIntent.
-     */
-    public static final IntentDefinition dateFieldIntent = intent("DateField")
-            .trainingSentences(BUNDLE.getStringArray("Value"))
-            .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(Entities.dateFieldEntity)
-            .getIntentDefinition();
-    /**
-     * The intent numericOperatorIntent.
-     */
-    public static final IntentDefinition numericOperatorIntent = intent("NumericOperator")
-            .trainingSentences(BUNDLE.getStringArray("Value"))
-            .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(Entities.numericOperatorEntity)
-            .getIntentDefinition();
-    /**
-     * The intent textualOperatorIntent.
-     */
-    public static final IntentDefinition textualOperatorIntent = intent("TextualOperator")
-            .trainingSentences(BUNDLE.getStringArray("Value"))
-            .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(Entities.textualOperatorEntity)
-            .getIntentDefinition();
-    /**
-     * The intent dateOperatorIntent.
-     */
-    public static final IntentDefinition dateOperatorIntent = intent("DateOperator")
-            .trainingSentences(BUNDLE.getStringArray("Value"))
-            .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(Entities.dateOperatorEntity)
-            .getIntentDefinition();
+
 }

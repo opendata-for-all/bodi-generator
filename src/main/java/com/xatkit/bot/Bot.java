@@ -1,15 +1,12 @@
 package com.xatkit.bot;
 
 import bodi.generator.dataSource.TabularDataSource;
-import com.xatkit.bot.customQuery.CustomFilter;
 import com.xatkit.bot.customQuery.CustomQuery;
 import com.xatkit.bot.getResult.GetResult;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Entities;
 import com.xatkit.bot.library.Intents;
 import com.xatkit.bot.library.Utils;
-import com.xatkit.bot.structuredQuery.SelectViewField;
-import com.xatkit.bot.structuredQuery.StructuredFilter;
 import com.xatkit.bot.structuredQuery.StructuredQuery;
 import com.xatkit.core.XatkitBot;
 import com.xatkit.plugins.core.library.CoreLibraryI18n;
@@ -107,21 +104,6 @@ public final class Bot {
     public static GetResult getResult;
 
     /**
-     * The Structured Filter workflow.
-     */
-    public static StructuredFilter structuredFilter;
-
-    /**
-     * The Select View Field workflow.
-     */
-    public static SelectViewField selectViewField;
-
-    /**
-     * The Custom Filter workflow.
-     */
-    public static CustomFilter customFilter;
-
-    /**
      * The Structured Query workflow.
      */
     public static StructuredQuery structuredQuery;
@@ -181,9 +163,6 @@ public final class Bot {
          * Initialize the chatbot workflows.
          */
         getResult = new GetResult(reactPlatform, startState.getState());
-        structuredFilter = new StructuredFilter(reactPlatform, startState.getState());
-        selectViewField = new SelectViewField(reactPlatform, startState.getState());
-        customFilter = new CustomFilter(reactPlatform, startState.getState());
         structuredQuery = new StructuredQuery(reactPlatform, startState.getState());
         customQuery = new CustomQuery(reactPlatform, startState.getState());
 

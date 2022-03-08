@@ -11,8 +11,6 @@ import lombok.val;
 import static com.xatkit.bot.Bot.coreLibraryI18n;
 import static com.xatkit.bot.Bot.getResult;
 import static com.xatkit.bot.Bot.messages;
-import static com.xatkit.bot.Bot.selectViewField;
-import static com.xatkit.bot.Bot.structuredFilter;
 import static com.xatkit.dsl.DSL.intentIs;
 import static com.xatkit.dsl.DSL.state;
 
@@ -35,12 +33,26 @@ public class StructuredQuery {
     private final State awaitingStructuredQueryState;
 
     /**
+     * The Structured Filter workflow.
+     */
+    public static StructuredFilter structuredFilter;
+
+    /**
+     * The Select View Field workflow.
+     */
+    public static SelectViewField selectViewField;
+
+
+    /**
      * Instantiates a new Structured Query workflow.
      *
      * @param reactPlatform the react platform of a chatbot
      * @param returnState   the state where the chatbot ends up arriving once the workflow is finished
      */
     public StructuredQuery(ReactPlatform reactPlatform, State returnState) {
+        structuredFilter = new StructuredFilter(reactPlatform, returnState);
+        selectViewField = new SelectViewField(reactPlatform, returnState);
+
         val awaitingStructuredQueryState = state("AwaitingStructuredQuery");
 
         awaitingStructuredQueryState

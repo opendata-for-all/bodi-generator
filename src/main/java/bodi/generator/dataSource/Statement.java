@@ -7,7 +7,9 @@ import org.apache.commons.lang3.tuple.ImmutableTriple;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -71,6 +73,11 @@ public class Statement {
         this.ignoreCaseFilterValue = false;
     }
 
+    /**
+     * Gets {@link #ignoreCaseFilterValue}.
+     *
+     * @return the {@link #ignoreCaseFilterValue} value
+     */
     public boolean isIgnoreCaseFilterValue() {
         return ignoreCaseFilterValue;
     }
@@ -148,16 +155,34 @@ public class Statement {
     }
 
     /**
-     * Execute the query with the current {@link #filters}, {@link #fields} and the {@link #ignoreCaseFilterValue}
-     * condition.
+     * Gets the number of filters.
+     * <p>
+     * For testing purposes.
      *
-     * @return the result set
-     * @see ResultSet
+     * @return the number of filters
      */
-    public ResultSet executeQuery() {
-        List<String> header = tds.getHeaderCopy();
-        List<Row> table = tds.getTableCopy();
-        // Filtering
+    public int getNumFilters() {
+        return filters.size();
+    }
+
+    /**
+     * Gets the number of fields.
+     * <p>
+     * For testing purposes.
+     *
+     * @return the number of fields
+     */
+    public int getNumFields() {
+        return fields.size();
+    }
+
+    /**
+     * Applies all the filters in {@link #filters} to {@code header} and {@code table}.
+     *
+     * @param header the header of a result set
+     * @param table  the table of a result set
+     */
+    private void applyFilters(List<String> header, List<Row> table) {
         for (ImmutableTriple<String, String, String> f : filters) {
             String value;
             if (ignoreCaseFilterValue) {
@@ -169,38 +194,38 @@ public class Statement {
                 // Numeric Filters
                 case "=":
                     table.removeIf(row ->
-                        isEmpty(row.getColumnValue(header.indexOf(f.left))) ||
-                        !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) == Float.parseFloat(f.right))
+                            isEmpty(row.getColumnValue(header.indexOf(f.left))) ||
+                                    !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) == Float.parseFloat(f.right))
                     );
                     break;
                 case "<":
                     table.removeIf(row ->
-                        isEmpty(row.getColumnValue(header.indexOf(f.left))) ||
-                        !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) < Float.parseFloat(f.right))
+                            isEmpty(row.getColumnValue(header.indexOf(f.left))) ||
+                                    !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) < Float.parseFloat(f.right))
                     );
                     break;
                 case "<=":
                     table.removeIf(row ->
-                        isEmpty(row.getColumnValue(header.indexOf(f.left))) ||
-                        !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) <= Float.parseFloat(f.right))
+                            isEmpty(row.getColumnValue(header.indexOf(f.left))) ||
+                                    !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) <= Float.parseFloat(f.right))
                     );
                     break;
                 case ">":
                     table.removeIf(row ->
-                        isEmpty(row.getColumnValue(header.indexOf(f.left))) ||
-                        !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) > Float.parseFloat(f.right))
+                            isEmpty(row.getColumnValue(header.indexOf(f.left))) ||
+                                    !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) > Float.parseFloat(f.right))
                     );
                     break;
                 case ">=":
                     table.removeIf(row ->
-                        isEmpty(row.getColumnValue(header.indexOf(f.left))) ||
-                        !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) >= Float.parseFloat(f.right))
+                            isEmpty(row.getColumnValue(header.indexOf(f.left))) ||
+                                    !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) >= Float.parseFloat(f.right))
                     );
                     break;
                 case "!=":
                     table.removeIf(row ->
-                        isEmpty(row.getColumnValue(header.indexOf(f.left))) ||
-                        !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) != Float.parseFloat(f.right))
+                            isEmpty(row.getColumnValue(header.indexOf(f.left))) ||
+                                    !(Float.parseFloat(row.getColumnValue(header.indexOf(f.left))) != Float.parseFloat(f.right))
                     );
                     break;
                 // Textual Filters
@@ -253,7 +278,15 @@ public class Statement {
                     break;
             }
         }
-        // Deleting fields not present in fields
+    }
+
+    /**
+     * Deletes all fields not present in {@link #fields}, in {@code header} and {@code table}.
+     *
+     * @param header the header of a result set
+     * @param table  the table of a result set
+     */
+    private void deleteFields(List<String> header, List<Row> table) {
         if (!fields.isEmpty()) {
             List<String> fieldsToDelete = tds.getHeaderCopy();
             fieldsToDelete.removeAll(fields);
@@ -262,29 +295,70 @@ public class Statement {
                 header.remove(field);
             }
         }
+    }
+
+    /**
+     * Executes the query with the current {@link #filters}, {@link #fields} and the {@link #ignoreCaseFilterValue}
+     * condition.
+     *
+     * @return the result set
+     * @see ResultSet
+     */
+    public ResultSet executeQuery() {
+        List<String> header = tds.getHeaderCopy();
+        List<Row> table = tds.getTableCopy();
+        // Filtering
+        applyFilters(header, table);
+        // Deleting fields not present in fields
+        deleteFields(header, table);
         return new ResultSet(header, table);
     }
 
     /**
-     * Gets the number of filters.
+     * Executes the query with the current {@link #filters}, {@link #fields} and the {@link #ignoreCaseFilterValue}
+     * condition.
      * <p>
-     * For testing purposes.
+     * In addition to {@link #executeQuery()}, this method allows to run another operation to the generated result set.
      *
-     * @return the number of filters
+     * @param operation the operation
+     * @param args      the arguments of the operation (if any)
+     * @return the result set
+     * @see ResultSet
      */
-    public int getNumFilters() {
-        return filters.size();
+    public ResultSet executeQuery(Operation operation, String... args) {
+        List<String> header = tds.getHeaderCopy();
+        List<Row> table = tds.getTableCopy();
+        // Filtering
+        applyFilters(header, table);
+
+        switch (operation) {
+            case SHOW_FIELD_DISTINCT:
+                showFieldDistinct(header, table, args[0]);
+                break;
+            default:
+                break;
+        }
+        return new ResultSet(header, table);
     }
 
     /**
-     * Gets the number of fields.
-     * <p>
-     * For testing purposes.
+     * Executes the {@link Operation#SHOW_FIELD_DISTINCT} operation.
      *
-     * @return the number of fields
+     * @param header the header of a result set
+     * @param table  the table of a result set
+     * @param field  the field from which unique values are to be extracted
+     *
+     * @see Operation#SHOW_FIELD_DISTINCT
      */
-    public int getNumFields() {
-        return fields.size();
+    private void showFieldDistinct(List<String> header, List<Row> table, String field) {
+        List<String> fieldsToDelete = tds.getHeaderCopy();
+        fieldsToDelete.remove(field);
+        for (String fieldToDelete : fieldsToDelete) {
+            table.forEach(row -> row.removeValue(header.indexOf(fieldToDelete)));
+            header.remove(fieldToDelete);
+        }
+        Set<String> fieldValues = new HashSet<>();
+        table.removeIf(row -> !fieldValues.add(row.getColumnValue(0)));
     }
 
     /**

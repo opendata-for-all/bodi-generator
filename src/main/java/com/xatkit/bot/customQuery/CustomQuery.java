@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.val;
 
 import static com.xatkit.bot.Bot.coreLibraryI18n;
-import static com.xatkit.bot.Bot.customFilter;
 import static com.xatkit.bot.Bot.getResult;
 import static com.xatkit.bot.Bot.messages;
 import static com.xatkit.dsl.DSL.intentIs;
@@ -33,12 +32,25 @@ public class CustomQuery {
     private final State awaitingCustomQueryState;
 
     /**
+     * The Custom Filter workflow.
+     */
+    public CustomFilter customFilter;
+
+    /**
+     * The Custom Show Field Distinct workflow.
+     */
+    public CustomShowFieldDistinct customShowFieldDistinct;
+
+    /**
      * Instantiates a new Custom Query workflow.
      *
      * @param reactPlatform the react platform of a chatbot
      * @param returnState   the state where the chatbot ends up arriving once the workflow is finished
      */
     public CustomQuery(ReactPlatform reactPlatform, State returnState) {
+        customFilter = new CustomFilter(reactPlatform, returnState);
+        customShowFieldDistinct = new CustomShowFieldDistinct(reactPlatform, returnState);
+
         val awaitingCustomQueryState = state("AwaitingCustomQuery");
 
         awaitingCustomQueryState
@@ -46,6 +58,7 @@ public class CustomQuery {
                     reactPlatform.reply(context, messages.getString("WriteYourQuery"));
                 })
                 .next()
+                .when(intentIs(Intents.customShowFieldDistinctIntent)).moveTo(customShowFieldDistinct.getProcessCustomShowFieldDistinctState())
                 .when(intentIs(Intents.customNumericFilterIntent)).moveTo(customFilter.getSaveCustomFilterState())
                 .when(intentIs(Intents.customDateFilterIntent)).moveTo(customFilter.getSaveCustomFilterState())
                 .when(intentIs(Intents.customTextualFilterIntent)).moveTo(customFilter.getSaveCustomFilterState())

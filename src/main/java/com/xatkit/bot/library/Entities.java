@@ -4,10 +4,15 @@ import com.xatkit.bot.Bot;
 import com.xatkit.dsl.entity.EntityDefinitionReferenceProvider;
 import com.xatkit.dsl.entity.MappingEntryStep;
 import com.xatkit.dsl.entity.MappingSynonymStep;
+import com.xatkit.intent.EntityDefinition;
+import com.xatkit.intent.MappingEntityDefinition;
+import com.xatkit.intent.MappingEntityDefinitionEntry;
+import lombok.NonNull;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import java.io.InputStream;
+import java.text.MessageFormat;
 
 import static com.xatkit.dsl.DSL.mapping;
 
@@ -60,7 +65,7 @@ public final class Entities {
      * @param entityName the name of the entity
      * @return the entity object
      */
-    public static EntityDefinitionReferenceProvider generateEntity(String entityName) {
+    private static EntityDefinitionReferenceProvider generateEntity(String entityName) {
         JSONObject entityJson = entitiesJson.getJSONObject(entityName);
         MappingEntryStep entity = mapping(entityName);
         for (String entry : entityJson.keySet()) {
@@ -70,6 +75,33 @@ public final class Entities {
             }
         }
         return (EntityDefinitionReferenceProvider) entity;
+    }
+
+    /**
+     * Generates a chatbot entity, combining entries of different entities.
+     *
+     * @param entityName the name of the entity
+     * @param entities   the entities that the new entity will be based on
+     * @return the entity object
+     */
+    private static EntityDefinitionReferenceProvider mergeEntities(String entityName, @NonNull EntityDefinitionReferenceProvider... entities) {
+        MappingEntryStep newEntity = mapping(entityName);
+        for (EntityDefinitionReferenceProvider entity : entities) {
+            EntityDefinition referredEntity = entity.getEntityReference().getReferredEntity();
+            if (referredEntity instanceof MappingEntityDefinition) {
+                MappingEntityDefinition mapping = (MappingEntityDefinition) referredEntity;
+                for (MappingEntityDefinitionEntry entry : mapping.getEntries()) {
+                    MappingSynonymStep synonymStep = newEntity.entry().value(entry.getReferenceValue());
+                    for (String synonym : entry.getSynonyms()) {
+                        synonymStep.synonym(synonym);
+                    }
+                }
+            } else {
+                throw new IllegalArgumentException(MessageFormat.format("Expected a {0}, found a {1}",
+                        MappingEntityDefinition.class.getSimpleName(), referredEntity.getClass().getSimpleName()));
+            }
+        }
+        return (EntityDefinitionReferenceProvider) newEntity;
     }
 
     /**
@@ -84,6 +116,12 @@ public final class Entities {
      * The entity dateFieldEntity.
      */
     public static final EntityDefinitionReferenceProvider dateFieldEntity = generateEntity("dateFieldEntity");
+    /**
+     * The entity fieldEntity (combines {@link #numericFieldEntity}, {@link #textualFieldEntity} and
+     * {@link #dateFieldEntity}).
+     */
+    public static final EntityDefinitionReferenceProvider fieldEntity = mergeEntities("fieldEntity", numericFieldEntity, textualFieldEntity, dateFieldEntity);
+
     /**
      * The entity numericOperatorEntity.
      */
