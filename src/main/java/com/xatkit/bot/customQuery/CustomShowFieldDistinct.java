@@ -1,8 +1,6 @@
 package com.xatkit.bot.customQuery;
 
 import bodi.generator.dataSource.Operation;
-import bodi.generator.dataSource.ResultSet;
-import bodi.generator.dataSource.Statement;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.execution.State;
 import com.xatkit.plugins.react.platform.ReactPlatform;
@@ -10,7 +8,9 @@ import lombok.Getter;
 import lombok.val;
 
 import static com.xatkit.bot.Bot.getResult;
+import static com.xatkit.bot.Bot.messages;
 import static com.xatkit.dsl.DSL.state;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * The Custom Show Field Distinct workflow of a chatbot.
@@ -30,6 +30,11 @@ public class CustomShowFieldDistinct {
     private final State processCustomShowFieldDistinctState;
 
     /**
+     * This variable stores the error condition of the workflow (i.e. if a field name was not recognized properly)
+     */
+    private boolean error;
+
+    /**
      * Instantiates a new Custom Show Field Distinct workflow.
      *
      * @param reactPlatform the react platform of a chatbot
@@ -41,12 +46,19 @@ public class CustomShowFieldDistinct {
         processCustomShowFieldDistinctState
                 .body(context -> {
                     String field = (String) context.getIntent().getValue(ContextKeys.FIELD);
-                    Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
-                    ResultSet resultSet = statement.executeQuery(Operation.SHOW_FIELD_DISTINCT, field);
-                    context.getSession().put(ContextKeys.RESULT_SET, resultSet);
+                    if (!isEmpty(field)) {
+                        context.getSession().put(ContextKeys.OPERATION, Operation.SHOW_FIELD_DISTINCT);
+                        String[] operationArgs = {field};
+                        context.getSession().put(ContextKeys.OPERATION_ARGS, operationArgs);
+                        error = false;
+                    } else {
+                        reactPlatform.reply(context, messages.getString("FieldNotRecognized"));
+                        error = true;
+                    }
                 })
                 .next()
-                .moveTo(getResult.getGenerateResultSetState());
+                .when(context -> error).moveTo(returnState)
+                .when(context -> !error).moveTo(getResult.getGenerateResultSetWithOperationState());
 
         this.processCustomShowFieldDistinctState = processCustomShowFieldDistinctState.getState();
     }

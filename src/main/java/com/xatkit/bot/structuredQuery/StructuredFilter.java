@@ -1,5 +1,6 @@
 package com.xatkit.bot.structuredQuery;
 
+import bodi.generator.dataSource.Operation;
 import bodi.generator.dataSource.ResultSet;
 import bodi.generator.dataSource.Statement;
 import com.xatkit.bot.library.ContextKeys;
@@ -57,6 +58,11 @@ public class StructuredFilter {
      */
     @Getter
     private final State selectFilterToRemoveState;
+
+    /**
+     * This variable stores the number of rows of the generated result set.
+     */
+    private int resultSetNumRows;
 
     /**
      * Instantiates a new Structured Filter workflow.
@@ -169,8 +175,8 @@ public class StructuredFilter {
                     if (!isEmpty(field) && !isEmpty(operator) && !isEmpty(value)) {
                         Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
                         statement.addFilter(field, operator, value);
-                        ResultSet resultSet = statement.executeQuery();
-                        context.getSession().put(ContextKeys.RESULT_SET, resultSet);
+                        ResultSet resultSet = (ResultSet) statement.executeQuery(Operation.NO_OPERATION);
+                        resultSetNumRows = resultSet.getNumRows();
                         reactPlatform.reply(context, MessageFormat.format(messages.getString("FilterAdded"),
                                 field, operator, value, resultSet.getNumRows()));
                     } else {
@@ -178,8 +184,8 @@ public class StructuredFilter {
                     }
                 })
                 .next()
-                .when(context -> ((ResultSet) context.getSession().get(ContextKeys.RESULT_SET)).getNumRows() <= maxEntriesToDisplay).moveTo(getResult.getGenerateResultSetState())
-                .when(context -> ((ResultSet) context.getSession().get(ContextKeys.RESULT_SET)).getNumRows() > maxEntriesToDisplay).moveTo(returnState);
+                .when(context -> resultSetNumRows <= maxEntriesToDisplay).moveTo(getResult.getGenerateResultSetState())
+                .when(context -> resultSetNumRows > maxEntriesToDisplay).moveTo(returnState);
 
         this.selectFieldState = selectFieldState.getState();
 
@@ -214,8 +220,7 @@ public class StructuredFilter {
                     if (!isEmpty(field) && !isEmpty(operator) && !isEmpty(value)) {
                         Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
                         statement.removeFilter(field, operator, value);
-                        ResultSet resultSet = statement.executeQuery();
-                        context.getSession().put(ContextKeys.RESULT_SET, resultSet);
+                        ResultSet resultSet = (ResultSet) statement.executeQuery(Operation.NO_OPERATION);
                         reactPlatform.reply(context, MessageFormat.format(messages.getString("FilterRemoved"),
                                 field, operator, value, resultSet.getNumRows()));
                     } else {

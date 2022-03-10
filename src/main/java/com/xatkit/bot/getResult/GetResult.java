@@ -1,5 +1,6 @@
 package com.xatkit.bot.getResult;
 
+import bodi.generator.dataSource.Operation;
 import bodi.generator.dataSource.ResultSet;
 import bodi.generator.dataSource.Statement;
 import com.xatkit.bot.library.ContextKeys;
@@ -38,11 +39,20 @@ public class GetResult {
     /**
      * One of the entry points for the Get Result workflow.
      * <p>
-     * This state applies the necessary filters or operations in the table (previously specified by the user) and
+     * This state applies the necessary filters in the table (previously specified by the user) and
      * gets the resulting table.
      */
     @Getter
     private final State generateResultSetState;
+
+    /**
+     * One of the entry points for the Get Result workflow.
+     * <p>
+     * This state applies the necessary filters and/or operations in the table (previously specified by the user) and
+     * gets the resulting table.
+     */
+    @Getter
+    private final State generateResultSetWithOperationState;
 
     /**
      * One of the entry points for the Get Result workflow.
@@ -74,17 +84,31 @@ public class GetResult {
      */
     public GetResult(ReactPlatform reactPlatform, State returnState) {
         val generateResultSetState = state("GenerateResultSet");
+        val generateResultSetWithOperationState = state("GenerateResultSetWithOperation");
         val generateResultSetFromQueryState = state("GenerateResultSetFromQuery");
         val showDataState = state("ShowData");
 
         generateResultSetState
                 .body(context -> {
-                    resultSet = (ResultSet) context.getSession().get(ContextKeys.RESULT_SET);
+                    Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
+                    resultSet = (ResultSet) statement.executeQuery(Operation.NO_OPERATION);
                 })
                 .next()
                 .moveTo(showDataState);
 
         this.generateResultSetState = generateResultSetState.getState();
+
+        generateResultSetWithOperationState
+                .body(context -> {
+                    Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
+                    Operation operation = (Operation) context.getSession().get(ContextKeys.OPERATION);
+                    String[] operationArgs = (String[]) context.getSession().get(ContextKeys.OPERATION_ARGS);
+                    resultSet = (ResultSet) statement.executeQuery(operation, operationArgs);
+                })
+                .next()
+                .moveTo(showDataState);
+
+        this.generateResultSetWithOperationState = generateResultSetWithOperationState.getState();
 
         generateResultSetFromQueryState
                 .body(context -> {

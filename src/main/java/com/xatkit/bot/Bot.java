@@ -1,7 +1,5 @@
 package com.xatkit.bot;
 
-import bodi.generator.dataSource.ResultSet;
-import bodi.generator.dataSource.Statement;
 import bodi.generator.dataSource.TabularDataSource;
 import com.xatkit.bot.customQuery.CustomQuery;
 import com.xatkit.bot.getResult.GetResult;
@@ -187,10 +185,7 @@ public final class Bot {
                     fields.addAll(Utils.getEntityValues(Entities.dateFieldEntity));
                     TabularDataSource tds =
                             (TabularDataSource) context.getSession().get(ContextKeys.TABULAR_DATA_SOURCE);
-                    Statement statement = tds.createStatement();
-                    context.getSession().put(ContextKeys.STATEMENT, statement);
-                    ResultSet initialResultSet = statement.executeQuery();
-                    context.getSession().put(ContextKeys.RESULT_SET, initialResultSet);
+                    context.getSession().put(ContextKeys.STATEMENT, tds.createStatement());
                     // Uncomment to disable case-sensitivity in filter values
                         //.setIgnoreCaseFilterValue(true));
                     List<String> filterFieldOptions = new ArrayList<>(fields);

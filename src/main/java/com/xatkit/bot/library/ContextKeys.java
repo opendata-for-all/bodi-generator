@@ -15,13 +15,17 @@ public final class ContextKeys {
      */
     public static final String TABULAR_DATA_SOURCE = "TABULAR_DATA_SOURCE";
     /**
-     * The constant RESULT_SET.
-     */
-    public static final String RESULT_SET = "RESULT_SET";
-    /**
      * The constant STATEMENT.
      */
     public static final String STATEMENT = "STATEMENT";
+    /**
+     * The constant OPERATION.
+     */
+    public static final String OPERATION = "OPERATION";
+    /**
+     * The constant OPERATION_ARGS.
+     */
+    public static final String OPERATION_ARGS = "OPERATION_ARGS";
     /**
      * The constant FILTER_FIELD_OPTIONS.
      */

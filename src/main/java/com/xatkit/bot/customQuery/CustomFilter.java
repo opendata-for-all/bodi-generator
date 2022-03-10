@@ -1,5 +1,6 @@
 package com.xatkit.bot.customQuery;
 
+import bodi.generator.dataSource.Operation;
 import bodi.generator.dataSource.ResultSet;
 import bodi.generator.dataSource.Statement;
 import com.xatkit.bot.library.ContextKeys;
@@ -38,6 +39,10 @@ public class CustomFilter {
     private final State saveCustomFilterState;
 
     /**
+     * This variable stores the number of rows of the generated result set.
+     */
+    private int resultSetNumRows;
+    /**
      * Instantiates a new Custom Filter workflow.
      *
      * @param reactPlatform the react platform of a chatbot
@@ -55,8 +60,8 @@ public class CustomFilter {
                     if (!isEmpty(field) && !isEmpty(operator) && !isEmpty(value)) {
                         Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
                         statement.addFilter(field, operator, value);
-                        ResultSet resultSet = statement.executeQuery();
-                        context.getSession().put(ContextKeys.RESULT_SET, resultSet);
+                        ResultSet resultSet = (ResultSet) statement.executeQuery(Operation.NO_OPERATION);
+                        resultSetNumRows = resultSet.getNumRows();
                         reactPlatform.reply(context, MessageFormat.format(messages.getString("FilterAdded"),
                                 field, operator, value, resultSet.getNumRows()));
                     } else {
@@ -64,8 +69,8 @@ public class CustomFilter {
                     }
                 })
                 .next()
-                .when(context -> ((ResultSet) context.getSession().get(ContextKeys.RESULT_SET)).getNumRows() <= maxEntriesToDisplay).moveTo(getResult.getGenerateResultSetState())
-                .when(context -> ((ResultSet) context.getSession().get(ContextKeys.RESULT_SET)).getNumRows() > maxEntriesToDisplay).moveTo(selectNextActionState);
+                .when(context -> resultSetNumRows <= maxEntriesToDisplay).moveTo(getResult.getGenerateResultSetState())
+                .when(context -> resultSetNumRows > maxEntriesToDisplay).moveTo(selectNextActionState);
 
         selectNextActionState
                 .body(context -> {

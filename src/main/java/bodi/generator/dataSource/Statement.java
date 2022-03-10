@@ -3,12 +3,17 @@ package bodi.generator.dataSource;
 import com.xatkit.bot.Bot;
 import com.xatkit.bot.library.Utils;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -60,6 +65,8 @@ public class Statement {
      * Otherwise, all filters will be case-sensitive ({@code "John"} would be different from {@code "john"}).
      */
     private boolean ignoreCaseFilterValue;
+
+    private final String NULL_CELL = "<NULL>";
 
     /**
      * Instantiates a new Statement bound to a given {@link TabularDataSource}.
@@ -300,45 +307,43 @@ public class Statement {
     /**
      * Executes the query with the current {@link #filters}, {@link #fields} and the {@link #ignoreCaseFilterValue}
      * condition.
-     *
-     * @return the result set
-     * @see ResultSet
-     */
-    public ResultSet executeQuery() {
-        List<String> header = tds.getHeaderCopy();
-        List<Row> table = tds.getTableCopy();
-        // Filtering
-        applyFilters(header, table);
-        // Deleting fields not present in fields
-        deleteFields(header, table);
-        return new ResultSet(header, table);
-    }
-
-    /**
-     * Executes the query with the current {@link #filters}, {@link #fields} and the {@link #ignoreCaseFilterValue}
-     * condition.
      * <p>
-     * In addition to {@link #executeQuery()}, this method allows to run another operation to the generated result set.
+     * This method allows to run another operation to the generated result
+     * set, and return the appropriate object.
      *
      * @param operation the operation
      * @param args      the arguments of the operation (if any)
      * @return the result set
      * @see ResultSet
      */
-    public ResultSet executeQuery(Operation operation, String... args) {
+    public Object executeQuery(Operation operation, String... args) {
         List<String> header = tds.getHeaderCopy();
         List<Row> table = tds.getTableCopy();
         // Filtering
         applyFilters(header, table);
 
         switch (operation) {
+            case NO_OPERATION:
+                deleteFields(header, table);
+                return new ResultSet(header, table);
             case SHOW_FIELD_DISTINCT:
                 showFieldDistinct(header, table, args[0]);
-                break;
+                return new ResultSet(header, table);
+            case FREQUENT_VALUE_IN_FIELD:
+                return frequentValueInField(header, table, args[0], args[1]);
             default:
                 break;
         }
-        return new ResultSet(header, table);
+        return null;
+    }
+
+    private void selectField(List<String> header, List<Row> table, String field) {
+        List<String> fieldsToDelete = tds.getHeaderCopy();
+        fieldsToDelete.remove(field);
+        for (String fieldToDelete : fieldsToDelete) {
+            table.forEach(row -> row.removeValue(header.indexOf(fieldToDelete)));
+            header.remove(fieldToDelete);
+        }
     }
 
     /**
@@ -351,12 +356,7 @@ public class Statement {
      * @see Operation#SHOW_FIELD_DISTINCT
      */
     private void showFieldDistinct(List<String> header, List<Row> table, String field) {
-        List<String> fieldsToDelete = tds.getHeaderCopy();
-        fieldsToDelete.remove(field);
-        for (String fieldToDelete : fieldsToDelete) {
-            table.forEach(row -> row.removeValue(header.indexOf(fieldToDelete)));
-            header.remove(fieldToDelete);
-        }
+        selectField(header, table, field);
         Set<String> fieldValues = new HashSet<>();
         table.removeIf(row -> !fieldValues.add(row.getColumnValue(0)));
     }

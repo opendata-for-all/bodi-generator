@@ -154,6 +154,9 @@ public final class Intents {
             .getIntentDefinition();
 
 
+    /**
+     * The intent customShowFieldDistinctIntent.
+     */
     public static final IntentDefinition customShowFieldDistinctIntent = intent("CustomShowFieldDistinct")
             .trainingSentences(BUNDLE.getStringArray("CustomShowFieldDistinct"))
             .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(Entities.fieldEntity)

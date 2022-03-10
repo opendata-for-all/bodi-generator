@@ -6,6 +6,10 @@ package bodi.generator.dataSource;
 public enum Operation {
 
     /**
+     * No operation or empty operation.
+     */
+    NO_OPERATION,
+    /**
      * SHOW_FIELD_DISTINCT Operation.
      * <p>
      * Given a field name, this operation gets the unique values (i.e. a set) of that field
