@@ -48,7 +48,7 @@ class DataSourceTest{
      */
     @Test
     void testResultSetDeepCopy() {
-        ResultSet resultSet = statement.executeQuery();
+        ResultSet resultSet = (ResultSet) statement.executeQuery(Operation.NO_OPERATION);
         assertEquals(resultSet.getNumRows(), tds.getNumRows());
         assertEquals(resultSet.getNumColumns(), tds.getNumColumns());
         assertNotSame(resultSet.getHeader(), tds.getHeaderCopy());
@@ -71,7 +71,7 @@ class DataSourceTest{
                 .addField("DONES")
                 .addField("HOMES")
                 .addField("DESC_NACIONALITAT");
-        ResultSet resultSet1 = statement.executeQuery();
+        ResultSet resultSet1 = (ResultSet) statement.executeQuery(Operation.NO_OPERATION);
         assertEquals(3, resultSet1.getNumColumns());
         assertEquals(Arrays.asList("DESC_NACIONALITAT", "HOMES", "DONES"), resultSet1.getHeader());
         assertEquals(27, resultSet1.getNumRows());
@@ -81,7 +81,7 @@ class DataSourceTest{
         // 2. Check that the new filter is applied but the previous filter is maintained
         statement
                 .addFilter("HOMES", ">", "10");
-        ResultSet resultSet2 = statement.executeQuery();
+        ResultSet resultSet2 = (ResultSet) statement.executeQuery(Operation.NO_OPERATION);
         assertEquals(3, resultSet2.getNumColumns());
         assertEquals(Arrays.asList("DESC_NACIONALITAT", "HOMES", "DONES"), resultSet2.getHeader());
         assertEquals(12, resultSet2.getNumRows());
@@ -92,7 +92,7 @@ class DataSourceTest{
         // 3. A field cannot be equal to two different values, so numRows should be 0
         statement
                 .addFilter("DESC_NACIONALITAT", "equals", "Espanya");
-        ResultSet resultSet3 = statement.executeQuery();
+        ResultSet resultSet3 = (ResultSet) statement.executeQuery(Operation.NO_OPERATION);
         assertEquals(0, resultSet3.getNumRows());
     }
 
@@ -127,7 +127,7 @@ class DataSourceTest{
         statement
                 .addFilter("DESC_NACIONALITAT", "equals", "XINA")
                 .setIgnoreCaseFilterValue(true);
-        ResultSet resultSet1 = statement.executeQuery();
+        ResultSet resultSet1 = (ResultSet) statement.executeQuery(Operation.NO_OPERATION);
         assertEquals(27, resultSet1.getNumRows());
         for (int i = 0; i < resultSet1.getNumRows(); i++) {
             assertEquals("Xina", resultSet1.getRow(i).getColumnValue(2));
