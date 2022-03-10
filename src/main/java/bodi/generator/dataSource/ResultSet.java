@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
  * and a {@link TabularDataSource} is generated from a tabular file such as csv.
  * @see TabularDataSource
  * @see Statement
- * @see Statement#executeQuery()
+ * @see Statement#executeQuery(Operation, String...) 
  */
 public class ResultSet {
 

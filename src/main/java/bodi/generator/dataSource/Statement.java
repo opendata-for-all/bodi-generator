@@ -66,6 +66,9 @@ public class Statement {
      */
     private boolean ignoreCaseFilterValue;
 
+    /**
+     * Constant value for the empty cells of a {@link TabularDataSource}.
+     */
     private final String NULL_CELL = "<NULL>";
 
     /**
@@ -313,8 +316,7 @@ public class Statement {
      *
      * @param operation the operation
      * @param args      the arguments of the operation (if any)
-     * @return the result set
-     * @see ResultSet
+     * @return          the object containing the result of the query
      */
     public Object executeQuery(Operation operation, String... args) {
         List<String> header = tds.getHeaderCopy();
@@ -337,6 +339,13 @@ public class Statement {
         return null;
     }
 
+    /**
+     * Updates a header and a table, removing all the fields (columns) except the one passed as an argument.
+     *
+     * @param header the header
+     * @param table  the table
+     * @param field  the field to preserve in the header and the table
+     */
     private void selectField(List<String> header, List<Row> table, String field) {
         List<String> fieldsToDelete = tds.getHeaderCopy();
         fieldsToDelete.remove(field);
@@ -344,6 +353,26 @@ public class Statement {
             table.forEach(row -> row.removeValue(header.indexOf(fieldToDelete)));
             header.remove(fieldToDelete);
         }
+    }
+
+    /**
+     * Given a field name, gets the frequency of each value of that field.
+     *
+     * @param header the header
+     * @param table  the table
+     * @param field  the target field to get the frequencies of its values
+     * @return       a {@link Map} containing the value - frequency pairs
+     */
+    private Map<String, Integer> getFieldFrequencies(List<String> header, List<Row> table, String field) {
+        selectField(header, table, field);
+        Map<String, Integer> frequenciesTable = new HashMap<>();
+        for (Row row : table) {
+            String value = row.getColumnValue(0);
+            value = (value.equals("") ? NULL_CELL : value);
+            int count = frequenciesTable.getOrDefault(value, 0);
+            frequenciesTable.put(value, count + 1);
+        }
+        return frequenciesTable;
     }
 
     /**
@@ -361,18 +390,17 @@ public class Statement {
         table.removeIf(row -> !fieldValues.add(row.getColumnValue(0)));
     }
 
-    private Map<String, Integer> getFieldFrequencies(List<String> header, List<Row> table, String field) {
-        selectField(header, table, field);
-        Map<String, Integer> frequenciesTable = new HashMap<>();
-        for (Row row : table) {
-            String value = row.getColumnValue(0);
-            value = (value.equals("") ? NULL_CELL : value);
-            int count = frequenciesTable.getOrDefault(value, 0);
-            frequenciesTable.put(value, count + 1);
-        }
-        return frequenciesTable;
-    }
-
+    /**
+     * Executes the {@link Operation#FREQUENT_VALUE_IN_FIELD} operation.
+     *
+     * @param header            the header of a result set
+     * @param table             the table of a result set
+     * @param field             the field from which the most or least frequent values are to be gotten
+     * @param frequencyOperator the kind of frequency that wants to be obtained: {@code most} for the most frequent
+     *                          values, and {@code least} for the least frequent values
+     *
+     * @see Operation#SHOW_FIELD_DISTINCT
+     */
     private Pair<Set<String>, Integer> frequentValueInField(List<String> header, List<Row> table, String field,
                                                             String frequencyOperator) {
         if (!table.isEmpty()) {
