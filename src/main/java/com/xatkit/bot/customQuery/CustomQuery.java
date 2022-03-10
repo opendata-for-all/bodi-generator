@@ -21,6 +21,7 @@ import static com.xatkit.dsl.DSL.state;
  * <ul>
  *     <li>{@link CustomFilter}</li>
  *     <li>{@link CustomShowFieldDistinct}</li>
+ *     <li>{@link CustomFrequentValueInField}</li>
  * </ul>
  * When no pre-defined query is matched, it is executed {@link GetResult#getGenerateResultSetFromQueryState()}
  */
@@ -43,6 +44,11 @@ public class CustomQuery {
     public CustomShowFieldDistinct customShowFieldDistinct;
 
     /**
+     * The Custom Frequent Value In Field workflow.
+     */
+    public CustomFrequentValueInField customFrequentValueInField;
+
+    /**
      * Instantiates a new Custom Query workflow.
      *
      * @param reactPlatform the react platform of a chatbot
@@ -51,6 +57,7 @@ public class CustomQuery {
     public CustomQuery(ReactPlatform reactPlatform, State returnState) {
         customFilter = new CustomFilter(reactPlatform, returnState);
         customShowFieldDistinct = new CustomShowFieldDistinct(reactPlatform, returnState);
+        customFrequentValueInField = new CustomFrequentValueInField(reactPlatform, returnState);
 
         val awaitingCustomQueryState = state("AwaitingCustomQuery");
 
@@ -60,6 +67,8 @@ public class CustomQuery {
                 })
                 .next()
                 .when(intentIs(Intents.customShowFieldDistinctIntent)).moveTo(customShowFieldDistinct.getProcessCustomShowFieldDistinctState())
+                .when(intentIs(Intents.customMostFrequentValueInFieldIntent)).moveTo(customFrequentValueInField.getProcessCustomMostFrequentValueInFieldState())
+                .when(intentIs(Intents.customLeastFrequentValueInFieldIntent)).moveTo(customFrequentValueInField.getProcessCustomLeastFrequentValueInFieldState())
                 .when(intentIs(Intents.customNumericFilterIntent)).moveTo(customFilter.getSaveCustomFilterState())
                 .when(intentIs(Intents.customDateFilterIntent)).moveTo(customFilter.getSaveCustomFilterState())
                 .when(intentIs(Intents.customTextualFilterIntent)).moveTo(customFilter.getSaveCustomFilterState())

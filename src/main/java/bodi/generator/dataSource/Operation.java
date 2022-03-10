@@ -14,5 +14,11 @@ public enum Operation {
      * <p>
      * Given a field name, this operation gets the unique values (i.e. a set) of that field
      */
-    SHOW_FIELD_DISTINCT
+    SHOW_FIELD_DISTINCT,
+    /**
+     * FREQUENT_VALUE_IN_FIELD Operation.
+     * <p>
+     * Given a field name, this operation gets the most or the least frequent values of that field
+     */
+    FREQUENT_VALUE_IN_FIELD
 }

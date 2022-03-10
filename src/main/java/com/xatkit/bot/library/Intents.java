@@ -162,4 +162,20 @@ public final class Intents {
             .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(Entities.fieldEntity)
             .getIntentDefinition();
 
+
+    /**
+     * The intent customMostFrequentValueInFieldIntent.
+     */
+    public static final IntentDefinition customMostFrequentValueInFieldIntent = intent("CustomMostFrequentValueInField")
+            .trainingSentences(BUNDLE.getStringArray("CustomMostFrequentValueInField"))
+            .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(Entities.fieldEntity)
+            .getIntentDefinition();
+    /**
+     * The intent customLeastFrequentValueInFieldIntent.
+     */
+    public static final IntentDefinition customLeastFrequentValueInFieldIntent = intent("CustomLeastFrequentValueInField")
+            .trainingSentences(BUNDLE.getStringArray("CustomLeastFrequentValueInField"))
+            .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(Entities.fieldEntity)
+            .getIntentDefinition();
+
 }

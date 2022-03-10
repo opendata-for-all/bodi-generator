@@ -361,6 +361,40 @@ public class Statement {
         table.removeIf(row -> !fieldValues.add(row.getColumnValue(0)));
     }
 
+    private Map<String, Integer> getFieldFrequencies(List<String> header, List<Row> table, String field) {
+        selectField(header, table, field);
+        Map<String, Integer> frequenciesTable = new HashMap<>();
+        for (Row row : table) {
+            String value = row.getColumnValue(0);
+            value = (value.equals("") ? NULL_CELL : value);
+            int count = frequenciesTable.getOrDefault(value, 0);
+            frequenciesTable.put(value, count + 1);
+        }
+        return frequenciesTable;
+    }
+
+    private Pair<Set<String>, Integer> frequentValueInField(List<String> header, List<Row> table, String field,
+                                                            String frequencyOperator) {
+        if (!table.isEmpty()) {
+            Map<String, Integer> frequenciesTable = getFieldFrequencies(header, table, field);
+            Map.Entry<String, Integer> firstEntry = frequenciesTable.entrySet().iterator().next();
+            Set<String> frequentValues = new HashSet<>(Collections.singleton(firstEntry.getKey()));
+            int frequency = firstEntry.getValue();
+            for (Map.Entry<String, Integer> entry : frequenciesTable.entrySet()) {
+                if (frequencyOperator.equals("most") && entry.getValue() > frequency
+                        || frequencyOperator.equals("least") && entry.getValue() < frequency) {
+                    frequentValues = new HashSet<>(Collections.singleton(entry.getKey()));
+                    frequency = entry.getValue();
+                } else if (entry.getValue() == frequency) {
+                    frequentValues.add(entry.getKey());
+                }
+            }
+            return new MutablePair<>(frequentValues, frequency);
+        } else {
+            return null;
+        }
+    }
+
     /**
      * Gets the collection of filters as Strings.
      *
