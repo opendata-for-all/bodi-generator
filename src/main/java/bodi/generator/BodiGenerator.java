@@ -215,7 +215,7 @@ public final class BodiGenerator {
 
             System.out.println("Creating the pom file");
             Path pomFile = Files.createFile(Paths.get(outputFolder + "/pom.xml"));
-            Files.write(pomFile, CodeGenerator.generatePomFile(botName).getBytes());
+            Files.write(pomFile, CodeGenerator.generatePomFile(botName, conf.getBoolean("enable_testing")).getBytes());
 
             System.out.println("Copying the bodi.generator.dataSource package");
             File dsSource = new File("src/main/java/bodi/generator/dataSource/");
@@ -270,6 +270,11 @@ public final class BodiGenerator {
             File messagesEsSource = new File("src/main/resources/messages_es.properties");
             File messagesEsDest = new File(outputFolder + "/src/main/resources/messages_es.properties");
             FileUtils.copyFile(messagesEsSource, messagesEsDest);
+
+            System.out.println("Copying the com.xatkit.bot test package");
+            File testBotSource = new File("src/test/java/com/xatkit/bot/");
+            File testBotDest = new File(outputFolder + "/src/test/java/com/xatkit/bot/");
+            FileUtils.copyDirectory(testBotSource, testBotDest);
 
             System.out.println("Creating resource bot.properties");
             createBotPropertiesFile(conf);

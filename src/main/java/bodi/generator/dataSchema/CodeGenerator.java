@@ -40,9 +40,7 @@ public final class CodeGenerator {
                         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
                         <maven-assembly-plugin.version>3.1.0</maven-assembly-plugin.version>
                         <maven-help-plugin.version>3.2.0</maven-help-plugin.version>
-                        <junit.version>4.12</junit.version>
-                        <assertj.version>3.14.0</assertj.version>
-                        <mockito.version>3.3.3</mockito.version>
+                        <junit-jupiter.version>LATEST</junit-jupiter.version>
                         <lombok.version>LATEST</lombok.version>
                         <opencsv.version>5.5.2</opencsv.version>
                     </properties>
@@ -87,97 +85,93 @@ public final class CodeGenerator {
                             <artifactId>xatkit-logs-postgres</artifactId>
                             <version>0.0.1-SNAPSHOT</version>
                         </dependency>
-                        <!-- Utils -->
-                        <dependency>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </dependency>
-                        <!-- Tests -->
-                        <dependency>
-                            <groupId>junit</groupId>
-                            <artifactId>junit</artifactId>
-                        </dependency>
-                        <dependency>
-                            <groupId>org.assertj</groupId>
-                            <artifactId>assertj-core</artifactId>
-                        </dependency>
-                        <dependency>
-                            <groupId>org.mockito</groupId>
-                            <artifactId>mockito-core</artifactId>
-                        </dependency>
-                    </dependencies>
-                    <dependencyManagement>
-                        <dependencies>
-                            <dependency>
-                                <groupId>com.opencsv</groupId>
-                                <artifactId>opencsv</artifactId>
-                                <version>${opencsv.version}</version>
-                            </dependency>
-                            <!-- Utils -->
-                            <dependency>
-                                <groupId>org.projectlombok</groupId>
-                                <artifactId>lombok</artifactId>
-                                <version>${lombok.version}</version>
-                                <scope>provided</scope>
-                            </dependency>
-                            <!-- Tests -->
-                            <dependency>
-                                <groupId>junit</groupId>
-                                <artifactId>junit</artifactId>
-                                <version>${junit.version}</version>
-                                <scope>test</scope>
-                            </dependency>
-                            <dependency>
-                                <groupId>org.assertj</groupId>
-                                <artifactId>assertj-core</artifactId>
-                                <scope>test</scope>
-                                <version>${assertj.version}</version>
-                            </dependency>
-                            <dependency>
-                                <groupId>org.mockito</groupId>
-                                <artifactId>mockito-core</artifactId>
-                                <version>${mockito.version}</version>
-                                <scope>test</scope>
-                            </dependency>
-                        </dependencies>
-                    </dependencyManagement>
-                    <build>
-                        <pluginManagement>
-                            <plugins>
-                                <plugin>
-                                    <groupId>org.apache.maven.plugins</groupId>
-                                    <artifactId>maven-assembly-plugin</artifactId>
-                                    <version>${maven-assembly-plugin.version}</version>
-                                    <executions>
-                                        <execution>
-                                            <phase>package</phase>
-                                            <goals>
-                                                <goal>single</goal>
-                                            </goals>
-                                        </execution>
-                                    </executions>
-                                    <configuration>
-                                        <descriptorRefs>
-                                            <descriptorRef>jar-with-dependencies</descriptorRef>
-                                        </descriptorRefs>
-                                        <archive>
-                                            <manifest>
-                                                <mainClass>Bot</mainClass>
-                                            </manifest>
-                                        </archive>
-                                        <finalName>bot</finalName>
-                                    </configuration>
-                                </plugin>
-                            </plugins>
-                        </pluginManagement>
-                        <plugins>
-                            <plugin>
-                                <groupId>org.apache.maven.plugins</groupId>
-                                <artifactId>maven-assembly-plugin</artifactId>
-                            </plugin>
-                        </plugins>
-                    </build>
-                </project>
                 """;
+                if (enableTesting) {
+                    pom += """
+                            <dependency>
+                                <groupId>com.xatkit</groupId>
+                                <artifactId>labs-bot-testing-tools</artifactId>
+                                <version>0.0.1-SNAPSHOT</version>
+                            </dependency>
+                    """;
+                }
+               pom += """
+                       <!-- Utils -->
+                       <dependency>
+                           <groupId>org.projectlombok</groupId>
+                           <artifactId>lombok</artifactId>
+                       </dependency>
+                       <!-- Tests -->
+                       <dependency>
+                           <groupId>org.junit.jupiter</groupId>
+                           <artifactId>junit-jupiter</artifactId>
+                       </dependency>
+                   </dependencies>
+                   <dependencyManagement>
+                       <dependencies>
+                           <dependency>
+                               <groupId>com.opencsv</groupId>
+                               <artifactId>opencsv</artifactId>
+                               <version>${opencsv.version}</version>
+                           </dependency>
+                           <!-- Utils -->
+                           <dependency>
+                               <groupId>org.projectlombok</groupId>
+                               <artifactId>lombok</artifactId>
+                               <version>${lombok.version}</version>
+                               <scope>provided</scope>
+                           </dependency>
+                           <!-- Tests -->
+                           <dependency>
+                               <groupId>org.junit.jupiter</groupId>
+                               <artifactId>junit-jupiter</artifactId>
+                               <version>${junit-jupiter.version}</version>
+                               <scope>test</scope>
+                           </dependency>
+                       </dependencies>
+                   </dependencyManagement>
+                   <build>
+                       <pluginManagement>
+                           <plugins>
+                               <plugin>
+                                   <groupId>org.apache.maven.plugins</groupId>
+                                   <artifactId>maven-assembly-plugin</artifactId>
+                                   <version>${maven-assembly-plugin.version}</version>
+                                   <executions>
+                                       <execution>
+                                           <phase>package</phase>
+                                           <goals>
+                                               <goal>single</goal>
+                                           </goals>
+                                       </execution>
+                                   </executions>
+                                   <configuration>
+                                       <descriptorRefs>
+                                           <descriptorRef>jar-with-dependencies</descriptorRef>
+                                       </descriptorRefs>
+                                       <archive>
+                                           <manifest>
+                                               <mainClass>Bot</mainClass>
+                                           </manifest>
+                                       </archive>
+                                       <finalName>bot</finalName>
+                                   </configuration>
+                               </plugin>
+                           </plugins>
+                       </pluginManagement>
+                       <plugins>
+                           <plugin>
+                               <groupId>org.apache.maven.plugins</groupId>
+                               <artifactId>maven-assembly-plugin</artifactId>
+                           </plugin>
+                           <plugin>
+                               <artifactId>maven-surefire-plugin</artifactId>
+                               <version>2.22.1</version>
+                           </plugin>
+                       </plugins>
+                   </build>
+               </project>
+               """;
+        return pom;
     }
 }

@@ -47,6 +47,12 @@
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.xatkit</groupId>
+            <artifactId>labs-bot-testing-tools</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
         <!-- Utilities -->
 
         <dependency>

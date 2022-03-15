@@ -6,7 +6,6 @@ import bodi.generator.dataSource.Statement;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Intents;
 import com.xatkit.bot.library.Utils;
-import com.xatkit.bot.nlp.NLPServerClient;
 import com.xatkit.execution.State;
 import com.xatkit.plugins.react.platform.ReactPlatform;
 import lombok.Getter;
@@ -16,6 +15,7 @@ import java.text.MessageFormat;
 
 import static com.xatkit.bot.Bot.coreLibraryI18n;
 import static com.xatkit.bot.Bot.messages;
+import static com.xatkit.bot.Bot.nlpServerClient;
 import static com.xatkit.bot.Bot.pageLimit;
 import static com.xatkit.dsl.DSL.intentIs;
 import static com.xatkit.dsl.DSL.state;
@@ -58,18 +58,13 @@ public class GetResult {
      * One of the entry points for the Get Result workflow.
      * <p>
      * When no intent is recognized from a user question, this state is executed to try to obtain a tabular answer to
-     * that question, using {@link #nlpServerClient}.
+     * that question, using {@link com.xatkit.bot.Bot#nlpServerClient}.
      * <p>
      * The filters previously applied by the user are also added to
      * the query (see {@link com.xatkit.bot.nlp.NLPServerClient#runQuery(String, Statement)}
      */
     @Getter
     private final State generateResultSetFromQueryState;
-
-    /**
-     * The client that interacts with the server that deploys the NLP models to answer the questions.
-     */
-    NLPServerClient nlpServerClient = new NLPServerClient();
 
     /**
      * This {@link ResultSet} stores the result to be printed.

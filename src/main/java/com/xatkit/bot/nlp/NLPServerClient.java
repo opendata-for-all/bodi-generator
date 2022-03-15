@@ -4,6 +4,7 @@ import bodi.generator.dataSource.ResultSet;
 import bodi.generator.dataSource.Row;
 import bodi.generator.dataSource.Statement;
 import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
 import com.xatkit.bot.Bot;
 import fr.inria.atlanmod.commons.log.Log;
 import org.apache.commons.configuration2.Configuration;
@@ -13,7 +14,10 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -64,24 +68,75 @@ public class NLPServerClient {
     }
 
     /**
-     * Makes a query to the server.
+     * Gets the response from the server endpoint.
      *
-     * @param input the input of the server
-     * @return if successful, the {@link bodi.generator.dataSource.ResultSet} containing the result of the server,
-     * otherwise an empty {@link bodi.generator.dataSource.ResultSet}.
+     * @param input     the input of the server
+     * @param statement the statement containing information to add to the request
+     * @return the server response
+     * @throws UnirestException
      */
-    public ResultSet runQuery(String input, Statement statement) {
+    private JSONObject getResponse(String input, Statement statement) throws UnirestException {
         JSONObject request = new JSONObject();
         request.put("input", input);
         request.put("language", Bot.language);
         request.put("fields", statement.getFieldsAsSqlVariables());
         request.put("filters", statement.getFiltersAsSqlConditions());
         request.put("ignoreCase", statement.isIgnoreCaseFilterValue());
+        return Unirest.post(serverUrl + textToTableEndpoint)
+                .header("Content-Type", "application/json")
+                .body(request).asJson().getBody().getObject();
+    }
+
+    /**
+     * Gets the response from the server endpoint.
+     *
+     * @param input     the input of the server
+     * @return the server response
+     * @throws UnirestException
+     */
+    private JSONObject getResponse(String input) throws UnirestException {
+        JSONObject request = new JSONObject();
+        request.put("input", input);
+        request.put("language", Bot.language);
+        request.put("fields", (Collection<?>) null);
+        request.put("filters", (Collection<?>) null);
+        request.put("ignoreCase", (Collection<?>) null);
+        return Unirest.post(serverUrl + textToTableEndpoint)
+                .header("Content-Type", "application/json")
+                .body(request).asJson().getBody().getObject();
+    }
+
+    /**
+     *
+     * @param input
+     * @return
+     */
+    public Map<String, String> getTranslations(String input) {
         try {
-            JSONObject response = Unirest.post(serverUrl + textToTableEndpoint)
-                    .header("Content-Type", "application/json")
-                    .body(request).asJson().getBody().getObject();
-            // assert response.getStatus() == HTTP_STATUS_OK; // COMPROBARRRRR
+            JSONObject response = getResponse(input);
+            String sqlQuery = response.getString("sql");
+            String inputInEnglish = response.getString("input_en");
+            Map<String, String> translations = new HashMap<>();
+            translations.put("sql", sqlQuery);
+            translations.put("english", inputInEnglish);
+            return translations;
+        } catch (Exception e) {
+            Log.error(e, "An error occurred while getting the SQL result, see the attached exception");
+            return null;
+        }
+    }
+
+    /**
+     * Makes a query to the server.
+     *
+     * @param input     the input of the server
+     * @param statement the statement containing information to add to the request
+     * @return if successful, the {@link bodi.generator.dataSource.ResultSet} containing the result of the server,
+     * otherwise an empty {@link bodi.generator.dataSource.ResultSet}.
+     */
+    public ResultSet runQuery(String input, Statement statement) {
+        try {
+            JSONObject response = getResponse(input, statement);
             String sqlQuery = response.getString("sql");
             JSONArray headerJson = response.getJSONArray("header");
             JSONArray tableJson = response.getJSONArray("table");

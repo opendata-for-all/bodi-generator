@@ -7,6 +7,7 @@ import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Entities;
 import com.xatkit.bot.library.Intents;
 import com.xatkit.bot.library.Utils;
+import com.xatkit.bot.nlp.NLPServerClient;
 import com.xatkit.bot.structuredQuery.StructuredQuery;
 import com.xatkit.core.XatkitBot;
 import com.xatkit.plugins.core.library.CoreLibraryI18n;
@@ -114,11 +115,16 @@ public final class Bot {
     public static CustomQuery customQuery;
 
     /**
-     * The entry point of application.
-     *
-     * @param args the input arguments
+     * The client that interacts with the server that deploys the NLP models to answer the questions.
      */
-    public static void main(String[] args) {
+    public static NLPServerClient nlpServerClient = new NLPServerClient();
+
+    /**
+     * Creates the {@link XatkitBot}.
+     *
+     * @return the xatkit chatbot
+     */
+    public static XatkitBot createBot() {
 
         /*
          * Add configuration properties (e.g. authentication tokens, platform tuning, intent provider to use).
@@ -195,7 +201,7 @@ public final class Bot {
                     reactPlatform.reply(context, messages.getString("Greetings"));
                     if (!isEmpty(odataTitle) && !isEmpty(odataUrl)) {
                         reactPlatform.reply(context, "[" + odataTitle + "](" + odataUrl + ")");
-                    }  else if (!isEmpty(odataTitle)) {
+                    } else if (!isEmpty(odataTitle)) {
                         reactPlatform.reply(context, odataTitle);
                     } else if (!isEmpty(odataUrl)) {
                         reactPlatform.reply(context, "[" + odataUrl + "](" + odataUrl + ")");
@@ -234,11 +240,19 @@ public final class Bot {
                 .defaultFallbackState(defaultFallback);
 
 
-        XatkitBot xatkitBot = new XatkitBot(botModel, botConfiguration);
+        return new XatkitBot(botModel, botConfiguration);
+    }
+
+    /**
+     * The entry point of application.
+     *
+     * @param args the input arguments
+     */
+    public static void main(String[] args) {
+        XatkitBot xatkitBot = createBot();
         xatkitBot.run();
         /*
-         * The bot is now started, you can check http://localhost:5000/admin to test it.
-         * The logs of the bot are stored in the logs folder at the root of this project.
+         * The bot is now started.
          */
     }
 }
