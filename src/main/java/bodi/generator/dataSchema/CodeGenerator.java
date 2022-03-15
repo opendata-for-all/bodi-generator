@@ -22,8 +22,8 @@ public final class CodeGenerator {
      * @param botName the bot name
      * @return the string containing the content of the pom.xml file
      */
-    public static String generatePomFile(String botName) {
-        return """
+    public static String generatePomFile(String botName, boolean enableTesting) {
+        String pom = """
                 <?xml version="1.0" encoding="UTF-8"?>
                 <project xmlns="http://maven.apache.org/POM/4.0.0"
                          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
