@@ -399,7 +399,7 @@ public class Statement {
      * @param frequencyOperator the kind of frequency that wants to be obtained: {@code most} for the most frequent
      *                          values, and {@code least} for the least frequent values
      *
-     * @see Operation#SHOW_FIELD_DISTINCT
+     * @see Operation#FREQUENT_VALUE_IN_FIELD
      */
     private Pair<Set<String>, Integer> frequentValueInField(List<String> header, List<Row> table, String field,
                                                             String frequencyOperator) {
