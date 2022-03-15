@@ -284,14 +284,17 @@ public final class BodiGenerator {
 
             List<String> botFiles = new ArrayList<>();
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/Bot.java");
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/getResult/GetResult.java");
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomQuery.java");
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomFilter.java");
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomShowFieldDistinct.java");
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomFrequentValueInField.java");
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/structuredQuery/StructuredQuery.java");
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/structuredQuery/SelectViewField.java");
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/structuredQuery/StructuredFilter.java");
 
-            System.out.println("Creating transitionGraph.dot file");
-            Path dotFile = Paths.get(outputFolder + "/src/main/resources/transitionGraph.dot");
+            System.out.println("Creating transitionGraph.dot test file");
+            Path dotFile = Paths.get(outputFolder + "/src/test/resources/transitionGraph.dot");
             Files.write(dotFile, generateGraph(botFiles).getBytes());
 
         } catch (IOException e) {
