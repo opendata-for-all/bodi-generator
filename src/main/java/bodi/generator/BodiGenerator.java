@@ -197,6 +197,7 @@ public final class BodiGenerator {
         String botName = conf.getString("xls.generator.bot.name");
         String inputDocName = conf.getString("xls.importer.xls");
         String outputFolder = conf.getString("xls.generator.output");
+        boolean enableTesting = conf.getBoolean("enable_testing");
         System.out.println("Attempting to create the bot " + botName + " in " + outputFolder);
         try {
             File outputFolderFile = new File(outputFolder);
