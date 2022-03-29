@@ -101,6 +101,11 @@ public final class CodeGenerator {
                            <groupId>org.projectlombok</groupId>
                            <artifactId>lombok</artifactId>
                        </dependency>
+                       <dependency>
+                           <groupId>org.json</groupId>
+                           <artifactId>json</artifactId>
+                           <version>20211205</version>
+                       </dependency>
                        <!-- Tests -->
                        <dependency>
                            <groupId>org.junit.jupiter</groupId>
