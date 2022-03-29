@@ -113,10 +113,13 @@ public final class BodiGenerator {
     /**
      * Creates a Data Schema from a given Tabular Data Source.
      *
-     * @param tds the Tabular Data Source
+     * @param tds                   the Tabular Data Source
+     * @param maxNumDifferentValues if the number of different values of a field is <= than this number, then the
+     *                              field will contain information about its values in the Data Schema. Otherwise, not.
      * @return the Data Schema
      */
-    private static DataSchema tabularDataSourceToDataSchema(TabularDataSource tds, String fieldsFile) {
+    private static DataSchema tabularDataSourceToDataSchema(TabularDataSource tds, String fieldsFile,
+                                                            int maxNumDifferentValues) {
         InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(fieldsFile);
         if (is == null) {
             throw new NullPointerException("Cannot find the fields file \"" + fieldsFile + "\"");
@@ -166,6 +169,9 @@ public final class BodiGenerator {
                         .map(object -> Objects.toString(object, null)).collect(Collectors.toSet());
                 schemaField.addSynonyms(language, synonyms);
                 schemaField.addSynonyms(language, Collections.singleton(schemaField.getReadableName(language)));
+            }
+            if (schemaField.getType().equals(TEXT) && schemaField.getNumDifferentValues() <= maxNumDifferentValues) {
+                schemaField.addMainValues(fieldValuesSet);
             }
             schemaType.addSchemaField(schemaField);
         }
@@ -375,9 +381,10 @@ public final class BodiGenerator {
         Configuration conf = loadBodiConfigurationProperties("bodi-generator.properties");
         String inputDocName = conf.getString("xls.importer.xls");
         char delimiter = conf.getString("csv.delimiter").charAt(0);
+        int maxNumDifferentValues = conf.getInt("maxNumDifferentValues");
 
         TabularDataSource tds = createTabularDataSource(inputDocName, delimiter);
-        DataSchema ds = tabularDataSourceToDataSchema(tds, "fields.json");
+        DataSchema ds = tabularDataSourceToDataSchema(tds, "fields.json", maxNumDifferentValues);
         createBot(conf, ds);
     }
 }

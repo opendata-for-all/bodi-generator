@@ -178,4 +178,13 @@ public final class Intents {
             .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(Entities.fieldEntity)
             .getIntentDefinition();
 
+
+    /**
+     * The intent customValueFrequencyIntent.
+     */
+    public static final IntentDefinition customValueFrequencyIntent = intent("CustomValueFrequency")
+            .trainingSentences(BUNDLE.getStringArray("CustomValueFrequency"))
+            .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(Entities.fieldValueEntity)
+            .getIntentDefinition();
+
 }

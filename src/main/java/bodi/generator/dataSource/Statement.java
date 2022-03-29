@@ -323,18 +323,21 @@ public class Statement {
         List<Row> table = tds.getTableCopy();
         // Filtering
         applyFilters(header, table);
-
-        switch (operation) {
-            case NO_OPERATION:
-                deleteFields(header, table);
-                return new ResultSet(header, table);
-            case SHOW_FIELD_DISTINCT:
-                showFieldDistinct(header, table, args[0]);
-                return new ResultSet(header, table);
-            case FREQUENT_VALUE_IN_FIELD:
-                return frequentValueInField(header, table, args[0], args[1]);
-            default:
-                break;
+        if (!header.isEmpty() && !table.isEmpty()) {
+            switch (operation) {
+                case NO_OPERATION:
+                    deleteFields(header, table);
+                    return new ResultSet(header, table);
+                case SHOW_FIELD_DISTINCT:
+                    showFieldDistinct(header, table, args[0]);
+                    return new ResultSet(header, table);
+                case FREQUENT_VALUE_IN_FIELD:
+                    return frequentValueInField(header, table, args[0], args[1]);
+                case VALUE_FREQUENCY:
+                    return valueFrequency(header, table, args[0], args[1]);
+                default:
+                    break;
+            }
         }
         return null;
     }
@@ -403,24 +406,34 @@ public class Statement {
      */
     private Pair<Set<String>, Integer> frequentValueInField(List<String> header, List<Row> table, String field,
                                                             String frequencyOperator) {
-        if (!table.isEmpty()) {
-            Map<String, Integer> frequenciesTable = getFieldFrequencies(header, table, field);
-            Map.Entry<String, Integer> firstEntry = frequenciesTable.entrySet().iterator().next();
-            Set<String> frequentValues = new HashSet<>(Collections.singleton(firstEntry.getKey()));
-            int frequency = firstEntry.getValue();
-            for (Map.Entry<String, Integer> entry : frequenciesTable.entrySet()) {
-                if (frequencyOperator.equals("most") && entry.getValue() > frequency
-                        || frequencyOperator.equals("least") && entry.getValue() < frequency) {
-                    frequentValues = new HashSet<>(Collections.singleton(entry.getKey()));
-                    frequency = entry.getValue();
-                } else if (entry.getValue() == frequency) {
-                    frequentValues.add(entry.getKey());
-                }
+        Map<String, Integer> frequenciesTable = getFieldFrequencies(header, table, field);
+        Map.Entry<String, Integer> firstEntry = frequenciesTable.entrySet().iterator().next();
+        Set<String> frequentValues = new HashSet<>(Collections.singleton(firstEntry.getKey()));
+        int frequency = firstEntry.getValue();
+        for (Map.Entry<String, Integer> entry : frequenciesTable.entrySet()) {
+            if (frequencyOperator.equals("most") && entry.getValue() > frequency
+                    || frequencyOperator.equals("least") && entry.getValue() < frequency) {
+                frequentValues = new HashSet<>(Collections.singleton(entry.getKey()));
+                frequency = entry.getValue();
+            } else if (entry.getValue() == frequency) {
+                frequentValues.add(entry.getKey());
             }
-            return new MutablePair<>(frequentValues, frequency);
-        } else {
-            return null;
         }
+        return new MutablePair<>(frequentValues, frequency);
+    }
+
+    /**
+     * Executes the {@link Operation#VALUE_FREQUENCY} operation.
+     *
+     * @param header the header of a result set
+     * @param table  the table of a result set
+     * @param field  the field that the value belongs to
+     * @param value  the value from which the frequency is to be gotten
+     * @return the frequency of the value within the field
+     */
+    private int valueFrequency(List<String> header, List<Row> table, String field, String value) {
+        Map<String, Integer> frequenciesTable = getFieldFrequencies(header, table, field);
+        return frequenciesTable.get(value);
     }
 
     /**

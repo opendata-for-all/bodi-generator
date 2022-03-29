@@ -13,6 +13,8 @@ import org.json.JSONTokener;
 
 import java.io.InputStream;
 import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.xatkit.dsl.DSL.mapping;
 
@@ -135,4 +137,47 @@ public final class Entities {
      */
     public static final EntityDefinitionReferenceProvider dateOperatorEntity = generateEntity("dateOperatorEntity");
 
+    /**
+     * The entity fieldValueEntity.
+     */
+    public static final EntityDefinitionReferenceProvider fieldValueEntity = generateFieldValueEntity();
+
+    /**
+     * The keys of this map are the entries of the entity {@link #fieldValueEntity} (i.e. the values of the fields),
+     * and the values of the map are the field they belong to.
+     * <p>
+     * This data structure is necessary since {@link #fieldValueEntity} contains the values of all fields together, so
+     * we need this to know which field they belong to.
+     */
+    public static Map<String, String> fieldValueMap;
+
+    /**
+     * Generates the fieldValueEntity, which contains an entry for each value of all fields (and their optional
+     * synonyms). The values of the fields are stored in {@link #entitiesJson}. Note that not all values are
+     * necessarily stored. Only those that are considered important for the chatbot should be stored.
+     *
+     * @return the fieldValueEntity
+     */
+    private static EntityDefinitionReferenceProvider generateFieldValueEntity() {
+        fieldValueMap = new HashMap<>();
+        MappingEntryStep entity = mapping("fieldValueEntity");
+        for (String typeFieldEntityName : entitiesJson.keySet()) {
+            for (String fieldName : entitiesJson.getJSONObject(typeFieldEntityName).keySet()) {
+                JSONObject field = entitiesJson.getJSONObject(typeFieldEntityName).getJSONObject(fieldName);
+                if (field.has("values") && !field.getJSONObject("values").isEmpty()) {
+                    JSONObject fieldValues = field.getJSONObject("values");
+                    for (String entryName : fieldValues.keySet()) {
+                        JSONObject valueObject = fieldValues.getJSONObject(entryName);
+                        MappingSynonymStep synonymStep = entity.entry().value(entryName);
+                        for (Object synonym : valueObject.getJSONArray(Bot.language)) {
+                            synonymStep.synonym((String) synonym);
+                        }
+                        fieldValueMap.put(entryName, fieldName);
+                    }
+                }
+            }
+        }
+        Utils.printEntity((EntityDefinitionReferenceProvider) entity);
+        return (EntityDefinitionReferenceProvider) entity;
+    }
 }

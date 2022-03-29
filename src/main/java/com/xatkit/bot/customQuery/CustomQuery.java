@@ -22,6 +22,7 @@ import static com.xatkit.dsl.DSL.state;
  *     <li>{@link CustomFilter}</li>
  *     <li>{@link CustomShowFieldDistinct}</li>
  *     <li>{@link CustomFrequentValueInField}</li>
+ *     <li>{@link CustomValueFrequency}</li>
  * </ul>
  * When no pre-defined query is matched, it is executed {@link GetResult#getGenerateResultSetFromQueryState()}
  */
@@ -49,6 +50,11 @@ public class CustomQuery {
     public CustomFrequentValueInField customFrequentValueInField;
 
     /**
+     * The Custom Value Frequency workflow.
+     */
+    public CustomValueFrequency customValueFrequency;
+
+    /**
      * Instantiates a new Custom Query workflow.
      *
      * @param reactPlatform the react platform of a chatbot
@@ -58,6 +64,7 @@ public class CustomQuery {
         customFilter = new CustomFilter(reactPlatform, returnState);
         customShowFieldDistinct = new CustomShowFieldDistinct(reactPlatform, returnState);
         customFrequentValueInField = new CustomFrequentValueInField(reactPlatform, returnState);
+        customValueFrequency = new CustomValueFrequency(reactPlatform, returnState);
 
         val awaitingCustomQueryState = state("AwaitingCustomQuery");
 
@@ -69,6 +76,7 @@ public class CustomQuery {
                 .when(intentIs(Intents.customShowFieldDistinctIntent)).moveTo(customShowFieldDistinct.getProcessCustomShowFieldDistinctState())
                 .when(intentIs(Intents.customMostFrequentValueInFieldIntent)).moveTo(customFrequentValueInField.getProcessCustomMostFrequentValueInFieldState())
                 .when(intentIs(Intents.customLeastFrequentValueInFieldIntent)).moveTo(customFrequentValueInField.getProcessCustomLeastFrequentValueInFieldState())
+                .when(intentIs(Intents.customValueFrequencyIntent)).moveTo(customValueFrequency.getEntryPoint())
                 .when(intentIs(Intents.customNumericFilterIntent)).moveTo(customFilter.getSaveCustomFilterState())
                 .when(intentIs(Intents.customDateFilterIntent)).moveTo(customFilter.getSaveCustomFilterState())
                 .when(intentIs(Intents.customTextualFilterIntent)).moveTo(customFilter.getSaveCustomFilterState())

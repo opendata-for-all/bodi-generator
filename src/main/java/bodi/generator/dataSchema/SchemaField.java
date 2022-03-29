@@ -48,6 +48,19 @@ public class SchemaField {
     private Map<String, Set<String>> synonyms;
 
     /**
+     * It contains a subset of the different values of the field, and this values can contain synonyms in different
+     * languages. Note that being a subset is just a possibility. All different values of the field can be stored
+     * here. Actually, the most common cases are to store all the values (when there are just a few of values) or none
+     * of them (when there are a lot of different values)
+     * <p>
+     * The keys are the values of the field. The values are maps that contain an entry for each language in
+     * {@link #languages} and a set of synonyms in that language (if any).
+     * <p>
+     * Example entry: {"Male", {"en", ["Man"]}, {"es", ["Hombre", "Macho"]}, {"ca", ["Home", "Mascle"]} >
+     */
+    private Map<String, Map<String, Set<String>>> mainValues;
+
+    /**
      * The data type of the field.
      *
      * @see DataType
@@ -68,6 +81,7 @@ public class SchemaField {
     public SchemaField() {
         readableName = new HashMap<>();
         synonyms = new HashMap<>();
+        mainValues = new HashMap<>();
         for (String language : languages) {
             readableName.put(language, null);
             synonyms.put(language, new HashSet<>());
@@ -165,6 +179,23 @@ public class SchemaField {
         this.numDifferentValues = numDifferentValues;
     }
 
+
+    /**
+     * Adds a set of values to {@link #mainValues}, with no synonyms in any value.
+     * @param values
+     */
+    public void addMainValues(Set<String> values) {
+        for (String value : values) {
+            if (!value.isEmpty()) {
+                Map<String, Set<String>> valueSynonyms = new HashMap<>();
+                for (String language: languages) {
+                    valueSynonyms.put(language, new HashSet<>());
+                }
+                mainValues.put(value, valueSynonyms);
+            }
+        }
+    }
+
     /**
      * Generates a JSON object containing all the information of the SchemaField.
      *
@@ -179,6 +210,16 @@ public class SchemaField {
             entity.put(language, languageEntity);
         }
         entity.put("numDifferentValues", this.numDifferentValues);
+        JSONObject valuesEntity = new JSONObject();
+        for (var entry : mainValues.entrySet()) {
+            JSONObject languagesEntity = new JSONObject();
+            String value = entry.getKey();
+            for (var entry2 : entry.getValue().entrySet()) {
+                languagesEntity.put(entry2.getKey(), entry2.getValue());
+            }
+            valuesEntity.put(value, languagesEntity);
+        }
+        entity.put("values", valuesEntity);
         return entity;
     }
 }
