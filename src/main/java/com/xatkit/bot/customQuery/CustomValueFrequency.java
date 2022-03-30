@@ -34,7 +34,7 @@ public class CustomValueFrequency {
      * The entry point for the Custom Value Frequency workflow.
      */
     @Getter
-    private final State entryPoint;
+    private final State processCustomValueFrequencyState;
 
     /**
      * Instantiates a new Custom Value Frequency workflow.
@@ -43,16 +43,16 @@ public class CustomValueFrequency {
      * @param returnState   the state where the chatbot ends up arriving once the workflow is finished
      */
     public CustomValueFrequency(ReactPlatform reactPlatform, State returnState) {
-        val entryPoint = state("EntryPoint");
+        val processCustomValueFrequencyState = state("ProcessCustomValueFrequency");
 
-        entryPoint
+        processCustomValueFrequencyState
                 .body(context -> {
                     String value = (String) context.getIntent().getValue(ContextKeys.VALUE);
                     if (!isEmpty(value)) {
                         String field = Entities.fieldValueMap.get(value);
                         Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
                         int valueFrequency = (int) statement.executeQuery(Operation.VALUE_FREQUENCY, field, value);
-                        reactPlatform.reply(context, MessageFormat.format(messages.getString("CustomShowValueFrequency"),
+                        reactPlatform.reply(context, MessageFormat.format(messages.getString("ShowValueFrequency"),
                                 valueFrequency, field, value));
                     } else {
                         reactPlatform.reply(context, messages.getString("FieldNotRecognized"));
@@ -61,6 +61,6 @@ public class CustomValueFrequency {
                 .next()
                 .moveTo(returnState);
 
-        this.entryPoint = entryPoint.getState();
+        this.processCustomValueFrequencyState = processCustomValueFrequencyState.getState();
     }
 }

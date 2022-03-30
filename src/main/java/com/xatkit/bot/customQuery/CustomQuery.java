@@ -83,7 +83,7 @@ public class CustomQuery {
                 .when(intentIs(Intents.customShowFieldDistinctIntent)).moveTo(customShowFieldDistinct.getProcessCustomShowFieldDistinctState())
                 .when(intentIs(Intents.customMostFrequentValueInFieldIntent)).moveTo(customFrequentValueInField.getProcessCustomMostFrequentValueInFieldState())
                 .when(intentIs(Intents.customLeastFrequentValueInFieldIntent)).moveTo(customFrequentValueInField.getProcessCustomLeastFrequentValueInFieldState())
-                .when(intentIs(Intents.customValueFrequencyIntent)).moveTo(customValueFrequency.getEntryPoint())
+                .when(intentIs(Intents.customValueFrequencyIntent)).moveTo(customValueFrequency.getProcessCustomValueFrequencyState())
                 .when(intentIs(Intents.customValue1MoreThanValue2Intent)).moveTo(customValue1vsValue2.getProcessCustomValue1MoreThanValue2State())
                 .when(intentIs(Intents.customValue1LessThanValue2Intent)).moveTo(customValue1vsValue2.getProcessCustomValue1LessThanValue2State())
                 .when(intentIs(Intents.customNumericFilterIntent)).moveTo(customFilter.getSaveCustomFilterState())
