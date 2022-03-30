@@ -177,7 +177,6 @@ public final class Entities {
                 }
             }
         }
-        Utils.printEntity((EntityDefinitionReferenceProvider) entity);
         return (EntityDefinitionReferenceProvider) entity;
     }
 }

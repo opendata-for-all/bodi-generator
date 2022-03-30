@@ -295,6 +295,8 @@ public final class BodiGenerator {
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomFilter.java");
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomShowFieldDistinct.java");
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomFrequentValueInField.java");
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomValueFrequency.java");
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomValue1vsValue2.java");
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/structuredQuery/StructuredQuery.java");
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/structuredQuery/SelectViewField.java");
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/structuredQuery/StructuredFilter.java");

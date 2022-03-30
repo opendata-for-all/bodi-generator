@@ -187,4 +187,24 @@ public final class Intents {
             .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(Entities.fieldValueEntity)
             .getIntentDefinition();
 
+
+    /**
+     * The intent customValue1MoreThanValue2Intent.
+     */
+    public static final IntentDefinition customValue1MoreThanValue2Intent = intent("CustomValue1MoreThanValue2")
+            .trainingSentences(BUNDLE.getStringArray("CustomValue1MoreThanValue2"))
+            .parameter(ContextKeys.VALUE + "1").fromFragment("VALUE1").entity(Entities.fieldValueEntity)
+            .parameter(ContextKeys.VALUE + "2").fromFragment("VALUE2").entity(Entities.fieldValueEntity)
+            .getIntentDefinition();
+    /**
+     * The intent customValue1LessThanValue2Intent.
+     */
+    public static final IntentDefinition customValue1LessThanValue2Intent = intent("CustomValue1LessThanValue2")
+            .trainingSentences(BUNDLE.getStringArray("CustomValue1LessThanValue2"))
+            .parameter(ContextKeys.VALUE + "1").fromFragment("VALUE1").entity(Entities.fieldValueEntity)
+            .parameter(ContextKeys.VALUE + "2").fromFragment("VALUE2").entity(Entities.fieldValueEntity)
+            .getIntentDefinition();
+
+
+
 }
