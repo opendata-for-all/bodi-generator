@@ -11,32 +11,45 @@ development platform.
 
 1 - [Build the latest version of Xatkit](https://github.com/xatkit-bot-platform/xatkit/wiki/Build-Xatkit)
 
-2 - Clone this repository
+2 - Install [xatkit-bot-platform/labs-bot-testing-tools](https://github.com/xatkit-bot-platform/labs-bot-testing-tools)
 
-3 - Edit the [bodi-generator.properties](src/main/resources/bodi-generator.properties) file according to your purposes 
+3 - Clone this repository
+
+4 - Edit the [bodi-generator.properties](src/main/resources/bodi-generator.properties) file according to your purposes 
 (see [Bot Configuration](#bot-configuration))
 
-4 - Navigate to the root directory and build the project:
+5 - Navigate to the root directory and build the project:
 
 ```bash
 mvn clean compile
 ```
 
-5 - You can run the bot generator!
+6 - You can run the bot generator!
 
 ```bash
 mvn exec:java -Dexec.mainClass="bodi.generator.BodiGenerator"
 ```
 
-6 - If you want to empower your chatbot with NLP functionalities (to provide answers to questions not implemented in 
+7 - If you want to empower your chatbot with NLP functionalities (to provide answers to questions not implemented in 
 the chatbot), you have to deploy a server that runs language models to perform NLP tasks. This server can be found 
 at [opendata-for-all/bodi-nlp-server](https://github.com/opendata-for-all/bodi-nlp-server)
 (see [NLP Server Configuration](#nlp-server-configuration)).
 
-7 - Once the chatbot is generated, you can run it:
+8 - Once the chatbot is generated, you can run it:
 ```bash
 cd <bot-folder>
 mvn clean compile
+```
+
+To run the chatbot tests:
+
+```bash
+mvn test
+```
+
+To run the chatbot itself:
+
+```bash
 mvn exec:java -Dexec.mainClass="com.xatkit.bot.Bot"
 ```
 
@@ -55,6 +68,8 @@ set in [bodi-generator.properties](src/main/resources/bodi-generator.properties)
 | `xls.generator.output`   | The path where the chatbot will be stored                                                                                                                                                                                                                                    |
 | `xls.importer.xls`       | The name of the tabular data file the chatbot will have access to, stored in the [resources](src/main/resources) folder (currently only `csv` files are supported)                                                                                                           |
 | `csv.delimiter`          | The delimiter or separator of the tabular data file cells (e.g. `,`, `\t` (tab))                                                                                                                                                                                             |
+| `enable_testing`         | `true` if you want to enable chatbot testing, `false` otherwise                                                                                                                                                                                                              |
+| `maxNumDifferentValues`  | the maximum number of different values that a field must have to add them to the generated `fields.json` file (e.g. 15)                                                                                                                                                      |
 | `xatkit.intent.provider` | The intent provider the generated chatbot will use. The currently available intent providers are: Dialogflow (`com.xatkit.core.recognition.dialogflow.DialogFlowIntentRecognitionProvider`) and  NLP.js (`com.xatkit.core.recognition.nlpjs.NlpjsIntentRecognitionProvider`) |
 | `xatkit.logs.database`   | The database used to store the chatbot tracing: `com.xatkit.core.recognition.RecognitionMonitorPostgreSQL`. If there is no database, leave this property empty.                                                                                                              |
 
@@ -68,6 +83,8 @@ properties. These will contain default values, so they should be set according t
 |----------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `xatkit.server.port`                   | The port where the chatbot will be running                                                                                                                                                        |
 | `bot.language`                         | The language of the bot (users must talk to the chatbot in this language, and it also replies in this language). Available languages: **Spanish** (`es`),  **Catalan** (`ca`), **English** (`en`) |
+| `bot.pageLimit`                        | The maximum number of entries of a table that are displayed at once in the chatbot chat box, that is, the page size (e.g. 10)                                                                     |
+| `bot.maxEntriesToDisplay`              | If the number of entries of a result set generated after a chatbot query is less or equal than this number, the result set is displayed immediately afterwards (e.g. 7)                           |
 | `xatkit.nlpjs.*`                       | All the properties related to [NLP.js](https://github.com/xatkit-bot-platform/xatkit/wiki/Using-NLP.js) engine (if used)                                                                          |
 | `xatkit.dialogflow.*`                  | All the properties related to [DialogFlow](https://github.com/xatkit-bot-platform/xatkit/wiki/Integrating-DialogFlow) engine (if used)                                                            |
 | `xatkit.recognition.enable_monitoring` | If `true`, enables chatbot monitoring, if `false`, not                                                                                                                                            |
