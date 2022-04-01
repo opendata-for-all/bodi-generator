@@ -324,6 +324,7 @@ public final class BodiGenerator {
             fw.write("xls.importer.xls" + " = " + conf.getString("xls.importer.xls") + "\n");
             fw.write("csv.delimiter" + " = " + conf.getString("csv.delimiter") + "\n");
             fw.write("xatkit.server.port" + " = " + "5000" + "\n");
+            fw.write("xatkit.react.port" + " = " + "5001" + "\n");
             fw.write("bot.language" + " = " + "en" + "\n");
             fw.write("bot.pageLimit" + " = " + "10" + "\n");
             fw.write("bot.maxEntriesToDisplay" + " = " + "5" + "\n");

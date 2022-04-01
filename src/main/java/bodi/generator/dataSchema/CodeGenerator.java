@@ -20,6 +20,7 @@ public final class CodeGenerator {
      * Generates a {@code pom} file for a chatbot.
      *
      * @param botName the bot name
+     * @param enableTesting true if testing is enabled (it will add extra dependencies to the pom file), false otherwise
      * @return the string containing the content of the pom.xml file
      */
     public static String generatePomFile(String botName, boolean enableTesting) {

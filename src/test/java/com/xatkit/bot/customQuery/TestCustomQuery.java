@@ -40,11 +40,12 @@ public class TestCustomQuery {
      * utterance_in_sql}, where the "detected" columns, "utterance_in_english" and "utterance_in_sql" are empty since
      * they will be filled through this process.
      */
-    private static final String fileName = "customQueryUtterances.csv";
+    private static String fileName;
 
     @BeforeAll
     static void setUpBeforeAll() {
         xatkitBot = createBot();
+        fileName = "customQueryUtterances_" + Bot.language + ".csv";
     }
 
     /**
