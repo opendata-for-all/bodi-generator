@@ -329,5 +329,99 @@
         ]
       }
     }
+  },
+  "numericFunctionOperatorEntity": {
+    "max": {
+      "en": {
+        "synonyms": [
+          "maximum",
+          "highest",
+          "biggest",
+          "greatest"
+        ]
+      },
+      "ca": {
+        "synonyms": [
+          "màxim",
+          "més alt",
+          "més gran",
+          "major"
+        ]
+      },
+      "es": {
+        "synonyms": [
+          "máximo",
+          "más alto",
+          "más grande",
+          "mayor"
+        ]
+      }
+    },
+    "min": {
+      "en": {
+        "synonyms": [
+          "minimum",
+          "lowest",
+          "smallest",
+          "minor"
+        ]
+      },
+      "ca": {
+        "synonyms": [
+          "mínim",
+          "més baix",
+          "més petit",
+          "menor"
+        ]
+      },
+      "es": {
+        "synonyms": [
+          "mínimo",
+          "más bajo",
+          "más pequeño",
+          "menor"
+        ]
+      }
+    },
+    "avg": {
+      "en": {
+        "synonyms": [
+          "average",
+          "mean"
+        ]
+      },
+      "ca": {
+        "synonyms": [
+          "promig",
+          "mitjà",
+          "mig"
+        ]
+      },
+      "es": {
+        "synonyms": [
+          "promedio",
+          "medio"
+        ]
+      }
+    },
+    "sum": {
+      "en": {
+        "synonyms": [
+          "total"
+        ]
+      },
+      "ca": {
+        "synonyms": [
+          "suma",
+          "total"
+        ]
+      },
+      "es": {
+        "synonyms": [
+          "suma",
+          "total"
+        ]
+      }
+    }
   }
 }

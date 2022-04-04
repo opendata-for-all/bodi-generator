@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
@@ -335,6 +336,8 @@ public class Statement {
                     return frequentValueInField(header, table, args[0], args[1]);
                 case VALUE_FREQUENCY:
                     return valueFrequency(header, table, args[0], args[1]);
+                case NUMERIC_FIELD_FUNCTION:
+                    return numericFieldFunction(header, table, args[0], args[1]);
                 default:
                     break;
             }
@@ -434,6 +437,59 @@ public class Statement {
     private int valueFrequency(List<String> header, List<Row> table, String field, String value) {
         Map<String, Integer> frequenciesTable = getFieldFrequencies(header, table, field);
         return frequenciesTable.get(value);
+    }
+
+    /**
+     * Executes the {@link Operation#NUMERIC_FIELD_FUNCTION} operation.
+     * <p>
+     * Supported operators are:
+     * <ul>
+     *     <li>{@code max}</li>
+     *     <li>{@code min}</li>
+     *     <li>{@code avg}</li>
+     *     <li>{@code sum}</li>
+     * </ul>
+     *
+     * @param header the header of a result set
+     * @param table  the table of a result set
+     * @param field the field where the operator is to be applied
+     * @param operator the operator
+     * @return
+     */
+    private Float numericFieldFunction(List<String> header, List<Row> table, String field, String operator) {
+        Float result = null;
+        switch (operator) {
+            case "max":
+            case "min":
+                for (Row row : table) {
+                    String stringValue = row.getColumnValue(header.indexOf(field));
+                    if (!isEmpty(stringValue)) {
+                        float value = Float.parseFloat(stringValue);
+                        if (isNull(result)
+                                || (operator.equals("max") && value > result)
+                                || (operator.equals("min") && value < result)) {
+                            result = value;
+                        }
+                    }
+                }
+                break;
+            case "avg":
+            case "sum":
+                result = 0f;
+                for (Row row : table) {
+                    String stringValue = row.getColumnValue(header.indexOf(field));
+                    if (!isEmpty(stringValue)) {
+                        result += Float.parseFloat(stringValue);
+                    }
+                }
+                if (operator.equals("avg")) {
+                    result = result / table.size();
+                }
+                break;
+            default:
+                break;
+        }
+        return result;
     }
 
     /**

@@ -2,6 +2,8 @@ package bodi.generator.dataSource;
 
 /**
  * A set of operations that a chatbot can do on a {@link TabularDataSource}.
+ *
+ * @see Statement#executeQuery(Operation, String...)
  */
 public enum Operation {
 
@@ -27,5 +29,12 @@ public enum Operation {
      * <p>
      * Given a value of a field, this operation gets its frequency (i.e. the number of occurrences) within the field.
      */
-    VALUE_FREQUENCY
+    VALUE_FREQUENCY,
+
+    /**
+     * NUMERIC_FIELD_FUNCTION Operation.
+     * <p>
+     * Given a numeric field name and an operator, this operation applies the operator in the field and gets the result.
+     */
+    NUMERIC_FIELD_FUNCTION
 }

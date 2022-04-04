@@ -206,5 +206,12 @@ public final class Intents {
             .getIntentDefinition();
 
 
-
+    /**
+     * The intent customNumericFieldFunctionIntent.
+     */
+    public static final IntentDefinition customNumericFieldFunctionIntent = intent("CustomNumericFieldFunction")
+            .trainingSentences(BUNDLE.getStringArray("CustomNumericFieldFunction"))
+            .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(Entities.numericFieldEntity)
+            .parameter(ContextKeys.OPERATOR).fromFragment("OPERATOR").entity(Entities.numericFunctionOperatorEntity)
+            .getIntentDefinition();
 }

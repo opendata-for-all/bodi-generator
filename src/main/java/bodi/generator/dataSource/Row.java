@@ -38,7 +38,6 @@ public class Row {
      * @param i the
      * @return the string
      *
-     * @see Statement#executeQuery()
      * @see TabularDataSource#removeColumn(int)
      */
     public String removeValue(int i) {
