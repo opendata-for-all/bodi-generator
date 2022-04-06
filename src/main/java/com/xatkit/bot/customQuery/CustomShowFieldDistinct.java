@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.val;
 
 import static com.xatkit.bot.Bot.getResult;
-import static com.xatkit.bot.Bot.messages;
 import static com.xatkit.dsl.DSL.state;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -30,7 +29,7 @@ public class CustomShowFieldDistinct {
     private final State processCustomShowFieldDistinctState;
 
     /**
-     * This variable stores the error condition of the workflow (i.e. if a field name was not recognized properly)
+     * This variable stores the error condition of the workflow (i.e. if some parameter was not recognized properly)
      */
     private boolean error;
 
@@ -45,19 +44,18 @@ public class CustomShowFieldDistinct {
 
         processCustomShowFieldDistinctState
                 .body(context -> {
+                    error = false;
                     String field = (String) context.getIntent().getValue(ContextKeys.FIELD);
                     if (!isEmpty(field)) {
                         context.getSession().put(ContextKeys.OPERATION, Operation.SHOW_FIELD_DISTINCT);
                         String[] operationArgs = {field};
                         context.getSession().put(ContextKeys.OPERATION_ARGS, operationArgs);
-                        error = false;
                     } else {
-                        reactPlatform.reply(context, messages.getString("FieldNotRecognized"));
                         error = true;
                     }
                 })
                 .next()
-                .when(context -> error).moveTo(returnState)
+                .when(context -> error).moveTo(getResult.getGenerateResultSetFromQueryState())
                 .when(context -> !error).moveTo(getResult.getGenerateResultSetWithOperationState());
 
         this.processCustomShowFieldDistinctState = processCustomShowFieldDistinctState.getState();

@@ -10,6 +10,7 @@ import lombok.val;
 
 import java.text.MessageFormat;
 
+import static com.xatkit.bot.Bot.getResult;
 import static com.xatkit.bot.Bot.messages;
 import static com.xatkit.dsl.DSL.state;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -34,6 +35,11 @@ public class CustomNumericFieldFunction {
     private final State processCustomNumericFieldFunctionState;
 
     /**
+     * This variable stores the error condition of the workflow (i.e. if some parameter was not recognized properly)
+     */
+    private boolean error;
+
+    /**
      * Instantiates a new Custom Numeric Field Function workflow.
      *
      * @param reactPlatform the react platform of a chatbot
@@ -44,6 +50,7 @@ public class CustomNumericFieldFunction {
 
         processCustomNumericFieldFunctionState
                 .body(context -> {
+                    error = false;
                     String field = (String) context.getIntent().getValue(ContextKeys.FIELD);
                     String operator = (String) context.getIntent().getValue(ContextKeys.OPERATOR);
                     if (!isEmpty(field) && !isEmpty(operator)) {
@@ -52,11 +59,12 @@ public class CustomNumericFieldFunction {
                         reactPlatform.reply(context, MessageFormat.format(messages.getString("CustomNumericFieldFunction"),
                                 operator, field, result));
                     } else {
-                        reactPlatform.reply(context, messages.getString("FieldNotRecognized"));
+                        error = true;
                     }
                 })
                 .next()
-                .moveTo(returnState);
+                .when(context -> error).moveTo(getResult.getGenerateResultSetFromQueryState())
+                .when(context -> !error).moveTo(returnState);
 
         this.processCustomNumericFieldFunctionState = processCustomNumericFieldFunctionState.getState();
     }

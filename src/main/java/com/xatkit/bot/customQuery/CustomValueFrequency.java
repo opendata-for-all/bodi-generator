@@ -11,6 +11,7 @@ import lombok.val;
 
 import java.text.MessageFormat;
 
+import static com.xatkit.bot.Bot.getResult;
 import static com.xatkit.bot.Bot.messages;
 import static com.xatkit.dsl.DSL.state;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -37,6 +38,11 @@ public class CustomValueFrequency {
     private final State processCustomValueFrequencyState;
 
     /**
+     * This variable stores the error condition of the workflow (i.e. if some parameter was not recognized properly)
+     */
+    private boolean error;
+
+    /**
      * Instantiates a new Custom Value Frequency workflow.
      *
      * @param reactPlatform the react platform of a chatbot
@@ -47,6 +53,7 @@ public class CustomValueFrequency {
 
         processCustomValueFrequencyState
                 .body(context -> {
+                    error = false;
                     String value = (String) context.getIntent().getValue(ContextKeys.VALUE);
                     if (!isEmpty(value)) {
                         String field = Entities.fieldValueMap.get(value);
@@ -55,11 +62,12 @@ public class CustomValueFrequency {
                         reactPlatform.reply(context, MessageFormat.format(messages.getString("ShowValueFrequency"),
                                 valueFrequency, field, value));
                     } else {
-                        reactPlatform.reply(context, messages.getString("FieldNotRecognized"));
+                        error = true;
                     }
                 })
                 .next()
-                .moveTo(returnState);
+                .when(context -> error).moveTo(getResult.getGenerateResultSetFromQueryState())
+                .when(context -> !error).moveTo(returnState);
 
         this.processCustomValueFrequencyState = processCustomValueFrequencyState.getState();
     }

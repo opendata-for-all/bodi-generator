@@ -11,6 +11,7 @@ import lombok.val;
 
 import java.text.MessageFormat;
 
+import static com.xatkit.bot.Bot.getResult;
 import static com.xatkit.bot.Bot.messages;
 import static com.xatkit.dsl.DSL.state;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -49,6 +50,11 @@ public class CustomValue1vsValue2 {
     private final State processCustomValue1LessThanValue2State;
 
     /**
+     * This variable stores the error condition of the workflow (i.e. if some parameter was not recognized properly)
+     */
+    private boolean error;
+
+    /**
      * Instantiates a new Custom Value1 vs Value2 workflow.
      *
      * @param reactPlatform the react platform of a chatbot
@@ -60,6 +66,7 @@ public class CustomValue1vsValue2 {
 
         processCustomValue1MoreThanValue2State
                 .body(context -> {
+                    error = false;
                     String value1 = (String) context.getIntent().getValue(ContextKeys.VALUE + "1");
                     String value2 = (String) context.getIntent().getValue(ContextKeys.VALUE + "2");
                     if (!isEmpty(value1) && !isEmpty(value2)) {
@@ -79,16 +86,18 @@ public class CustomValue1vsValue2 {
                                     value1, field1, value2, field2, value1Freq));
                         }
                     } else {
-                        reactPlatform.reply(context, messages.getString("FieldNotRecognized"));
+                        error = true;
                     }
                 })
                 .next()
-                .moveTo(returnState);
+                .when(context -> error).moveTo(getResult.getGenerateResultSetFromQueryState())
+                .when(context -> !error).moveTo(returnState);
 
         this.processCustomValue1MoreThanValue2State = processCustomValue1MoreThanValue2State.getState();
 
         processCustomValue1LessThanValue2State
                 .body(context -> {
+                    error = false;
                     String value1 = (String) context.getIntent().getValue(ContextKeys.VALUE + "1");
                     String value2 = (String) context.getIntent().getValue(ContextKeys.VALUE + "2");
                     if (!isEmpty(value1) && !isEmpty(value2)) {
@@ -108,11 +117,12 @@ public class CustomValue1vsValue2 {
                                     value1, field1, value2, field2, value1Freq));
                         }
                     } else {
-                        reactPlatform.reply(context, messages.getString("FieldNotRecognized"));
+                        error = true;
                     }
                 })
                 .next()
-                .moveTo(returnState);
+                .when(context -> error).moveTo(getResult.getGenerateResultSetFromQueryState())
+                .when(context -> !error).moveTo(returnState);
 
         this.processCustomValue1LessThanValue2State = processCustomValue1LessThanValue2State.getState();
     }

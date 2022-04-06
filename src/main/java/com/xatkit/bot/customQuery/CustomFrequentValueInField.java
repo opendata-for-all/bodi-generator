@@ -13,6 +13,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Set;
 
+import static com.xatkit.bot.Bot.getResult;
 import static com.xatkit.bot.Bot.messages;
 import static com.xatkit.dsl.DSL.state;
 import static java.util.Objects.isNull;
@@ -53,6 +54,11 @@ public class CustomFrequentValueInField {
     private final State processCustomLeastFrequentValueInFieldState;
 
     /**
+     * This variable stores the error condition of the workflow (i.e. if some parameter was not recognized properly)
+     */
+    private boolean error;
+
+    /**
      * Instantiates a new Custom Frequent Value In Field workflow.
      *
      * @param reactPlatform the react platform of a chatbot
@@ -64,6 +70,7 @@ public class CustomFrequentValueInField {
 
         processCustomMostFrequentValueInFieldState
                 .body(context -> {
+                    error = false;
                     String field = (String) context.getIntent().getValue(ContextKeys.FIELD);
                     if (!isEmpty(field)) {
                         Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
@@ -77,16 +84,18 @@ public class CustomFrequentValueInField {
                             reactPlatform.reply(context, new ArrayList<>(result.getKey()).toString());
                         }
                     } else {
-                        reactPlatform.reply(context, messages.getString("FieldNotRecognized"));
+                        error = true;
                     }
                 })
                 .next()
-                .moveTo(returnState);
+                .when(context -> error).moveTo(getResult.getGenerateResultSetFromQueryState())
+                .when(context -> !error).moveTo(returnState);
 
         this.processCustomMostFrequentValueInFieldState = processCustomMostFrequentValueInFieldState.getState();
 
         processCustomLeastFrequentValueInFieldState
                 .body(context -> {
+                    error = false;
                     String field = (String) context.getIntent().getValue(ContextKeys.FIELD);
                     if (!isEmpty(field)) {
                         Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
@@ -100,11 +109,12 @@ public class CustomFrequentValueInField {
                             reactPlatform.reply(context, new ArrayList<>(result.getKey()).toString());
                         }
                     } else {
-                        reactPlatform.reply(context, messages.getString("FieldNotRecognized"));
+                        error = true;
                     }
                 })
                 .next()
-                .moveTo(returnState);
+                .when(context -> error).moveTo(getResult.getGenerateResultSetFromQueryState())
+                .when(context -> !error).moveTo(returnState);
 
         this.processCustomLeastFrequentValueInFieldState = processCustomLeastFrequentValueInFieldState.getState();
     }
