@@ -46,6 +46,10 @@ public final class ContextKeys {
      * The constant LAST_OPERATOR_NAME.
      */
     public static final String LAST_OPERATOR = "LAST_OPERATOR";
+    /**
+     * The constant LAST_SQL_QUERY.
+     */
+    public static final String LAST_SQL_QUERY = "LAST_SQL_QUERY";
 
      // Intent Parameter Keys
 

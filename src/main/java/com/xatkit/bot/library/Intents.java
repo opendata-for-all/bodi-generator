@@ -77,6 +77,12 @@ public final class Intents {
     public static final IntentDefinition anotherQueryIntent = intent("AnotherQuery")
             .trainingSentences(BUNDLE.getStringArray("AnotherQuery"))
             .getIntentDefinition();
+    /**
+     * The intent iDontKnowIntent.
+     */
+    public static final IntentDefinition iDontKnowIntent = intent("IDontKnow")
+            .trainingSentences(BUNDLE.getStringArray("IDontKnow"))
+            .getIntentDefinition();
 
 
     /**

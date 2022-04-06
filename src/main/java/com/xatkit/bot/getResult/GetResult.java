@@ -61,7 +61,8 @@ public class GetResult {
      * that question, using {@link com.xatkit.bot.Bot#nlpServerClient}.
      * <p>
      * The filters previously applied by the user are also added to
-     * the query (see {@link com.xatkit.bot.nlp.NLPServerClient#runQuery(String, Statement)}
+     * the query (see
+     * {@link com.xatkit.bot.nlp.NLPServerClient#runQuery(com.xatkit.execution.StateContext, String, Statement)}
      */
     @Getter
     private final State generateResultSetFromQueryState;
@@ -109,7 +110,7 @@ public class GetResult {
                 .body(context -> {
                     Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
                     String query = context.getIntent().getMatchedInput();
-                    resultSet = nlpServerClient.runQuery(query, statement);
+                    resultSet = nlpServerClient.runQuery(context, query, statement);
                 })
                 .next()
                 .moveTo(showDataState);

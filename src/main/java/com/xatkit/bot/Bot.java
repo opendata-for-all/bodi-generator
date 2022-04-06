@@ -2,6 +2,7 @@ package com.xatkit.bot;
 
 import bodi.generator.dataSource.TabularDataSource;
 import com.xatkit.bot.customQuery.CustomQuery;
+import com.xatkit.bot.getResult.CheckCorrectAnswer;
 import com.xatkit.bot.getResult.GetResult;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Entities;
@@ -100,6 +101,11 @@ public final class Bot {
     public static CoreLibraryI18n coreLibraryI18n;
 
     /**
+     * The Check Correct Answer workflow.
+     */
+    public static CheckCorrectAnswer checkCorrectAnswer;
+
+    /**
      * The Get Result workflow.
      */
     public static GetResult getResult;
@@ -148,6 +154,7 @@ public final class Bot {
         maxEntriesToDisplay = botConfiguration.getInt("bot.maxEntriesToDisplay");
         coreLibraryI18n = new CoreLibraryI18n(locale);
         char delimiter = botConfiguration.getString("csv.delimiter").charAt(0);
+        boolean enableCheckCorrectAnswer = botConfiguration.getBoolean("bot.enableCheckCorrectAnswer");
         String odataTitle = botConfiguration.getString("bot.odata.title." + language, null);
         String odataUrl = botConfiguration.getString("bot.odata.url." + language, null);
 
@@ -168,9 +175,16 @@ public final class Bot {
         /*
          * Initialize the chatbot workflows.
          */
-        getResult = new GetResult(reactPlatform, startState.getState());
-        structuredQuery = new StructuredQuery(reactPlatform, startState.getState());
-        customQuery = new CustomQuery(reactPlatform, startState.getState());
+        if (enableCheckCorrectAnswer) {
+            checkCorrectAnswer = new CheckCorrectAnswer(reactPlatform, startState.getState());
+            getResult = new GetResult(reactPlatform, checkCorrectAnswer.getProcessCheckCorrectAnswerState());
+            structuredQuery = new StructuredQuery(reactPlatform, checkCorrectAnswer.getProcessCheckCorrectAnswerState());
+            customQuery = new CustomQuery(reactPlatform, checkCorrectAnswer.getProcessCheckCorrectAnswerState());
+        } else {
+            getResult = new GetResult(reactPlatform, startState.getState());
+            structuredQuery = new StructuredQuery(reactPlatform, startState.getState());
+            customQuery = new CustomQuery(reactPlatform, startState.getState());
+        }
 
         /*
          * Specify the content of the bot states (i.e. the behavior of the bot).

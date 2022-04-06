@@ -6,6 +6,8 @@ import bodi.generator.dataSource.Statement;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.xatkit.bot.Bot;
+import com.xatkit.bot.library.ContextKeys;
+import com.xatkit.execution.StateContext;
 import fr.inria.atlanmod.commons.log.Log;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
@@ -107,9 +109,10 @@ public class NLPServerClient {
     }
 
     /**
+     * Makes a query to the server and obtains the translation of the server input.
      *
-     * @param input
-     * @return
+     * @param input the input of the server
+     * @return if successful, a map containing the language-translation entries, otherwise null
      */
     public Map<String, String> getTranslations(String input) {
         try {
@@ -127,17 +130,19 @@ public class NLPServerClient {
     }
 
     /**
-     * Makes a query to the server.
+     * Makes a query to the server and obtains a {@link bodi.generator.dataSource.ResultSet} containing the response.
      *
+     * @param context   the chatbot context to store the sql query
      * @param input     the input of the server
      * @param statement the statement containing information to add to the request
      * @return if successful, the {@link bodi.generator.dataSource.ResultSet} containing the result of the server,
      * otherwise an empty {@link bodi.generator.dataSource.ResultSet}.
      */
-    public ResultSet runQuery(String input, Statement statement) {
+    public ResultSet runQuery(StateContext context, String input, Statement statement) {
         try {
             JSONObject response = getResponse(input, statement);
             String sqlQuery = response.getString("sql");
+            context.getSession().put(ContextKeys.LAST_SQL_QUERY, sqlQuery);
             JSONArray headerJson = response.getJSONArray("header");
             JSONArray tableJson = response.getJSONArray("table");
             if (isEmpty(sqlQuery)) {
