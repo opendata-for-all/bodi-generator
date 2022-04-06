@@ -157,7 +157,7 @@ public final class CodeGenerator {
                                        </descriptorRefs>
                                        <archive>
                                            <manifest>
-                                               <mainClass>Bot</mainClass>
+                                               <mainClass>com.xatkit.bot.Bot</mainClass>
                                            </manifest>
                                        </archive>
                                        <finalName>bot</finalName>
