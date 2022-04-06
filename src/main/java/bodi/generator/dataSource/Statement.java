@@ -476,14 +476,16 @@ public class Statement {
             case "avg":
             case "sum":
                 result = 0f;
+                int count = 0;
                 for (Row row : table) {
                     String stringValue = row.getColumnValue(header.indexOf(field));
                     if (!isEmpty(stringValue)) {
                         result += Float.parseFloat(stringValue);
+                        ++count;
                     }
                 }
                 if (operator.equals("avg")) {
-                    result = result / table.size();
+                    result = result / count;
                 }
                 break;
             default:
