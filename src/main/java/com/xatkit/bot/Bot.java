@@ -178,7 +178,7 @@ public final class Bot {
         if (enableCheckCorrectAnswer) {
             checkCorrectAnswer = new CheckCorrectAnswer(reactPlatform, startState.getState());
             getResult = new GetResult(reactPlatform, checkCorrectAnswer.getProcessCheckCorrectAnswerState());
-            structuredQuery = new StructuredQuery(reactPlatform, checkCorrectAnswer.getProcessCheckCorrectAnswerState());
+            structuredQuery = new StructuredQuery(reactPlatform, startState.getState());
             customQuery = new CustomQuery(reactPlatform, checkCorrectAnswer.getProcessCheckCorrectAnswerState());
         } else {
             getResult = new GetResult(reactPlatform, startState.getState());
