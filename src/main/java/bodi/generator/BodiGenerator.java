@@ -121,10 +121,12 @@ public final class BodiGenerator {
     private static DataSchema tabularDataSourceToDataSchema(TabularDataSource tds, String fieldsFile,
                                                             int maxNumDifferentValues) {
         InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(fieldsFile);
+        JSONObject fieldsJson = null;
         if (is == null) {
-            throw new NullPointerException("Cannot find the fields file \"" + fieldsFile + "\"");
+            System.out.println("Cannot find the fields file \"" + fieldsFile + "\"");
+        } else {
+            fieldsJson = new JSONObject(new JSONTokener(is));
         }
-        JSONObject fieldsJson = new JSONObject(new JSONTokener(is));
         DataSchema ds = new DataSchema();
         SchemaType schemaType = new SchemaType("mainSchemaType");
         // TODO: Test dataType inference
@@ -162,16 +164,22 @@ public final class BodiGenerator {
             }
             schemaField.setOriginalName(fieldName);
             schemaField.setNumDifferentValues(fieldValuesSet.size());
-            for (String language : SchemaField.languages) {
-                JSONObject fieldJson = fieldsJson.getJSONObject(fieldName).getJSONObject(language);
-                schemaField.setReadableName(language, fieldJson.getString("readable_name"));
-                Set<String> synonyms = fieldJson.getJSONArray("synonyms").toList().stream()
-                        .map(object -> Objects.toString(object, null)).collect(Collectors.toSet());
-                schemaField.addSynonyms(language, synonyms);
-                schemaField.addSynonyms(language, Collections.singleton(schemaField.getReadableName(language)));
-            }
             if (schemaField.getType().equals(TEXT) && schemaField.getNumDifferentValues() <= maxNumDifferentValues) {
                 schemaField.addMainValues(fieldValuesSet);
+            }
+            if (fieldsJson != null) {
+                for (String language : SchemaField.languages) {
+                    JSONObject fieldJson = fieldsJson.getJSONObject(fieldName).getJSONObject(language);
+                    schemaField.setReadableName(language, fieldJson.getString("readable_name"));
+                    Set<String> synonyms = fieldJson.getJSONArray("synonyms").toList().stream()
+                            .map(object -> Objects.toString(object, null)).collect(Collectors.toSet());
+                    schemaField.addSynonyms(language, synonyms);
+                    schemaField.addSynonyms(language, Collections.singleton(schemaField.getReadableName(language)));
+                }
+            } else {
+                for (String language : SchemaField.languages) {
+                    schemaField.setReadableName(language, fieldName);
+                }
             }
             schemaType.addSchemaField(schemaField);
         }
