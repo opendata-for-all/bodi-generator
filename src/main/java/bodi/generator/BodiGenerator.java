@@ -43,7 +43,7 @@ import static com.xatkit.bot.library.Utils.isNumeric;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
- * The entry point of the bodi-generator application. It generates a complete chatbot application.
+ * It generates a complete chatbot application.
  */
 public final class BodiGenerator {
 
@@ -78,7 +78,7 @@ public final class BodiGenerator {
      * @param fileName the properties file name
      * @return the configuration
      */
-    private static Configuration loadBodiConfigurationProperties(String fileName) {
+    static Configuration loadBodiConfigurationProperties(String fileName) {
         Configurations configurations = new Configurations();
         Configuration botConfiguration = new BaseConfiguration();
         try {
@@ -97,7 +97,7 @@ public final class BodiGenerator {
      * @param inputDocName the file name
      * @return the Tabular Data Source
      */
-    private static TabularDataSource createTabularDataSource(String inputDocName, char delimiter) {
+    static TabularDataSource createTabularDataSource(String inputDocName, char delimiter) {
         TabularDataSource tds = null;
         try {
             tds = new TabularDataSource(Objects.requireNonNull(BodiGenerator.class.getClassLoader()
@@ -118,8 +118,8 @@ public final class BodiGenerator {
      *                              field will contain information about its values in the Data Schema. Otherwise, not.
      * @return the Data Schema
      */
-    private static DataSchema tabularDataSourceToDataSchema(TabularDataSource tds, String fieldsFile,
-                                                            int maxNumDifferentValues) {
+    static DataSchema tabularDataSourceToDataSchema(TabularDataSource tds, String fieldsFile,
+                                                    int maxNumDifferentValues) {
         InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(fieldsFile);
         JSONObject fieldsJson = null;
         if (is == null) {
@@ -207,9 +207,10 @@ public final class BodiGenerator {
      * @param conf the bodi-generator configuration properties
      * @param ds   the Data Schema
      */
-    private static void createBot(Configuration conf, DataSchema ds) {
+    static void createBot(Configuration conf, DataSchema ds) {
         String botName = conf.getString("xls.generator.bot.name");
-        String inputDocName = conf.getString("xls.importer.xls");
+        String dataName = conf.getString("xls.importer.xls");
+        String inputDocName = dataName + ".csv";
         String outputFolder = conf.getString("xls.generator.output");
         boolean enableTesting = conf.getBoolean("enable_testing");
         System.out.println("Attempting to create the bot " + botName + " in " + outputFolder);
@@ -243,7 +244,7 @@ public final class BodiGenerator {
             FileUtils.copyDirectory(botSource, botDest);
 
             System.out.println("Creating csv");
-            File csvSource = new File("src/main/resources/" + inputDocName);
+            File csvSource = new File("src/main/resources/" + dataName + "/" + inputDocName);
             File csvDest = new File(outputFolder + "/src/main/resources/" + inputDocName);
             FileUtils.copyFile(csvSource, csvDest);
 
@@ -381,22 +382,5 @@ public final class BodiGenerator {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    /**
-     * The entry point of application.
-     *
-     * @param args the input arguments
-     */
-    public static void main(String[] args) {
-        // Load bot properties
-        Configuration conf = loadBodiConfigurationProperties("bodi-generator.properties");
-        String inputDocName = conf.getString("xls.importer.xls");
-        char delimiter = conf.getString("csv.delimiter").charAt(0);
-        int maxNumDifferentValues = conf.getInt("maxNumDifferentValues");
-
-        TabularDataSource tds = createTabularDataSource(inputDocName, delimiter);
-        DataSchema ds = tabularDataSourceToDataSchema(tds, "fields.json", maxNumDifferentValues);
-        createBot(conf, ds);
     }
 }

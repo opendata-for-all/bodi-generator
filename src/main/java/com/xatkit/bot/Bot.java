@@ -149,7 +149,7 @@ public final class Bot {
         language = botConfiguration.getString("bot.language", "en");
         locale = new Locale(language);
         messages = ResourceBundle.getBundle("messages", locale);
-        inputDoc = botConfiguration.getString("xls.importer.xls");
+        inputDoc = botConfiguration.getString("xls.importer.xls") + ".csv";
         pageLimit = botConfiguration.getInt("bot.pageLimit");
         maxEntriesToDisplay = botConfiguration.getInt("bot.maxEntriesToDisplay");
         coreLibraryI18n = new CoreLibraryI18n(locale);
