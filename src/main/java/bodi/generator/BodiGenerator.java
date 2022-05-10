@@ -1,6 +1,6 @@
 package bodi.generator;
 
-import bodi.generator.dataSchema.BotProperties;
+import bodi.generator.dataSchema.BodiGeneratorProperties;
 import bodi.generator.dataSchema.CodeGenerator;
 import bodi.generator.dataSchema.DataSchema;
 import bodi.generator.dataSchema.DataType;
@@ -8,6 +8,8 @@ import bodi.generator.dataSchema.SchemaField;
 import bodi.generator.dataSchema.SchemaType;
 import bodi.generator.dataSource.Row;
 import bodi.generator.dataSource.TabularDataSource;
+import bodi.generator.ui.model.Properties;
+import com.xatkit.bot.library.BotProperties;
 import org.apache.commons.configuration2.BaseConfiguration;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
@@ -114,11 +116,12 @@ public final class BodiGenerator {
      * Creates a Data Schema from a given Tabular Data Source.
      *
      * @param tds                   the Tabular Data Source
+     * @param fieldsFile            the json file containing fields information, stored in the resources folder
      * @param maxNumDifferentValues if the number of different values of a field is <= than this number, then the
      *                              field will contain information about its values in the Data Schema. Otherwise, not.
      * @return the Data Schema
      */
-    static DataSchema tabularDataSourceToDataSchema(TabularDataSource tds, String fieldsFile,
+    public static DataSchema tabularDataSourceToDataSchema(TabularDataSource tds, String fieldsFile,
                                                     int maxNumDifferentValues) {
         InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(fieldsFile);
         JSONObject fieldsJson = null;
@@ -188,17 +191,56 @@ public final class BodiGenerator {
     }
 
     /**
-     * Creates a Bot Properties from a given Data Schema.
+     * Creates a Data Schema from a given Tabular Data Source.
      *
-     * @param ds           the Data Schema
-     * @param botName      the bot name
-     * @param inputDocName the input doc name
-     * @return the Bot Properties
+     * @return the Data Schema
      */
-    private static BotProperties dataSchemaToBotProperties(DataSchema ds, String botName, String inputDocName) {
-        BotProperties bp = new BotProperties(botName, inputDocName, ds);
-        bp.createBotStructure();
-        return bp;
+    public static DataSchema tabularDataSourceToDataSchema(TabularDataSource tds) {
+        DataSchema ds = new DataSchema();
+        SchemaType schemaType = new SchemaType("mainSchemaType");
+        // TODO: Test dataType inference
+        for (String fieldName : tds.getHeaderCopy()) {
+            Set<String> fieldValuesSet = new HashSet<>();
+            Map<DataType, Boolean> dataTypes = new HashMap<>();
+            dataTypes.put(NUMBER, true);
+            dataTypes.put(DATE, true);
+            dataTypes.put(TEXT, true);
+            dataTypes.put(EMPTY, true);
+            int columnIndex = tds.getHeaderCopy().indexOf(fieldName);
+            for (Row row : tds.getTableCopy()) {
+                String value = row.getColumnValue(columnIndex);
+                fieldValuesSet.add(value);
+                if (dataTypes.get(NUMBER) && !isNumeric(value) && !isEmpty(value)) {
+                    dataTypes.put(NUMBER, false);
+                }
+                if (dataTypes.get(DATE) && !isDate(value) && !isEmpty(value)) {
+                    dataTypes.put(DATE, false);
+                }
+                if (dataTypes.get(EMPTY) && !isEmpty(value)) {
+                    dataTypes.put(EMPTY, false);
+                }
+            }
+            SchemaField schemaField = new SchemaField();
+            if (dataTypes.get(EMPTY)) {
+                // TODO: Consider empty (unknown) type?
+                schemaField.setType(TEXT);
+            } else if (dataTypes.get(DATE)) {
+                schemaField.setType(DATE);
+            } else if (dataTypes.get(NUMBER)) {
+                schemaField.setType(NUMBER);
+            } else {
+                schemaField.setType(TEXT);
+            }
+            schemaField.setOriginalName(fieldName);
+            schemaField.setNumDifferentValues(fieldValuesSet.size());
+            schemaField.setCategorical(false);
+            for (String language : SchemaField.languages) {
+                schemaField.setReadableName(language, fieldName);
+            }
+            schemaType.addSchemaField(schemaField);
+        }
+        ds.addSchemaType(schemaType);
+        return ds;
     }
 
     /**
@@ -207,7 +249,7 @@ public final class BodiGenerator {
      * @param conf the bodi-generator configuration properties
      * @param ds   the Data Schema
      */
-    static void createBot(Configuration conf, DataSchema ds) {
+    public static void createBot(Configuration conf, DataSchema ds) {
         String botName = conf.getString("xls.generator.bot.name");
         String dataName = conf.getString("xls.importer.xls");
         String inputDocName = dataName + ".csv";

@@ -4,6 +4,7 @@ import bodi.generator.dataSource.TabularDataSource;
 import com.xatkit.bot.customQuery.CustomQuery;
 import com.xatkit.bot.getResult.CheckCorrectAnswer;
 import com.xatkit.bot.getResult.GetResult;
+import com.xatkit.bot.library.BotProperties;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Entities;
 import com.xatkit.bot.library.Intents;
@@ -146,15 +147,15 @@ public final class Bot {
             e.printStackTrace();
             System.out.println("Configuration file not found");
         }
-        language = botConfiguration.getString("bot.language", "en");
+        language = botConfiguration.getString(BotProperties.BOT_LANGUAGE, "en");
         locale = new Locale(language);
         messages = ResourceBundle.getBundle("messages", locale);
-        inputDoc = botConfiguration.getString("xls.importer.xls") + ".csv";
-        pageLimit = botConfiguration.getInt("bot.pageLimit");
-        maxEntriesToDisplay = botConfiguration.getInt("bot.maxEntriesToDisplay");
+        inputDoc = botConfiguration.getString(BotProperties.DATA_NAME, "data") + ".csv";
+        pageLimit = botConfiguration.getInt(BotProperties.BOT_PAGE_LIMIT, 10);
+        maxEntriesToDisplay = botConfiguration.getInt(BotProperties.BOT_MAX_ENTRIES_TO_DISPLAY, 7);
         coreLibraryI18n = new CoreLibraryI18n(locale);
-        char delimiter = botConfiguration.getString("csv.delimiter").charAt(0);
-        boolean enableCheckCorrectAnswer = botConfiguration.getBoolean("bot.enableCheckCorrectAnswer");
+        char delimiter = botConfiguration.getString(BotProperties.CSV_DELIMITER, ",").charAt(0);
+        boolean enableCheckCorrectAnswer = botConfiguration.getBoolean(BotProperties.BOT_ENABLE_CHECK_CORRECT_ANSWER, false);
         String odataTitle = botConfiguration.getString("bot.odata.title." + language, null);
         String odataUrl = botConfiguration.getString("bot.odata.url." + language, null);
 

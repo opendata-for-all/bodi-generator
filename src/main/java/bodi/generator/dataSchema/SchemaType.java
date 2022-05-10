@@ -57,6 +57,21 @@ public class SchemaType {
     }
 
     /**
+     * Gets a schema field.
+     *
+     * @param originalName the original name of the schema field
+     * @return if it exists, the schema field. Otherwise, {@code null}
+     */
+    public SchemaField getSchemaField(String originalName) {
+        for (SchemaField schemaField : schemaFields) {
+            if (schemaField.getOriginalName().equals(originalName)) {
+                return schemaField;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Adds a {@link SchemaField} to the {@link SchemaType}.
      *
      * @param schemaField the {@link SchemaField}

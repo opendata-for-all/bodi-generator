@@ -7,9 +7,13 @@ import com.opencsv.exceptions.CsvException;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Representation of a tabular data structure, that is, data organized as a table.
@@ -61,6 +65,37 @@ public class TabularDataSource {
     public TabularDataSource(String filePath, char delimiter) {
         try {
             CSVReader reader = new CSVReaderBuilder(new FileReader(filePath))
+                    .withCSVParser(new CSVParserBuilder().withSeparator(delimiter).build()).build();
+            List<String[]> csv = reader.readAll();
+            header = new ArrayList<>(Arrays.asList(csv.get(0)));
+            csv.remove(0);
+            table = new ArrayList<>();
+            csv.forEach(row -> table.add(new Row(new ArrayList<>(Arrays.asList(row)))));
+            numColumns = header.size();
+            numRows = table.size();
+            for (int i = 0; i < table.size(); i++) {
+                if (table.get(i).getValues().size() != header.size()) {
+                    throw new IllegalArgumentException("The header size (" + header.size() + ") is not equal to size of "
+                            + "row " + i + " (" + table.get(i).getValues().size() + ")");
+                }
+            }
+        } catch (IOException | CsvException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Instantiates a new {@link TabularDataSource} from a given Input Stream.
+     * <p>
+     * The column names are extracted from the first row of the csv file and stored in {@link #header}, and the
+     * following rows are stored in {@link #table}. Everything is stored preserving the original order of the data.
+     * <p>{@link #numColumns} and {@link #numRows} are also set.
+     *
+     * @param is input stream of a csv file
+     */
+    public TabularDataSource(InputStream is, char delimiter) {
+        try {
+            CSVReader reader = new CSVReaderBuilder(new InputStreamReader(is))
                     .withCSVParser(new CSVParserBuilder().withSeparator(delimiter).build()).build();
             List<String[]> csv = reader.readAll();
             header = new ArrayList<>(Arrays.asList(csv.get(0)));
@@ -171,6 +206,20 @@ public class TabularDataSource {
             row.removeValue(i);
         }
         return this;
+    }
+
+    /**
+     * Gets the unique values of a column.
+     *
+     * @param columnName the column name
+     * @return the column unique values
+     */
+    public Set<String> getColumnUniqueValues(String columnName) {
+        Set<String> values = new HashSet<>();
+        for (Row row : table) {
+            values.add(row.getColumnValue(header.indexOf(columnName)));
+        }
+        return values;
     }
 
 }

@@ -76,16 +76,23 @@ public class SchemaField {
     private int numDifferentValues;
 
     /**
+     * Indicates weather this field is categorical or not.
+     * <p>
+     * This can be useful to consider storing the main values of the field only if it is categorical.
+     */
+    private boolean categorical;
+
+    /**
      * Instantiates a new empty {@link SchemaField}.
      */
     public SchemaField() {
         readableName = new HashMap<>();
         synonyms = new HashMap<>();
-        mainValues = new HashMap<>();
         for (String language : languages) {
             readableName.put(language, null);
             synonyms.put(language, new HashSet<>());
         }
+        this.resetMainValues();
     }
 
     /**
@@ -109,37 +116,76 @@ public class SchemaField {
     /**
      * Gets the readable name of the field in a specific language.
      *
-     * @return the readable name
+     * @return the readable name in a specific language
      */
     public String getReadableName(String language) {
         return readableName.get(language);
     }
 
     /**
+     * Gets the readable name of the field.
+     *
+     * @return the readable name
+     */
+    public Map<String, String> getReadableName() {
+        return readableName;
+    }
+
+    /**
      * Sets the readable name of the field in a specific language.
      *
      * @param readableName the readable name
+     * @param language     the language
      */
     public void setReadableName(String language, String readableName) {
         this.readableName.put(language, readableName);
     }
 
     /**
+     * Sets the readable name of the field.
+     *
+     * @param readableName the readable name
+     */
+    public void setReadableName(Map<String, String> readableName) {
+        this.readableName = readableName;
+    }
+
+    /**
      * Adds a set of synonyms of the field, in a specific language.
      *
      * @param newSynonyms the synonyms to add
+     * @param language    the language
      */
     public void addSynonyms(String language, Collection<String> newSynonyms) {
         synonyms.get(language).addAll(newSynonyms);
     }
 
     /**
-     * Gets the list of synonyms of the field, in a specific language.
+     * Gets the set of synonyms of the field, in a specific language.
      *
+     * @param language the language
      * @return the synonyms
      */
     public Set<String> getSynonyms(String language) {
         return synonyms.get(language);
+    }
+
+    /**
+     * Gets the synonyms of the field.
+     *
+     * @return the synonyms
+     */
+    public Map<String, Set<String>> getSynonyms() {
+        return synonyms;
+    }
+
+    /**
+     * Sets the synonyms of the field.
+     *
+     * @param synonyms the synonyms
+     */
+    public void setSynonyms(Map<String, Set<String>> synonyms) {
+        this.synonyms = synonyms;
     }
 
     /**
@@ -179,10 +225,9 @@ public class SchemaField {
         this.numDifferentValues = numDifferentValues;
     }
 
-
     /**
      * Adds a set of values to {@link #mainValues}, with no synonyms in any value.
-     * @param values
+     * @param values the main values to add
      */
     public void addMainValues(Set<String> values) {
         for (String value : values) {
@@ -194,6 +239,49 @@ public class SchemaField {
                 mainValues.put(value, valueSynonyms);
             }
         }
+    }
+
+    /**
+     * Gets the main values of the field.
+     *
+     * @return the main values
+     */
+    public Map<String, Map<String, Set<String>>> getMainValues() {
+        return mainValues;
+    }
+
+    /**
+     * Sets the main values of the field.
+     *
+     * @param mainValues the main values to add
+     */
+    public void setMainValues(Map<String, Map<String, Set<String>>> mainValues) {
+        this.mainValues = mainValues;
+    }
+
+    /**
+     * Resets the main values, deleting all values that were stored.
+     */
+    public void resetMainValues() {
+        mainValues = new HashMap<>();
+    }
+
+    /**
+     * Gets the value of the categorical attribute.
+     *
+     * @return true if the field is categorical, false otherwise
+     */
+    public boolean isCategorical() {
+        return categorical;
+    }
+
+    /**
+     * Sets the value of the categorical attribute.
+     *
+     * @param categorical the new value of the categorical attribute
+     */
+    public void setCategorical(boolean categorical) {
+        this.categorical = categorical;
     }
 
     /**
