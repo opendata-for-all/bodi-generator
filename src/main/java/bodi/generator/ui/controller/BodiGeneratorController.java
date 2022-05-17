@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -97,7 +98,7 @@ public class BodiGeneratorController {
         properties.setBodiGeneratorProperties(new HashMap<>());
 
         properties.getBodiGeneratorProperties().put(BodiGeneratorProperties.BOT_NAME, "bot-" + dataName.replace(".csv", ""));
-        properties.getBodiGeneratorProperties().put(BodiGeneratorProperties.OUTPUT_DIRECTORY, "./ui-bot");
+        properties.getBodiGeneratorProperties().put(BodiGeneratorProperties.OUTPUT_DIRECTORY, "bot-" + dataName.replace(".csv", ""));
         properties.getBodiGeneratorProperties().put(BodiGeneratorProperties.DATA_NAME, dataName.replace(".csv", ""));
         properties.getBodiGeneratorProperties().put(BodiGeneratorProperties.CSV_DELIMITER, ',');
         properties.getBodiGeneratorProperties().put(BodiGeneratorProperties.ENABLE_TESTING, true);
@@ -146,7 +147,7 @@ public class BodiGeneratorController {
     public String storeBodiGeneratorProperties(@Valid @ModelAttribute("bodiGeneratorProperties") Properties updatedProperties,
                                                Model model) {
         properties.getBodiGeneratorProperties().put(BodiGeneratorProperties.BOT_NAME, updatedProperties.getBodiGeneratorProperties().get(BodiGeneratorProperties.BOT_NAME));
-        properties.getBodiGeneratorProperties().put(BodiGeneratorProperties.OUTPUT_DIRECTORY, updatedProperties.getBodiGeneratorProperties().get(BodiGeneratorProperties.OUTPUT_DIRECTORY));
+        // properties.getBodiGeneratorProperties().put(BodiGeneratorProperties.OUTPUT_DIRECTORY, updatedProperties.getBodiGeneratorProperties().get(BodiGeneratorProperties.OUTPUT_DIRECTORY));
         properties.getBodiGeneratorProperties().put(BodiGeneratorProperties.DATA_NAME, updatedProperties.getBodiGeneratorProperties().get(BodiGeneratorProperties.DATA_NAME));
         properties.getBotProperties().put(BotProperties.DATA_NAME,updatedProperties.getBodiGeneratorProperties().get(BodiGeneratorProperties.DATA_NAME));
         properties.getBodiGeneratorProperties().put(BodiGeneratorProperties.CSV_DELIMITER, updatedProperties.getBodiGeneratorProperties().get(BodiGeneratorProperties.CSV_DELIMITER));
@@ -205,9 +206,8 @@ public class BodiGeneratorController {
     }
 
     @PostMapping("/createBot")
-    public String createBotEndpoint(Model model) {
-        createBot(properties, ds, new ByteArrayInputStream(csv));
-        return "redirect:/bodi-generator";
+    public void createBotEndpoint(HttpServletResponse response, Model model) {
+        createBot(properties, ds, new ByteArrayInputStream(csv), response);
     }
 
 }
