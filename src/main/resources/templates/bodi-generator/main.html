@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Users</title>
+</head>
+<style>
+    table, th, td {
+        border: 1px solid black;
+    }
+    .column {
+        float: left;
+        width: 33%;
+    }
+    /* Clear floats after the columns */
+    .row:after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+</style>
+<body>
+<script type="text/javascript" th:src="@{/js/functions.js}"></script>
+<main>
+
+    <form th:action="@{/bodi-generator/storeFile}"
+          enctype="multipart/form-data"
+          method="POST">
+        <table>
+            <tr><td>File to upload:</td><td><input type="file" name="file" /></td></tr>
+            <tr><td></td><td><input type="submit" value="Upload" /></td></tr>
+        </table>
+    </form>
+
+    <form th:action="@{/bodi-generator/createBot}"
+          method="POST">
+        <button type="submit">CREATE BOT</button>
+    </form>
+
+    <div class="row">
+
+        <!-- FIELDS -->
+
+        <div class="column" id="schemaType"
+             th:if="${schemaType != null}">
+            <h1>Fields</h1>
+            <form>
+                <li th:each="field : ${schemaType.getSchemaFields()}">
+                    <button th:text="${field.getOriginalName()}"
+                            th:name="field"
+                            th:value="${field.getOriginalName()}">
+                    </button>
+                </li>
+            </form>
+        </div>
+
+        <form th:object="${schemaField}"
+              th:action="@{/bodi-generator/storeField}"
+              method="POST">
+            <div class="column" id="schemaField"
+                 th:if="${schemaField != null}">
+
+                <h1 th:text="${schemaField.getOriginalName()}"></h1>
+
+                <div>
+                    <ul>
+                        <li>
+                            <p th:text="'Number of different values: ' + *{getNumDifferentValues()}"></p>
+                        </li>
+                        <li>
+                            <p th:text="'Data type: ' + *{getType()}"></p>
+                        </li>
+                        <li>
+                            <label for="categorical">Categorical</label>
+                            <select id="categorical"
+                                    th:field="*{categorical}">
+                                <option th:value="true">Yes</option>
+                                <option th:value="false">No</option>
+                            </select>
+                        </li>
+                        <li>
+                            <p>Readable name</p>
+                            <div th:each="entry : *{readableName.entrySet()}">
+                                <label th:for="*{readableName['__${entry.key}__']}" th:text="${entry.key}"></label>
+                                <input th:id="*{readableName['__${entry.key}__']}" type="text"
+                                       th:field="*{readableName['__${entry.key}__']}">
+                            </div>
+                        </li>
+                        <li>
+                            <p>Synonyms</p>
+                            <div th:each="entry : *{synonyms.entrySet()}">
+                                <label th:for="*{synonyms['__${entry.key}__']}" th:text="${entry.key}"></label>
+                                <input th:id="*{synonyms['__${entry.key}__']}" type="text"
+                                       th:field="*{synonyms['__${entry.key}__']}">
+                            </div>
+                        </li>
+
+                    </ul>
+                </div>
+                <button type="submit">Save field</button>
+            </div>
+
+            <div class="column" id="schemaField_mainValues"
+                 th:if="${schemaField != null and !schemaField.mainValues.isEmpty()}">
+                <h1>Field values</h1>
+                <div>
+                    <ul>
+                        <li th:each="entry : *{mainValues.entrySet()}">
+                            <p th:text="${entry.key}"></p>
+                            <div th:each="entryLang : ${entry.value.entrySet()}">
+                                <label th:for="${entry.value['__${entryLang.key}__']}" th:text="${entryLang.key}"></label>
+                                <input th:id="${entry.value['__${entryLang.key}__']}" type="text"
+                                       th:field="*{mainValues['__${entry.key}__']['__${entryLang.key}__']}">
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+        </form>
+    </div>
+
+    <div class="row">
+
+        <div class="column" id="bodiGeneratorProperties"
+             th:if="${properties != null}">
+
+            <!-- bodi-generator.properties -->
+            <form th:object="${properties}"
+                  th:action="@{/bodi-generator/storeBodiGeneratorProperties}"
+                  th:with="BodiGeneratorProperties=${T(bodi.generator.dataSchema.BodiGeneratorProperties)}"
+                  method="POST">
+                    <h1>bodi-generator.properties</h1>
+                    <div>
+                        <ul>
+                            <li>
+                                <label th:for="${BodiGeneratorProperties.BOT_NAME}"
+                                       th:text="${BodiGeneratorProperties.BOT_NAME}"></label>
+                                <input th:id="${BodiGeneratorProperties.BOT_NAME}" type="text"
+                                       th:field="*{bodiGeneratorProperties['__${BodiGeneratorProperties.BOT_NAME}__']}">
+                            </li>
+                            <li>
+                                <label th:for="${BodiGeneratorProperties.DATA_NAME}"
+                                       th:text="${BodiGeneratorProperties.DATA_NAME}"></label>
+                                <input th:id="${BodiGeneratorProperties.DATA_NAME}" type="text"
+                                       th:field="*{bodiGeneratorProperties['__${BodiGeneratorProperties.DATA_NAME}__']}">
+                            </li>
+                            <li>
+                                <label th:for="${BodiGeneratorProperties.CSV_DELIMITER}"
+                                       th:text="${BodiGeneratorProperties.CSV_DELIMITER}"></label>
+                                <input th:id="${BodiGeneratorProperties.CSV_DELIMITER}" type="text"
+                                       th:maxlength="1"
+                                       th:field="*{bodiGeneratorProperties['__${BodiGeneratorProperties.CSV_DELIMITER}__']}">
+                            </li>
+                            <li>
+                                <label th:for="${BodiGeneratorProperties.ENABLE_TESTING}"
+                                       th:text="${BodiGeneratorProperties.ENABLE_TESTING}"></label>
+                                <select th:id="${BodiGeneratorProperties.ENABLE_TESTING}"
+                                        th:field="*{bodiGeneratorProperties['__${BodiGeneratorProperties.ENABLE_TESTING}__']}">
+                                    <option th:value="true">Yes</option>
+                                    <option th:value="false">No</option>
+                                </select>
+                            </li>
+                            <li>
+                                <label th:for="${BodiGeneratorProperties.XATKIT_INTENT_PROVIDER}"
+                                       th:text="${BodiGeneratorProperties.XATKIT_INTENT_PROVIDER}"></label>
+                                <select th:id="${BodiGeneratorProperties.XATKIT_INTENT_PROVIDER}"
+                                        th:field="*{bodiGeneratorProperties['__${BodiGeneratorProperties.XATKIT_INTENT_PROVIDER}__']}">
+                                    <option th:value="''">-</option>
+                                    <option th:value="'com.xatkit.core.recognition.dialogflow.DialogFlowIntentRecognitionProvider'">DialogFlow</option>
+                                    <option th:value="'com.xatkit.core.recognition.nlpjs.NlpjsIntentRecognitionProvider'">NLP.js</option>
+                                </select>
+                            </li>
+                            <li>
+                                <label th:for="${BodiGeneratorProperties.XATKIT_LOGS_DATABASE}"
+                                       th:text="${BodiGeneratorProperties.XATKIT_LOGS_DATABASE}"></label>
+                                <select th:id="${BodiGeneratorProperties.XATKIT_LOGS_DATABASE}"
+                                        th:field="*{bodiGeneratorProperties['__${BodiGeneratorProperties.XATKIT_LOGS_DATABASE}__']}">
+                                    <option th:value="''">-</option>
+                                    <option th:value="'com.xatkit.core.recognition.RecognitionMonitorPostgreSQL'">PostgreSQL</option>
+                                </select>
+                            </li>
+                        </ul>
+                    </div>
+                    <button type="submit">Save properties</button>
+            </form>
+        </div>
+
+        <div class="column" id="botProperties"
+             th:if="${properties != null}">
+
+            <!-- bot.properties -->
+            <form th:object="${properties}"
+                  th:action="@{/bodi-generator/storeBotProperties}"
+                  th:with="BotProperties=${T(com.xatkit.bot.library.BotProperties)}"
+                  method="POST">
+                <h1>bot.properties</h1>
+                <div>
+                    <h2>Bot</h2>
+                    <ul>
+                        <li>
+                            <label th:for="${BotProperties.DATA_NAME}"
+                                   th:text="${BotProperties.DATA_NAME}"></label>
+                            <input th:id="${BotProperties.DATA_NAME}" type="text"
+                                   th:field="*{botProperties['__${BotProperties.DATA_NAME}__']}">
+                        </li>
+                        <li>
+                            <p th:text="${BotProperties.CSV_DELIMITER} + ': ' + *{botProperties['__${BotProperties.CSV_DELIMITER}__']}"></p>
+                        </li>
+                        <li>
+                            <label th:for="${BotProperties.XATKIT_SERVER_PORT}"
+                                   th:text="${BotProperties.XATKIT_SERVER_PORT}"></label>
+                            <input th:id="${BotProperties.XATKIT_SERVER_PORT}" type="number"
+                                   th:field="*{botProperties['__${BotProperties.XATKIT_SERVER_PORT}__']}">
+                        </li>
+                        <li>
+                            <label th:for="${BotProperties.XATKIT_REACT_PORT}"
+                                   th:text="${BotProperties.XATKIT_REACT_PORT}"></label>
+                            <input th:id="${BotProperties.XATKIT_REACT_PORT}" type="number"
+                                   th:field="*{botProperties['__${BotProperties.XATKIT_REACT_PORT}__']}">
+                        </li>
+                        <li>
+                            <label th:for="${BotProperties.BOT_LANGUAGE}"
+                                   th:text="${BotProperties.BOT_LANGUAGE}"></label>
+                            <select th:id="${BotProperties.BOT_LANGUAGE}"
+                                    th:field="*{botProperties['__${BotProperties.BOT_LANGUAGE}__']}">
+                                <option th:value="'en'">English</option>
+                                <option th:value="'ca'">Catalan</option>
+                                <option th:value="'es'">Spanish</option>
+                            </select>
+                        </li>
+                        <li>
+                            <label th:for="${BotProperties.BOT_PAGE_LIMIT}"
+                                   th:text="${BotProperties.BOT_PAGE_LIMIT}"></label>
+                            <input th:id="${BotProperties.BOT_PAGE_LIMIT}" type="number"
+                                   th:field="*{botProperties['__${BotProperties.BOT_PAGE_LIMIT}__']}">
+                        </li>
+                        <li>
+                            <label th:for="${BotProperties.BOT_MAX_ENTRIES_TO_DISPLAY}"
+                                   th:text="${BotProperties.BOT_MAX_ENTRIES_TO_DISPLAY}"></label>
+                            <input th:id="${BotProperties.BOT_MAX_ENTRIES_TO_DISPLAY}" type="number"
+                                   th:field="*{botProperties['__${BotProperties.BOT_MAX_ENTRIES_TO_DISPLAY}__']}">
+                        </li>
+                        <li>
+                            <label th:for="${BotProperties.BOT_ENABLE_CHECK_CORRECT_ANSWER}"
+                                   th:text="${BotProperties.BOT_ENABLE_CHECK_CORRECT_ANSWER}"></label>
+                            <select th:id="${BotProperties.BOT_ENABLE_CHECK_CORRECT_ANSWER}"
+                                    th:field="*{botProperties['__${BotProperties.BOT_ENABLE_CHECK_CORRECT_ANSWER}__']}">
+                                <option th:value="true">Yes</option>
+                                <option th:value="false">No</option>
+                            </select>
+                        </li>
+                    </ul>
+                </div>
+
+                <div th:if="${properties.botProperties['__${BotProperties.XATKIT_INTENT_PROVIDER}__']} == 'com.xatkit.core.recognition.dialogflow.DialogFlowIntentRecognitionProvider'">
+                    <h2>DialogFlow</h2>
+                    <ul>
+                        <li>
+                            <p th:text="${BotProperties.XATKIT_INTENT_PROVIDER} + ': ' + *{botProperties['__${BotProperties.XATKIT_INTENT_PROVIDER}__']}"></p>
+                        </li>
+                        <li>
+                            <label th:for="${BotProperties.XATKIT_DIALOGFLOW_PROJECT_ID}"
+                                   th:text="${BotProperties.XATKIT_DIALOGFLOW_PROJECT_ID}"></label>
+                            <input th:id="${BotProperties.XATKIT_DIALOGFLOW_PROJECT_ID}" type="text"
+                                   th:field="*{botProperties['__${BotProperties.XATKIT_DIALOGFLOW_PROJECT_ID}__']}">
+                        </li>
+                        <li>
+                            <label th:for="${BotProperties.XATKIT_DIALOGFLOW_CREDENTIALS_PATH}"
+                                   th:text="${BotProperties.XATKIT_DIALOGFLOW_CREDENTIALS_PATH}"></label>
+                            <input th:id="${BotProperties.XATKIT_DIALOGFLOW_CREDENTIALS_PATH}" type="text"
+                                   th:field="*{botProperties['__${BotProperties.XATKIT_DIALOGFLOW_CREDENTIALS_PATH}__']}">
+                        </li>
+                        <li>
+                            <label th:for="${BotProperties.XATKIT_DIALOGFLOW_LANGUAGE}"
+                                   th:text="${BotProperties.XATKIT_DIALOGFLOW_LANGUAGE}"></label>
+                            <select th:id="${BotProperties.XATKIT_DIALOGFLOW_LANGUAGE}"
+                                    th:field="*{botProperties['__${BotProperties.XATKIT_DIALOGFLOW_LANGUAGE}__']}">
+                                <option th:value="'en'">English</option>
+                                <option th:value="'ca'">Catalan</option>
+                                <option th:value="'es'">Spanish</option>
+                            </select>
+                        </li>
+                        <li>
+                            <label th:for="${BotProperties.XATKIT_DIALOGFLOW_CLEAN_ON_STARTUP}"
+                                   th:text="${BotProperties.XATKIT_DIALOGFLOW_CLEAN_ON_STARTUP}"></label>
+                            <select th:id="${BotProperties.XATKIT_DIALOGFLOW_CLEAN_ON_STARTUP}"
+                                    th:field="*{botProperties['__${BotProperties.XATKIT_DIALOGFLOW_CLEAN_ON_STARTUP}__']}">
+                                <option th:value="true">Yes</option>
+                                <option th:value="false">No</option>
+                            </select>
+                        </li>
+                    </ul>
+                </div>
+
+                <div th:if="${properties.botProperties['__${BotProperties.XATKIT_INTENT_PROVIDER}__']} == 'com.xatkit.core.recognition.nlpjs.NlpjsIntentRecognitionProvider'">
+                    <h2>NLP.js</h2>
+                    <ul>
+                        <li>
+                            <label th:for="${BotProperties.XATKIT_NLPJS_AGENTID}"
+                                   th:text="${BotProperties.XATKIT_NLPJS_AGENTID}"></label>
+                            <input th:id="${BotProperties.XATKIT_NLPJS_AGENTID}" type="text"
+                                   th:field="*{botProperties['__${BotProperties.XATKIT_NLPJS_AGENTID}__']}">
+                        </li>
+                        <li>
+                            <label th:for="${BotProperties.XATKIT_NLPJS_LANGUAGE}"
+                                   th:text="${BotProperties.XATKIT_NLPJS_LANGUAGE}"></label>
+                            <select th:id="${BotProperties.XATKIT_NLPJS_LANGUAGE}"
+                                    th:field="*{botProperties['__${BotProperties.XATKIT_NLPJS_LANGUAGE}__']}">
+                                <option th:value="'en'">English</option>
+                                <option th:value="'ca'">Catalan</option>
+                                <option th:value="'es'">Spanish</option>
+                            </select>
+                        </li>
+                        <li>
+                            <label th:for="${BotProperties.XATKIT_NLPJS_SERVER}"
+                                   th:text="${BotProperties.XATKIT_NLPJS_SERVER}"></label>
+                            <input th:id="${BotProperties.XATKIT_NLPJS_SERVER}" type="text"
+                                   th:field="*{botProperties['__${BotProperties.XATKIT_NLPJS_SERVER}__']}">
+                        </li>
+                    </ul>
+                </div>
+
+                <div th:if="${properties.botProperties['__${BotProperties.XATKIT_LOGS_DATABASE}__']} == 'com.xatkit.core.recognition.RecognitionMonitorPostgreSQL'">
+                    <h2>PostgreSQL</h2>
+                    <ul>
+                        <li>
+                            <p th:text="${BotProperties.XATKIT_LOGS_DATABASE} + ': ' + *{botProperties['__${BotProperties.XATKIT_LOGS_DATABASE}__']}"></p>
+                        </li>
+                        <li>
+                            <p th:text="${BotProperties.XATKIT_DATABASE_MODEL} + ': ' + *{botProperties['__${BotProperties.XATKIT_DATABASE_MODEL}__']}"></p>
+                        </li>
+                        <li>
+                            <label th:for="${BotProperties.XATKIT_RECOGNITION_ENABLE_MONITORING}"
+                                   th:text="${BotProperties.XATKIT_RECOGNITION_ENABLE_MONITORING}"></label>
+                            <select th:id="${BotProperties.XATKIT_RECOGNITION_ENABLE_MONITORING}"
+                                    th:field="*{botProperties['__${BotProperties.XATKIT_RECOGNITION_ENABLE_MONITORING}__']}">
+                                <option th:value="true">Yes</option>
+                                <option th:value="false">No</option>
+                            </select>
+                        </li>
+                        <li>
+                            <label th:for="${BotProperties.XATKIT_POSTGRESQL_URL}"
+                                   th:text="${BotProperties.XATKIT_POSTGRESQL_URL}"></label>
+                            <input th:id="${BotProperties.XATKIT_POSTGRESQL_URL}" type="text"
+                                   th:field="*{botProperties['__${BotProperties.XATKIT_POSTGRESQL_URL}__']}">
+                        </li>
+                        <li>
+                            <label th:for="${BotProperties.XATKIT_POSTGRESQL_USER}"
+                                   th:text="${BotProperties.XATKIT_POSTGRESQL_USER}"></label>
+                            <input th:id="${BotProperties.XATKIT_POSTGRESQL_USER}" type="text"
+                                   th:field="*{botProperties['__${BotProperties.XATKIT_POSTGRESQL_USER}__']}">
+                        </li>
+                        <li>
+                            <label th:for="${BotProperties.XATKIT_POSTGRESQL_PASSWORD}"
+                                   th:text="${BotProperties.XATKIT_POSTGRESQL_PASSWORD}"></label>
+                            <input th:id="${BotProperties.XATKIT_POSTGRESQL_PASSWORD}" type="text"
+                                   th:field="*{botProperties['__${BotProperties.XATKIT_POSTGRESQL_PASSWORD}__']}">
+                        </li>
+                        <li>
+                            <label th:for="${BotProperties.XATKIT_POSTGRESQL_BOT_ID}"
+                                   th:text="${BotProperties.XATKIT_POSTGRESQL_BOT_ID}"></label>
+                            <input th:id="${BotProperties.XATKIT_POSTGRESQL_BOT_ID}" type="number"
+                                   th:field="*{botProperties['__${BotProperties.XATKIT_POSTGRESQL_BOT_ID}__']}">
+                        </li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h2>NLP Server</h2>
+                    <ul>
+                        <li>
+                            <label th:for="${BotProperties.SERVER_URL}"
+                                   th:text="${BotProperties.SERVER_URL}"></label>
+                            <input th:id="${BotProperties.SERVER_URL}" type="text"
+                                   th:field="*{botProperties['__${BotProperties.SERVER_URL}__']}">
+                        </li>
+                        <li>
+                            <label th:for="${BotProperties.TEXT_TO_TABLE_ENDPOINT}"
+                                   th:text="${BotProperties.TEXT_TO_TABLE_ENDPOINT}"></label>
+                            <input th:id="${BotProperties.TEXT_TO_TABLE_ENDPOINT}" type="text"
+                                   th:field="*{botProperties['__${BotProperties.TEXT_TO_TABLE_ENDPOINT}__']}">
+                        </li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h2>Open data resource information</h2>
+                    <ul>
+                        <li>
+                            <label th:for="${BotProperties.BOT_ODATA_TITLE_EN}"
+                                   th:text="${BotProperties.BOT_ODATA_TITLE_EN}"></label>
+                            <input th:id="${BotProperties.BOT_ODATA_TITLE_EN}" type="text"
+                                   th:field="*{botProperties['__${BotProperties.BOT_ODATA_TITLE_EN}__']}">
+                        </li>
+                        <li>
+                            <label th:for="${BotProperties.BOT_ODATA_TITLE_CA}"
+                                   th:text="${BotProperties.BOT_ODATA_TITLE_CA}"></label>
+                            <input th:id="${BotProperties.BOT_ODATA_TITLE_CA}" type="text"
+                                   th:field="*{botProperties['__${BotProperties.BOT_ODATA_TITLE_CA}__']}">
+                        </li>
+                        <li>
+                            <label th:for="${BotProperties.BOT_ODATA_TITLE_ES}"
+                                   th:text="${BotProperties.BOT_ODATA_TITLE_ES}"></label>
+                            <input th:id="${BotProperties.BOT_ODATA_TITLE_ES}" type="text"
+                                   th:field="*{botProperties['__${BotProperties.BOT_ODATA_TITLE_ES}__']}">
+                        </li>
+                        <li>
+                            <label th:for="${BotProperties.BOT_ODATA_URL_EN}"
+                                   th:text="${BotProperties.BOT_ODATA_URL_EN}"></label>
+                            <input th:id="${BotProperties.BOT_ODATA_URL_EN}" type="text"
+                                   th:field="*{botProperties['__${BotProperties.BOT_ODATA_URL_EN}__']}">
+                        </li>
+                        <li>
+                            <label th:for="${BotProperties.BOT_ODATA_URL_CA}"
+                                   th:text="${BotProperties.BOT_ODATA_URL_CA}"></label>
+                            <input th:id="${BotProperties.BOT_ODATA_URL_CA}" type="text"
+                                   th:field="*{botProperties['__${BotProperties.BOT_ODATA_URL_CA}__']}">
+                        </li>
+                        <li>
+                            <label th:for="${BotProperties.BOT_ODATA_URL_ES}"
+                                   th:text="${BotProperties.BOT_ODATA_URL_ES}"></label>
+                            <input th:id="${BotProperties.BOT_ODATA_URL_ES}" type="text"
+                                   th:field="*{botProperties['__${BotProperties.BOT_ODATA_URL_ES}__']}">
+                        </li>
+                    </ul>
+                </div>
+
+                <button type="submit">Save properties</button>
+            </form>
+        </div>
+    </div>
+
+    <!--
+    <h1>Create Field</h1>
+    <form th:object="${schemaField}"
+          th:action="@{/bodi-generator/storeField}"
+          method="POST">
+        <div>
+            <label for="originalName">Given name</label>
+            <input id="originalName" type="text"
+                   th:field="*{originalName}">
+            <p th:if="${#fields.hasErrors('originalName')}"
+               th:text="${#strings.listJoin(#fields.errors('originalName'), ', ')}"></p>
+        </div>
+        <button type="submit">Create field</button>
+    </form>
+    -->
+
+
+
+
+    <div class="row"
+         th:if="${tds != null}">
+        <!-- CSV -->
+        <h1>CSV</h1>
+        <p th:text="${fileName}"></p>
+        <table id="csv_data"
+               th:with="header=${tds.getHeaderCopy()}, table=${tds.getTableCopy()}">
+            <tr>
+                <th th:each="field : ${header}">
+                    <a th:text="${field}"></a>
+                </th>
+            </tr>
+
+            <tr th:each="i: ${#numbers.sequence(0, 1)}">
+                <td th:each="field : ${header}"
+                    th:text="${table[i].getColumnValue(header.indexOf(field))}"></td>
+            </tr>
+        </table>
+    </div>
+
+</main>
+
+</body>
+</html>
