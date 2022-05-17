@@ -252,11 +252,11 @@ public final class BodiGenerator {
      * @param ds   the Data Schema
      */
     public static void createBot(Configuration conf, DataSchema ds) {
-        String botName = conf.getString("xls.generator.bot.name");
-        String dataName = conf.getString("xls.importer.xls");
+        String botName = conf.getString(BodiGeneratorProperties.BOT_NAME);
+        String dataName = conf.getString(BodiGeneratorProperties.DATA_NAME);
         String inputDocName = dataName + ".csv";
-        String outputFolder = conf.getString("xls.generator.output");
-        boolean enableTesting = conf.getBoolean("enable_testing");
+        String outputFolder = conf.getString(BodiGeneratorProperties.OUTPUT_DIRECTORY);
+        boolean enableTesting = conf.getBoolean(BodiGeneratorProperties.ENABLE_TESTING);
         System.out.println("Attempting to create the bot " + botName + " in " + outputFolder);
         try {
             File outputFolderFile = new File(outputFolder);
@@ -374,54 +374,55 @@ public final class BodiGenerator {
             FileWriter fw = new FileWriter(outputFolder + "/src/main/resources/bot.properties");
 
             fw.write("# Bot\n\n");
-            fw.write("xls.importer.xls" + " = " + conf.getString("xls.importer.xls") + "\n");
-            fw.write("csv.delimiter" + " = " + conf.getString("csv.delimiter") + "\n");
-            fw.write("xatkit.server.port" + " = " + "5000" + "\n");
-            fw.write("xatkit.react.port" + " = " + "5001" + "\n");
-            fw.write("bot.language" + " = " + "en" + "\n");
-            fw.write("bot.pageLimit" + " = " + "10" + "\n");
-            fw.write("bot.maxEntriesToDisplay" + " = " + "5" + "\n");
-            fw.write("bot.enableCheckCorrectAnswer" + " = " + "true" + "\n");
+            fw.write(BotProperties.DATA_NAME + " = " + conf.getString(BodiGeneratorProperties.DATA_NAME) + "\n");
+            fw.write(BotProperties.CSV_DELIMITER + " = " + conf.getString(BodiGeneratorProperties.CSV_DELIMITER) + "\n");
+            fw.write(BotProperties.XATKIT_SERVER_PORT + " = " + "5000" + "\n");
+            fw.write(BotProperties.XATKIT_REACT_PORT + " = " + "5001" + "\n");
+            fw.write(BotProperties.BOT_LANGUAGE + " = " + "en" + "\n");
+            fw.write(BotProperties.BOT_PAGE_LIMIT + " = " + "10" + "\n");
+            fw.write(BotProperties.BOT_MAX_ENTRIES_TO_DISPLAY + " = " + "5" + "\n");
+            fw.write(BotProperties.BOT_ENABLE_CHECK_CORRECT_ANSWER + " = " + "true" + "\n");
 
             fw.write("\n# Intent provider\n\n");
-            if (conf.getString("xatkit.intent.provider")
+            if (conf.getString(BodiGeneratorProperties.XATKIT_INTENT_PROVIDER)
                     .equals("com.xatkit.core.recognition.dialogflow.DialogFlowIntentRecognitionProvider")) {
-                fw.write("xatkit.intent.provider" + " = " + conf.getString("xatkit.intent.provider") + "\n");
-                fw.write("xatkit.dialogflow.projectId" + " = " + "your-project-id" + "\n");
-                fw.write("xatkit.dialogflow.credentials.path" + " = " + "path-to-your-credentials-file" + "\n");
-                fw.write("xatkit.dialogflow.language" + " = " + "en" + "\n");
-                fw.write("xatkit.dialogflow.clean_on_startup" + " = " + "true" + "\n");
-            } else if (conf.getString("xatkit.intent.provider")
+                fw.write(BotProperties.XATKIT_INTENT_PROVIDER + " = " + conf.getString(BodiGeneratorProperties.XATKIT_INTENT_PROVIDER) + "\n");
+                fw.write(BotProperties.XATKIT_DIALOGFLOW_PROJECT_ID + " = " + "your-project-id" + "\n");
+                fw.write(BotProperties.XATKIT_DIALOGFLOW_CREDENTIALS_PATH + " = " + "path-to-your-credentials-file" + "\n");
+                fw.write(BotProperties.XATKIT_DIALOGFLOW_LANGUAGE + " = " + "en" + "\n");
+                fw.write(BotProperties.XATKIT_DIALOGFLOW_CLEAN_ON_STARTUP + " = " + "true" + "\n");
+            } else if (conf.getString(BodiGeneratorProperties.XATKIT_INTENT_PROVIDER)
                     .equals("com.xatkit.core.recognition.nlpjs.NlpjsIntentRecognitionProvider")) {
-                fw.write("xatkit.intent.provider" + " = " + conf.getString("xatkit.intent.provider") + "\n");
-                fw.write("xatkit.nlpjs.agentId" + " = " + "default" + "\n");
-                fw.write("xatkit.nlpjs.language" + " = " + "en" + "\n");
-                fw.write("xatkit.nlpjs.server" + " = " + "http://localhost:8080" + "\n");
+                fw.write(BotProperties.XATKIT_INTENT_PROVIDER + " = " + conf.getString(BodiGeneratorProperties.XATKIT_INTENT_PROVIDER) + "\n");
+                fw.write(BotProperties.XATKIT_NLPJS_AGENTID + " = " + "default" + "\n");
+                fw.write(BotProperties.XATKIT_NLPJS_LANGUAGE + " = " + "en" + "\n");
+                fw.write(BotProperties.XATKIT_NLPJS_SERVER + " = " + "http://localhost:8080" + "\n");
 
             }
 
-            if (conf.getString("xatkit.logs.database")
+            if (conf.getString(BodiGeneratorProperties.XATKIT_LOGS_DATABASE)
                     .equals("com.xatkit.core.recognition.RecognitionMonitorPostgreSQL")) {
                 fw.write("\n# PostgreSQL\n\n");
-                fw.write("xatkit.logs.database" + " = " + conf.getString("xatkit.logs.database") + "\n");
-                fw.write("xatkit.recognition.enable_monitoring" + " = " + "true" + "\n");
-                fw.write("xatkit.postgres.url" + " = " + "your-url" + "\n");
-                fw.write("xatkit.postgresql.user" + " = " + "your-user" + "\n");
-                fw.write("xatkit.postgresql.password" + " = " + "your-password" + "\n");
-                fw.write("xatkit.postgresql.bot_id" + " = " + "your-bot-id" + "\n");
+                fw.write(BotProperties.XATKIT_LOGS_DATABASE + " = " + conf.getString(BodiGeneratorProperties.XATKIT_LOGS_DATABASE) + "\n");
+                fw.write(BotProperties.XATKIT_DATABASE_MODEL + " = " + "postgresql" + "\n");
+                fw.write(BotProperties.XATKIT_RECOGNITION_ENABLE_MONITORING + " = " + "true" + "\n");
+                fw.write(BotProperties.XATKIT_POSTGRESQL_URL + " = " + "your-url" + "\n");
+                fw.write(BotProperties.XATKIT_POSTGRESQL_USER + " = " + "your-user" + "\n");
+                fw.write(BotProperties.XATKIT_POSTGRESQL_PASSWORD + " = " + "your-password" + "\n");
+                fw.write(BotProperties.XATKIT_POSTGRESQL_BOT_ID + " = " + "your-bot-id" + "\n");
             }
 
             fw.write("\n# NLP Server properties\n\n");
-            fw.write("SERVER_URL" + " = " + "127.0.0.1:5001" + "\n");
-            fw.write("TEXT_TO_TABLE_ENDPOINT" + " = " + "text-to-table" + "\n");
+            fw.write(BotProperties.SERVER_URL + " = " + "127.0.0.1:5001" + "\n");
+            fw.write(BotProperties.TEXT_TO_TABLE_ENDPOINT + " = " + "text-to-table" + "\n");
 
             fw.write("\n# Open data resource information\n\n");
-            fw.write("bot.odata.title.en" + " = " + "title-in-english" + "\n");
-            fw.write("bot.odata.title.ca" + " = " + "title-in-catalan" + "\n");
-            fw.write("bot.odata.title.es" + " = " + "title-in-spanish" + "\n");
-            fw.write("bot.odata.url.en" + " = " + "url-english-source" + "\n");
-            fw.write("bot.odata.url.ca" + " = " + "url-catalan-source" + "\n");
-            fw.write("bot.odata.url.es" + " = " + "url-spanish-source" + "\n");
+            fw.write(BotProperties.BOT_ODATA_TITLE_EN + " = " + "title-in-english" + "\n");
+            fw.write(BotProperties.BOT_ODATA_TITLE_CA + " = " + "title-in-catalan" + "\n");
+            fw.write(BotProperties.BOT_ODATA_TITLE_ES + " = " + "title-in-spanish" + "\n");
+            fw.write(BotProperties.BOT_ODATA_URL_EN + " = " + "url-english-source" + "\n");
+            fw.write(BotProperties.BOT_ODATA_URL_CA + " = " + "url-catalan-source" + "\n");
+            fw.write(BotProperties.BOT_ODATA_URL_ES + " = " + "url-spanish-source" + "\n");
             fw.close();
         } catch (IOException e) {
             e.printStackTrace();
