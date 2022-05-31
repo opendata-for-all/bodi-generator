@@ -170,7 +170,10 @@ public final class BodiGenerator {
             schemaField.setOriginalName(fieldName);
             schemaField.setNumDifferentValues(fieldValuesSet.size());
             if (schemaField.getType().equals(TEXT) && schemaField.getNumDifferentValues() <= maxNumDifferentValues) {
+                schemaField.setCategorical(true);
                 schemaField.addMainValues(fieldValuesSet);
+            } else {
+                schemaField.setCategorical(false);
             }
             if (fieldsJson != null) {
                 for (String language : SchemaField.languages) {
@@ -198,6 +201,7 @@ public final class BodiGenerator {
      * @return the Data Schema
      */
     public static DataSchema tabularDataSourceToDataSchema(TabularDataSource tds) {
+        int maxNumDifferentValues = 10;
         DataSchema ds = new DataSchema();
         SchemaType schemaType = new SchemaType("mainSchemaType");
         // TODO: Test dataType inference
@@ -235,7 +239,12 @@ public final class BodiGenerator {
             }
             schemaField.setOriginalName(fieldName);
             schemaField.setNumDifferentValues(fieldValuesSet.size());
-            schemaField.setCategorical(false);
+            if (schemaField.getType().equals(TEXT) && schemaField.getNumDifferentValues() <= maxNumDifferentValues) {
+                schemaField.setCategorical(true);
+                schemaField.addMainValues(fieldValuesSet);
+            } else {
+                schemaField.setCategorical(false);
+            }
             for (String language : SchemaField.languages) {
                 schemaField.setReadableName(language, fieldName);
             }
