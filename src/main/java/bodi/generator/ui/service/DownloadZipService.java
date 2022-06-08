@@ -1,4 +1,4 @@
-package bodi.generator.ui.model;
+package bodi.generator.ui.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +20,6 @@ import java.util.zip.ZipOutputStream;
 public class DownloadZipService {
 
     private static Logger logger = LoggerFactory.getLogger(DownloadZipService.class);
-
 
     /**
      * Generate a zip file and store it into a Http servlet response.

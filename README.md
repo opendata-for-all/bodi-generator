@@ -11,12 +11,13 @@ development platform.
 
 1 - [Build the latest version of Xatkit](https://github.com/xatkit-bot-platform/xatkit/wiki/Build-Xatkit)
 
-2 - Install [xatkit-bot-platform/labs-bot-testing-tools](https://github.com/xatkit-bot-platform/labs-bot-testing-tools)
+2 - Install [xatkit-bot-platform/labs-bot-testing-tools](https://github.com/xatkit-bot-platform/labs-bot-testing-tools) 
+and [xatkit-bot-platform/xatkit-core-library-i18n](https://github.com/xatkit-bot-platform/xatkit-core-library-i18n)
 
 3 - Clone this repository
 
-4 - Edit the [bodi-generator.properties](src/main/resources/bodi-generator.properties) file according to your purposes 
-(see [Bot Configuration](#bot-configuration))
+~~4 - Edit the [bodi-generator.properties](src/main/resources/bodi-generator.properties) file according to your 
+purposes(see [Bot Configuration](#bot-configuration))~~
 
 5 - Navigate to the root directory and build the project:
 
@@ -26,9 +27,20 @@ mvn clean compile
 
 6 - You can run the bot generator!
 
+CLI, needs the [bodi-generator.properties](src/main/resources/bodi-generator.properties) properly set, and 
+optionally the [fields.json](src/main/resources/fields.json).
+
 ```bash
 mvn exec:java -Dexec.mainClass="bodi.generator.BodiGenerator"
 ```
+
+UI (Recommended)
+
+```bash
+mvn exec:java -Dexec.mainClass="mvn exec:java -Dexec.mainClass="bodi.generator.ui.Application""
+```
+
+Then, you can access the bodi-generator UI at [http://localhost:8080/bodi-generator/](http://localhost:8080/bodi-generator/)
 
 7 - If you want to empower your chatbot with NLP functionalities (to provide answers to questions not implemented in 
 the chatbot), you have to deploy a server that runs language models to perform NLP tasks. This server can be found 

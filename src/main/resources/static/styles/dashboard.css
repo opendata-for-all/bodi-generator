@@ -1,0 +1,813 @@
+/*
+ * Foundation tuning
+ */
+.switch.large .switch-paddle::after {
+    border-radius: 100px;
+}
+
+.switch.large .switch-paddle {
+    border-radius: 100px;
+}
+
+.switch-active {
+    display: block;
+}
+
+.button {
+    border-radius: 10px;
+}
+
+.button {
+    background-color: #44828f;
+}
+
+.button:hover, .button:focus {
+    background-color: #315f68;
+}
+
+.button[disabled], .button[disabled]:hover, .button[disabled]:focus {
+    background-color: #5e5e5e;
+}
+
+.enable-conversation-container {
+    margin-bottom: 1em;
+}
+
+.enable-conversation-container .enable-conversation {
+    margin: 0;
+    font-weight: bold;
+    color: #315f68;
+}
+
+.enable-conversation-container .switch {
+    margin-bottom: 0;
+    display: inline-block;
+}
+
+.enable-conversation-container input:checked ~.switch-paddle {
+    background-color: #315f68;
+}
+
+.enable-conversation-container .switch-paddle {
+    background-color: #bfdddf;
+}
+
+.conversation-disabled .card .card-header {
+    background-color: #eef6f6;
+}
+
+.conversation-disabled .card .card-header h2 {
+    color: #8a8a8a;
+}
+
+.conversation-disabled .card .card-content {
+    background-color: #eef6f6;
+    color: #8a8a8a;
+}
+
+.conversation-disabled .card .card-content p i {
+    color: #8a8a8a;
+}
+
+.card-content {
+    padding-right: 5px;
+    padding-left: 5px;
+}
+
+.card-content p {
+    margin: 0;
+}
+
+.card-content .card-content-description {
+    text-align: center;
+    margin-bottom: 1em;
+    font-style: italic;
+    font-size: 1.1em;
+    margin-top: 0;
+}
+
+.card-content p i {
+    color: #315f68;
+}
+
+.card-content .conversation-trigger {
+    text-align: center;
+    font-style: italic;
+}
+
+.card-content .conversation-hits {
+    text-align: right;
+}
+
+.card-container .faq-content p {
+    /*text-align: center;*/
+    font-style: italic;
+}
+
+.card-container .faq-content .button-container {
+    margin-top: .7em;
+    margin-bottom: .2em;
+}
+
+.card-container .faq-content input {
+    margin: 0;
+}
+
+.card-container .faq-content .button {
+    margin: 0;
+}
+
+.card-container .faq-content .delete-faq-container {
+    text-align: right;
+}
+
+.empty-faq {
+    margin-left: 1rem;
+    margin-right: 1rem;
+}
+
+.new-faq {
+    padding-left: 1rem;
+}
+
+.new-faq a {
+    font-size: 1.1em;
+    font-weight: bold;
+    background-color: #44828f;
+}
+
+.form-field-description p {
+    font-size: small;
+}
+
+.form-field-description li {
+    font-size: small;
+}
+
+.status-enabled {
+    color: #29a329;
+}
+
+.status-disabled {
+    color: #bfbfbf;
+}
+
+
+.app-dashboard {
+    height: 100vh;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-direction: column;
+    -ms-flex-direction: column;
+    flex-direction: column;
+}
+
+.app-dashboard-body {
+    -webkit-flex: 1 1 auto;
+    -ms-flex: 1 1 auto;
+    flex: 1 1 auto;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+}
+
+.app-dashboard-top-nav-bar {
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-align-items: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-justify-content: center;
+    -ms-flex-pack: center;
+    justify-content: left;
+    /*background: #2c3840;*/
+    border-bottom: 1px solid #808080;
+    height: 55px;
+    width: 100%;
+    -webkit-flex: 0 0 55px;
+    -ms-flex: 0 0 55px;
+    flex: 0 0 55px;
+}
+
+.app-dashboard-top-nav-bar .menu-icon {
+    vertical-align: text-bottom;
+}
+
+.app-dashboard-logo {
+    color: #fefefe;
+    text-transform: uppercase;
+    font-weight: bold;
+    padding: 3px 0 3px 3px;
+    height: 100%;
+}
+
+.app-dashboard-logo > img {
+    height: 100%;
+}
+
+.app-dashboard-search-bar-container {
+    position: relative;
+}
+
+.app-dashboard-search {
+    background: #41525e;
+    border: 0;
+    margin-bottom: 0;
+    color: #fefefe;
+}
+
+.app-dashboard-search:active, .app-dashboard-search:focus {
+    background: #222b31;
+}
+
+.app-dashboard-search-icon {
+    position: absolute;
+    color: #fefefe;
+    right: 1rem;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
+}
+
+.app-dashboard-top-bar-actions {
+    -webkit-align-items: center;
+    -ms-flex-align: center;
+    align-items: center;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+}
+
+.app-dashboard-top-bar-actions button {
+    margin-bottom: 0;
+    margin-right: 2rem;
+}
+
+.app-dashboard-top-bar-actions button.hollow {
+    border-color: #fefefe;
+    color: #fefefe;
+}
+
+.app-dashboard-top-bar-actions button.hollow:hover {
+    background: #fefefe;
+    color: #1779ba;
+}
+
+.app-dashboard-top-bar-actions .fa-info-circle {
+    color: #fefefe;
+    font-size: 1.5rem;
+}
+
+.app-dashboard-sidebar {
+    background-color: #fefefe;
+    height: 100%;
+    overflow-x: visible;
+    overflow-y: auto;
+    z-index: 1;
+    transition: all 0.5s ease;
+    border-right: 1px solid #808080;
+}
+
+.app-dashboard-sidebar .app-dashboard-open-sidebar, .app-dashboard-sidebar .app-dashboard-close-sidebar {
+    -webkit-align-items: baseline;
+    -ms-flex-align: baseline;
+    align-items: baseline;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-justify-content: space-between;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    padding: 2rem 1rem;
+}
+
+.app-dashboard-sidebar .app-dashboard-sidebar-close-button {
+    font-size: 14px;
+}
+
+.app-dashboard-sidebar .app-dashboard-sidebar-inner {
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.app-dashboard-sidebar .app-dashboard-sidebar-inner .menu > li > a {
+    -webkit-align-items: center;
+    -ms-flex-align: center;
+    align-items: center;
+    color: #44828f;
+}
+
+.app-dashboard-sidebar .app-dashboard-sidebar-inner .menu > li > a:hover {
+    color: #315f68;
+}
+
+.app-dashboard-sidebar .fa.large {
+    font-size: 1.5rem;
+    width: 40px;
+    color: #44828f;
+}
+
+.app-dashboard-sidebar .is-active .fa.large {
+    color: #fefefe;
+}
+
+.reveal-for-medium .app-dashboard-open-sidebar {
+    display: none;
+}
+
+.app-dashboard-sidebar-footer {
+    background: rgba(42, 57, 79, 0.8);
+    bottom: 0;
+    left: 0;
+    padding: 1rem;
+    position: absolute;
+    width: 100%;
+}
+
+.app-dashboard-open-sidebar {
+    text-align: center;
+}
+
+.app-dashboard-body-content {
+    transition: all 0.5s ease;
+    overflow-y: auto;
+    -webkit-flex: 1 1 0;
+    -ms-flex: 1 1 0px;
+    flex: 1 1 0;
+    padding: 20px;
+    background-color: #fefefe;
+}
+
+.app-dashboard-body-content h2 {
+    color: #315f68;
+    margin-bottom: 1em;
+}
+
+/*
+ * TODO check this, added on top of the foundation stuff
+ */
+.app-dashboard-sidebar-text {
+    font-weight: bold;
+}
+
+.app-dashboard-sidebar .app-dashboard-sidebar-inner .menu > li > a.is-active {
+    background-color: #44828f;
+    color: #fefefe;
+}
+
+.app-dashboard-sidebar .app-dashboard-sidebar-inner .menu > li > a.is-active:focus,
+.app-dashboard-sidebar .app-dashboard-sidebar-inner .menu > li > a.is-active:hover {
+    color: #fefefe;
+}
+
+.conversation-container {
+    background-image: url("/img/network-2.png");
+    background-position: center center;
+    background-size: cover;
+}
+
+.conversation-card {
+    border: none;
+}
+
+.card-container {
+    padding: 1rem;
+    width: 15em;
+}
+
+.card-container > .card:active, .card-container > .card:focus, .card-container > .card:hover {
+    color: #0a0a0a
+}
+
+.card .card-header {
+    background-color: #44828f;
+    padding-top: 0.2em;
+    padding-bottom: 0.2em;
+}
+
+.card .card-header h2 {
+    font-size: 1.2rem;
+    color: #fff;
+    margin: 0;
+    text-align: center;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.card {
+    border: none;
+}
+
+.card > .card-content {
+    border-top: 1px solid #808080;
+    background-color: #bfdddf;
+}
+
+.card {
+    border-radius: 10px;
+}
+
+@media screen and (min-width: 40em) and (max-width: 63.9375em) {
+    .app-dashboard.shrink-medium .app-dashboard-close-sidebar, .app-dashboard.shrink-medium .app-dashboard-sidebar-text {
+        display: none;
+    }
+    .app-dashboard.shrink-medium .app-dashboard-open-sidebar {
+        display: block;
+    }
+    .app-dashboard.shrink-medium .app-dashboard-sidebar {
+        width: 80px;
+    }
+    .app-dashboard.shrink-medium .app-dashboard-sidebar .fa.large {
+        width: auto;
+    }
+    .app-dashboard.shrink-medium .off-canvas-content {
+        margin-left: 80px;
+        width: calc(100% - 80px);
+    }
+    .app-dashboard.shrink-medium .navigation {
+        margin-top: 2rem;
+        text-align: center;
+    }
+    .app-dashboard.shrink-medium .menu.vertical > li > a {
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+    }
+    .app-dashboard.shrink-medium .menu li::after {
+        display: none;
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
+    }
+    .app-dashboard.shrink-medium .menu li a {
+        padding: 0.75rem;
+    }
+    .app-dashboard.shrink-medium .menu li a svg {
+        margin: 0;
+    }
+    .app-dashboard.shrink-medium .menu li a span {
+        display: none;
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
+    }
+}
+
+@media print, screen and (min-width: 64em) {
+    .app-dashboard.shrink-large .app-dashboard-close-sidebar, .app-dashboard.shrink-large .app-dashboard-sidebar-text {
+        display: none;
+    }
+    .app-dashboard.shrink-large .app-dashboard-open-sidebar {
+        display: block;
+    }
+    .app-dashboard.shrink-large .app-dashboard-sidebar {
+        width: 80px;
+    }
+    .app-dashboard.shrink-large .app-dashboard-sidebar .fa.large {
+        width: auto;
+    }
+    .app-dashboard.shrink-large .off-canvas-content {
+        margin-left: 80px;
+        width: calc(100% - 80px);
+    }
+    .app-dashboard.shrink-large .navigation {
+        margin-top: 2rem;
+        text-align: center;
+    }
+    .app-dashboard.shrink-large .menu.vertical > li > a {
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+    }
+    .app-dashboard.shrink-large .menu li::after {
+        display: none;
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
+    }
+    .app-dashboard.shrink-large .menu li a {
+        padding: 0.75rem;
+    }
+    .app-dashboard.shrink-large .menu li a svg {
+        margin: 0;
+    }
+    .app-dashboard.shrink-large .menu li a span {
+        display: none;
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
+    }
+}
+
+/*
+ * Reports page
+ */
+.callout {
+    border-radius: 5px;
+}
+
+h3 {
+    color: #315f68;
+}
+
+h3 img {
+    height: 1.2em;
+}
+
+.missed-messages select {
+    margin-bottom: 0;
+}
+
+.missed-messages input {
+    margin-bottom: 0;
+}
+
+.missed-messages label {
+    margin-bottom: 0;
+}
+
+.account-details {
+    padding-top: 1rem;
+}
+
+.your-bot {
+    margin-top: 1em;
+}
+
+
+.community {
+    margin-top: 1em;
+}
+
+.slack-button img {
+    display: inline-block;
+    height: 2em;
+    border: 1px solid #315f68;
+    border-radius: 5px;
+}
+
+.danger-zone {
+    margin-top: 1em;
+}
+
+.danger-zone h3 {
+    color: #cc4b37;
+}
+
+.missed-message h5 {
+    font-size: 1rem;
+    display: inline-block;
+}
+
+.missed-message form {
+    display:inline-block;
+    width: 70%;
+    vertical-align: top;
+}
+
+.missed-messages .actions form {
+    display: inline-block;
+}
+
+.add-to-faq {
+    vertical-align: middle;
+    width: 70%;
+}
+
+
+
+/*
+ * Conversation tree editor.
+ */
+
+.conversation-node {
+    /*padding: 2px;*/
+    border-radius: 5px;
+    background-color: #bfdddf;
+    max-width: 20em;
+    cursor: pointer;
+    user-select: none;
+}
+
+.conversation-node span {
+    padding-left: 2px;
+}
+
+.conversation-node input {
+    background-color: #bfdddf;
+    color: #44828f;
+    margin-bottom: 0;
+    padding: 0;
+    display: inline-block;
+    width: 75%;
+    border: 1px solid #bfdddf;
+    box-shadow: none;
+    text-overflow: ellipsis;
+}
+
+.conversation-node input:hover {
+    color: #44828f;
+}
+
+.conversation-node input:focus {
+    color: #000;
+}
+
+.conversation-node h5 {
+    padding: 2px;
+    font-size: 1em;
+    border-radius: 5px 5px 0 0;
+    background-color: #44828f;
+    color: #fff;
+    margin: 0;
+    text-align: center;
+}
+
+.conversation-node .insert-data {
+    border-top: 1px solid #44828f;
+    padding-bottom: 6px;
+    padding-left: 2px;
+    padding-right: 2px;
+    text-align: center;
+}
+
+.conversation-node .insert-data p {
+    /*background-color: #70bdc2;*/
+    color: #44828f;
+    font-weight: bold;
+    margin-bottom: 2px;
+    font-size: 0.82em;
+}
+
+.conversation-node .collapse-switch {
+    width: auto !important;
+    height: auto !important;
+    background-color: #44828f !important;
+    border: 0 !important;
+    margin-right: 3px;
+    font-weight: bold;
+    color: #fff;
+}
+
+.collapse-switch::before {
+    content: "+";
+}
+
+.conversation-node .button.hollow.primary {
+    border: 1px solid #315f68;
+    color: #315f68;
+    background-color: rgba(49, 95, 104, 0.2);
+    /*background-color: #315f68;*/
+    padding: 0.5em 0.6em;
+    font-weight: bold;
+    font-size: 0.7em;
+    margin-left: 2px;
+    margin-bottom: 2px;
+}
+
+.conversation-node .button.hollow.primary:first-of-type {
+    margin-left: 0;
+}
+
+
+
+
+/*
+ * Import WooCommerce shop
+ */
+
+.config-panel {
+    margin-top: 1rem;
+    border-radius: 0;
+}
+
+.form-container {
+    padding-right: 1rem;
+}
+
+.form-panel {
+    padding: 1rem;
+    border-radius: 10px;
+    border: 2px solid black;
+}
+
+.form-panel label {
+    font-weight: bold;
+}
+
+.form-panel input[type="submit"] {
+    margin-bottom: 0;
+}
+
+/*
+ * WooCommerce theme
+ */
+.woocommerce-submit {
+    background-color: #9b5c8f;
+}
+
+.woocommerce-submit:hover, .woocommerce-submit:focus {
+    background-color: #814b77;
+}
+
+.woocommerce-panel {
+    border: 2px solid #9b5c8f;
+}
+
+.woocommerce-title {
+    color: #814b77;
+}
+
+.woocommerce-label {
+    color: #814b77;
+}
+
+.woocommerce-import-message {
+    margin-top: 1em;
+    margin-bottom: 0;
+}
+
+.woocommerce-connected {
+    background-image: url("/img/woocommerce-connected.png");
+    background-size: auto clamp(100px, 100%, 256px);
+    background-position: top center;
+    background-repeat: no-repeat;
+}
+
+#woocommerce-update-form input {
+    margin-bottom: 0;
+}
+
+/*
+ * Preview buttons
+ */
+.preview {
+    margin-left: 1rem;
+}
+
+/*
+ * Validation
+ */
+input[type='text'].error {
+    box-shadow: inset 0 0 3px red;
+}
+
+/*
+ * Tabs
+ */
+.tabs-title a {
+
+}
+
+.tabs-title a img {
+    display: block;
+    height: 1em;
+}
+
+.tabs-title > a {
+    color: #44828f;
+    font-size: 2rem;
+}
+
+.tabs-title > a:hover {
+    color: #315f68;
+}
+
+.tabs-title > a:focus, .tabs-title > a[aria-selected='true'] {
+    color: #315f68;
+}
+
+/*
+ * Callout with logo
+ */
+/*
+ * Logo must be a div containing an img/icon with the callout logo.
+ */
+.callout .logo {
+    display: flex;
+    align-items: center;
+    font-size: 2em;
+}
+
+.callout .logo p {
+    margin:0;
+}
+
+.callout .content {
+    display: flex;
+    align-items: center;
+}
+
+.callout .content p {
+    margin:0;
+}
+
+.blue {
+    color: #4287f5;
+}
+
+/*
+ * Code highlighting
+ */
+code {
+    border: none;
+}

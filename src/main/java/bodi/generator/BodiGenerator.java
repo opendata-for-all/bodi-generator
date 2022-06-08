@@ -8,7 +8,7 @@ import bodi.generator.dataSchema.SchemaField;
 import bodi.generator.dataSchema.SchemaType;
 import bodi.generator.dataSource.Row;
 import bodi.generator.dataSource.TabularDataSource;
-import bodi.generator.ui.model.DownloadZipService;
+import bodi.generator.ui.service.DownloadZipService;
 import bodi.generator.ui.model.Properties;
 import com.xatkit.bot.library.BotProperties;
 import org.apache.commons.configuration2.BaseConfiguration;

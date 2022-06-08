@@ -1,0 +1,49 @@
+<!DOCTYPE HTML>
+<html xmlns:th="https://www.thymeleaf.org">
+<div class="app-dashboard-body-content off-canvas-content" data-off-canvas-content th:fragment="content">
+    <h2 class="text-center">Manage your Xatkit bot</h2>
+    <!--<div th:replace="'user/dashboard/fragments/ui/popup'::content"></div>-->
+    <div class="grid-x">
+        <div class="cell small-4 card-container">
+            <a th:href="${dashboardUrl} + '/import_data'" class="card">
+                <div class="card-section card-header">
+                    <h2><i class="large fa fa-file-arrow-up"></i>&nbsp;<span>Import data</span></h2>
+                </div>
+                <div class="card-section card-content">
+                    <p class="card-content-description">Load the tabular data your bot will work with.</p>
+                </div>
+            </a>
+        </div>
+        <div class="cell small-4 card-container">
+            <a th:href="${dashboardUrl} + '/fields'" class="card">
+                <div class="card-section card-header">
+                    <h2><i class="large fa fa-table-list"></i>&nbsp;<span>Fields</span></h2>
+                </div>
+                <div class="card-section card-content">
+                    <p class="card-content-description">Edit the fields generated from the tabular data by adding
+                        synonyms, translations in different languages, etc.</p>
+                </div>
+            </a>
+        </div>
+        <div class="cell small-4 card-container">
+            <a th:href="${dashboardUrl} + '/properties'" class="card">
+                <div class="card-section card-header">
+                    <h2><i class="large fa fa-sliders-h"></i>&nbsp;<span>Properties</span></h2>
+                </div>
+                <div class="card-section card-content">
+                    <p class="card-content-description">Configure the bot properties.</p>
+                </div>
+            </a>
+        </div>
+        <div class="cell small-4 card-container">
+            <a th:href="${dashboardUrl} + '/deploy_bot'" class="card">
+                <div class="card-section card-header">
+                    <h2><i class="large fa fa-cloud-arrow-up"></i>&nbsp;<span>Deploy bot</span></h2>
+                </div>
+                <div class="card-section card-content">
+                    <p class="card-content-description">Download your chatbot or deploy it in your webpage.</p>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>

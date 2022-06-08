@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<div class="app-dashboard-body-content off-canvas-content" data-off-canvas-content th:fragment="content">
+    <h2 class="text-left" th:text="'Import data'"></h2>
+    <form th:action="@{/bodi-generator/import_data/store_file}"
+          enctype="multipart/form-data"
+          method="POST">
+        <div class="grid-x">
+            <br>
+            <div class="cell small-2" style="min-width: 70px; max-width: 100px">
+                <p>File:</p>
+                <p>Delimiter:</p>
+            </div>
+            <div class="cell auto" style="min-width: 230px; max-width: 230px">
+                <input type="file" name="file"/>
+                <input type="text"
+                       th:name="csvDelimiter"
+                       th:maxlength="1"
+                       th:value="','">
+                <input type="submit" class="button" value="Upload"/>
+            </div>
+        </div>
+    </form>
+    <div th:if="${tds != null}">
+        <!-- CSV -->
+        <h3 th:text="'CSV'"></h3>
+        <h4 th:text="${fileName}"></h4>
+        <p th:text="${tds.getNumRows()} + ' rows x ' + ${tds.getNumColumns() + ' columns'}"></p>
+        <table id="csv_data"
+               th:with="header=${tds.getHeaderCopy()}, table=${tds.getTableCopy()}">
+            <tr>
+                <th th:each="field : ${header}">
+                    <a th:text="${field}"></a>
+                </th>
+            </tr>
+
+            <tr th:each="i: ${#numbers.sequence(0, 1)}">
+                <td th:each="field : ${header}"
+                    th:text="${table[i].getColumnValue(header.indexOf(field))}"></td>
+            </tr>
+        </table>
+    </div>
+</div>
+</html>
