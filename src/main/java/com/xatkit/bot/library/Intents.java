@@ -175,6 +175,7 @@ public final class Intents {
     public static final IntentDefinition customMostFrequentValueInFieldIntent = intent("CustomMostFrequentValueInField")
             .trainingSentences(BUNDLE.getStringArray("CustomMostFrequentValueInField"))
             .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(Entities.fieldEntity)
+            .parameter(ContextKeys.ROW_NAME).fromFragment("ROW_NAME").entity(Entities.rowNameEntity)
             .getIntentDefinition();
     /**
      * The intent customLeastFrequentValueInFieldIntent.
@@ -219,5 +220,14 @@ public final class Intents {
             .trainingSentences(BUNDLE.getStringArray("CustomNumericFieldFunction"))
             .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(Entities.numericFieldEntity)
             .parameter(ContextKeys.OPERATOR).fromFragment("OPERATOR").entity(Entities.numericFunctionOperatorEntity)
+            .getIntentDefinition();
+
+
+    /**
+     * The intent customNumericFieldFunctionIntent.
+     */
+    public static final IntentDefinition customRowCountIntent = intent("CustomRowCount")
+            .trainingSentences(BUNDLE.getStringArray("CustomRowCount"))
+            .parameter(ContextKeys.ROW_NAME).fromFragment("ROW_NAME").entity(Entities.rowNameEntity)
             .getIntentDefinition();
 }

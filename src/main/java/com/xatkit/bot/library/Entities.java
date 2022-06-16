@@ -20,6 +20,9 @@ import static com.xatkit.dsl.DSL.mapping;
 
 public final class Entities {
 
+    private Entities() {
+    }
+
     /**
      * The name of the file containing the chatbot field entities.
      */
@@ -31,9 +34,25 @@ public final class Entities {
     private static String fieldOperatorsJsonFile = "fieldOperators.json";
 
     /**
+     * The name of the file containing the chatbot associated row names.
+     */
+    private static String rowNamesJsonFile = "rowNames.json";
+
+    /**
      * Contains the chatbot entities in a JSON format and in the bot language ({@link Bot#language}).
      */
     private static final JSONObject entitiesJson;
+
+    private static final JSONObject rowNamesJson;
+
+    /**
+     * The keys of this map are the entries of the entity {@link #fieldValueEntity} (i.e. the values of the fields),
+     * and the values of the map are the field they belong to.
+     * <p>
+     * This data structure is necessary since {@link #fieldValueEntity} contains the values of all fields together, so
+     * we need this to know which field they belong to.
+     */
+    public static Map<String, String> fieldValueMap;
 
     // Merge the json files containing bot entities
     static {
@@ -45,6 +64,10 @@ public final class Entities {
         if (is2 == null) {
             throw new NullPointerException("Cannot find the json file \"" + fieldOperatorsJsonFile + "\"");
         }
+        InputStream is3 = Thread.currentThread().getContextClassLoader().getResourceAsStream(rowNamesJsonFile);
+        if (is3 == null) {
+            throw new NullPointerException("Cannot find the json file \"" + rowNamesJsonFile + "\"");
+        }
         JSONObject fields = new JSONObject(new JSONTokener(is1));
         JSONObject fieldOperators = new JSONObject(new JSONTokener(is2));
         entitiesJson = new JSONObject();
@@ -54,10 +77,50 @@ public final class Entities {
         for (String key : fieldOperators.keySet()) {
             entitiesJson.put(key, fieldOperators.getJSONObject(key));
         }
+        rowNamesJson = new JSONObject(new JSONTokener(is3));
     }
 
-    private Entities() {
-    }
+    /**
+     * The entity numericFieldEntity.
+     */
+    public static final EntityDefinitionReferenceProvider numericFieldEntity = generateEntity("numericFieldEntity");
+    /**
+     * The entity textualFieldEntity.
+     */
+    public static final EntityDefinitionReferenceProvider textualFieldEntity = generateEntity("textualFieldEntity");
+    /**
+     * The entity dateFieldEntity.
+     */
+    public static final EntityDefinitionReferenceProvider dateFieldEntity = generateEntity("dateFieldEntity");
+    /**
+     * The entity fieldEntity (combines {@link #numericFieldEntity}, {@link #textualFieldEntity} and
+     * {@link #dateFieldEntity}).
+     */
+    public static final EntityDefinitionReferenceProvider fieldEntity = mergeEntities("fieldEntity", numericFieldEntity, textualFieldEntity, dateFieldEntity);
+
+    /**
+     * The entity numericOperatorEntity.
+     */
+    public static final EntityDefinitionReferenceProvider numericOperatorEntity = generateEntity("numericOperatorEntity");
+    /**
+     * The entity textualOperatorEntity.
+     */
+    public static final EntityDefinitionReferenceProvider textualOperatorEntity = generateEntity("textualOperatorEntity");
+    /**
+     * The entity dateOperatorEntity.
+     */
+    public static final EntityDefinitionReferenceProvider dateOperatorEntity = generateEntity("dateOperatorEntity");
+    /**
+     * The entity numericFunctionOperatorEntity.
+     */
+    public static final EntityDefinitionReferenceProvider numericFunctionOperatorEntity = generateEntity("numericFunctionOperatorEntity");
+
+    /**
+     * The entity fieldValueEntity.
+     */
+    public static final EntityDefinitionReferenceProvider fieldValueEntity = generateFieldValueEntity();
+
+    public static final EntityDefinitionReferenceProvider rowNameEntity = generateRowNameEntity();
 
     /**
      * Generates a chatbot entity.
@@ -107,55 +170,6 @@ public final class Entities {
     }
 
     /**
-     * The entity numericFieldEntity.
-     */
-    public static final EntityDefinitionReferenceProvider numericFieldEntity = generateEntity("numericFieldEntity");
-    /**
-     * The entity textualFieldEntity.
-     */
-    public static final EntityDefinitionReferenceProvider textualFieldEntity = generateEntity("textualFieldEntity");
-    /**
-     * The entity dateFieldEntity.
-     */
-    public static final EntityDefinitionReferenceProvider dateFieldEntity = generateEntity("dateFieldEntity");
-    /**
-     * The entity fieldEntity (combines {@link #numericFieldEntity}, {@link #textualFieldEntity} and
-     * {@link #dateFieldEntity}).
-     */
-    public static final EntityDefinitionReferenceProvider fieldEntity = mergeEntities("fieldEntity", numericFieldEntity, textualFieldEntity, dateFieldEntity);
-
-    /**
-     * The entity numericOperatorEntity.
-     */
-    public static final EntityDefinitionReferenceProvider numericOperatorEntity = generateEntity("numericOperatorEntity");
-    /**
-     * The entity textualOperatorEntity.
-     */
-    public static final EntityDefinitionReferenceProvider textualOperatorEntity = generateEntity("textualOperatorEntity");
-    /**
-     * The entity dateOperatorEntity.
-     */
-    public static final EntityDefinitionReferenceProvider dateOperatorEntity = generateEntity("dateOperatorEntity");
-    /**
-     * The entity numericFunctionOperatorEntity.
-     */
-    public static final EntityDefinitionReferenceProvider numericFunctionOperatorEntity = generateEntity("numericFunctionOperatorEntity");
-
-    /**
-     * The entity fieldValueEntity.
-     */
-    public static final EntityDefinitionReferenceProvider fieldValueEntity = generateFieldValueEntity();
-
-    /**
-     * The keys of this map are the entries of the entity {@link #fieldValueEntity} (i.e. the values of the fields),
-     * and the values of the map are the field they belong to.
-     * <p>
-     * This data structure is necessary since {@link #fieldValueEntity} contains the values of all fields together, so
-     * we need this to know which field they belong to.
-     */
-    public static Map<String, String> fieldValueMap;
-
-    /**
      * Generates the fieldValueEntity, which contains an entry for each value of all fields (and their optional
      * synonyms). The values of the fields are stored in {@link #entitiesJson}. Note that not all values are
      * necessarily stored. Only those that are considered important for the chatbot should be stored.
@@ -180,6 +194,17 @@ public final class Entities {
                     }
                 }
             }
+        }
+        return (EntityDefinitionReferenceProvider) entity;
+    }
+
+
+    private static EntityDefinitionReferenceProvider generateRowNameEntity() {
+        String entityName = "rowNameEntity";
+        JSONObject entityJson = rowNamesJson.getJSONObject(entityName);
+        MappingEntryStep entity = mapping(entityName);
+        for (Object entry : entityJson.getJSONArray(Bot.language)) {
+            entity.entry().value((String) entry);
         }
         return (EntityDefinitionReferenceProvider) entity;
     }

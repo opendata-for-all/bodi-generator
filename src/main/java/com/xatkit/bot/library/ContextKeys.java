@@ -65,6 +65,11 @@ public final class ContextKeys {
      * The constant value.
      */
     public static final String VALUE = "value";
+    /**
+     * The constant row_name.
+     */
+    public static final String ROW_NAME = "row_name";
+
 
 
 }
