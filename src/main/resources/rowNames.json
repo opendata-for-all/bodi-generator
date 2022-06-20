@@ -4,46 +4,19 @@
       "entry",
       "row",
       "value",
-      "record",
-      "officer",
-      "elected official",
-      "person",
-      "people",
-      "politician",
-      "employee",
-      "member",
-      "government member"
+      "record"
     ],
     "ca": [
       "entrada",
       "fila",
       "valor",
-      "registre",
-      "càrrec",
-      "carrec",
-      "càrrec electe",
-      "persona",
-      "gent",
-      "polític",
-      "politic",
-      "treballador",
-      "membre",
-      "membre del govern"
+      "registre"
     ],
     "es": [
       "entrada",
       "fila",
       "valor",
-      "registro",
-      "cargo",
-      "cargo electo",
-      "persona",
-      "gente",
-      "político",
-      "politico",
-      "trabajador",
-      "miembro",
-      "miembro del gobierno"
+      "registro"
     ]
   }
 }

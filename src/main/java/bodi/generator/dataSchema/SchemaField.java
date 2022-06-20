@@ -18,11 +18,6 @@ import java.util.Set;
 public class SchemaField {
 
     /**
-     * A set containing all the possible languages of the fields.
-     */
-    public static final Set<String> languages = new HashSet<>(Set.of("en", "ca", "es"));
-
-    /**
      * The name of the field as it was in the {@link TabularDataSource} from which it was inferred.
      */
     private String originalName;
@@ -31,7 +26,7 @@ public class SchemaField {
      * A secondary, more human-friendly, name. It may be used instead of {@link #originalName} if is a complex or
      * difficult-to-read name.
      * <p>
-     * It is defined in all the languages stored in {@link #languages}. The keys are the languages and the values are
+     * It is defined in all the languages stored in {@link DataSchema#languages}. The keys are the languages and the values are
      * the actual names in that language.
      */
     private Map<String, String> readableName;
@@ -42,7 +37,7 @@ public class SchemaField {
      * In a chatbot, they are useful for the user to be able to refer to a field in different ways. For instance,
      * {@code location} could be a synonym of {@code address}.
      * <p>
-     * They are defined in all the languages stored in {@link #languages}. The keys are the languages and the
+     * They are defined in all the languages stored in {@link DataSchema#languages}. The keys are the languages and the
      * values are the actual synonym collections in that language.
      */
     private Map<String, Set<String>> synonyms;
@@ -54,7 +49,7 @@ public class SchemaField {
      * of them (when there are a lot of different values)
      * <p>
      * The keys are the values of the field. The values are maps that contain an entry for each language in
-     * {@link #languages} and a set of synonyms in that language (if any).
+     * {@link DataSchema#languages} and a set of synonyms in that language (if any).
      * <p>
      * Example entry: {"Male", {"en", ["Man"]}, {"es", ["Hombre", "Macho"]}, {"ca", ["Home", "Mascle"]} >
      */
@@ -88,7 +83,7 @@ public class SchemaField {
     public SchemaField() {
         readableName = new HashMap<>();
         synonyms = new HashMap<>();
-        for (String language : languages) {
+        for (String language : DataSchema.languages) {
             readableName.put(language, null);
             synonyms.put(language, new HashSet<>());
         }
@@ -233,7 +228,7 @@ public class SchemaField {
         for (String value : values) {
             if (!value.isEmpty()) {
                 Map<String, Set<String>> valueSynonyms = new HashMap<>();
-                for (String language: languages) {
+                for (String language: DataSchema.languages) {
                     valueSynonyms.put(language, new HashSet<>());
                 }
                 mainValues.put(value, valueSynonyms);
@@ -291,7 +286,7 @@ public class SchemaField {
      */
     public JSONObject generateFieldJson() {
         JSONObject entity = new JSONObject();
-        for (String language : languages) {
+        for (String language : DataSchema.languages) {
             JSONObject languageEntity = new JSONObject();
             languageEntity.put("readableName", this.getReadableName(language));
             languageEntity.put("synonyms", this.getSynonyms(language));

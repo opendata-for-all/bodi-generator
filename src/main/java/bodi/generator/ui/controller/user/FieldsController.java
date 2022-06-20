@@ -63,7 +63,7 @@ public class FieldsController {
             }
             model.addAttribute("schemaField", objects.getSchemaField());
         }
-        return dashboard.view(DashboardView.FIELDS, model);
+        return dashboard.viewCustomization(CustomizationTab.FIELDS, model);
     }
 
     /**

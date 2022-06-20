@@ -3,17 +3,17 @@
 <div class="app-dashboard-body-content off-canvas-content" data-off-canvas-content th:fragment="content">
     <h2 class="text-left" th:text="'Properties'"></h2>
     <div class="grid-x">
-        <ul class="tabs cell auto" data-tabs id="installation-tabs">
+        <ul class="tabs cell auto" data-tabs id="properties-tabs">
             <li class="tabs-title is-active"><a href="#general" aria-selected="true">General</a></li>
-            <li class="tabs-title"><a data-tabs-target="intent_provider" href="#intent_provider">Intent provider</a></li>
-            <li class="tabs-title"><a data-tabs-target="database" href="#database">Database</a></li>
-            <li class="tabs-title"><a data-tabs-target="nlp_server" href="#nlp_server">NLP Server</a></li>
-            <li class="tabs-title"><a data-tabs-target="open_data" href="#open_data">Open data</a></li>
+            <li class="tabs-title"><a href="#intent_provider">Intent provider</a></li>
+            <li class="tabs-title"><a href="#database">Database</a></li>
+            <li class="tabs-title"><a href="#nlp_server">NLP Server</a></li>
+            <li class="tabs-title"><a href="#open_data">Open data</a></li>
         </ul>
     </div>
     <br>
     <div class="grid-x">
-        <div class="tabs-content cell auto" data-tabs-content="installation-tabs"
+        <div class="tabs-content cell auto" data-tabs-content="properties-tabs"
             th:if="${properties != null}">
             <div class="tabs-panel is-active" id="general">
                 <form th:object="${properties}"
@@ -277,19 +277,21 @@
                 </form>
             </div>
         </div>
-        <div class="grid-x callout cell auto"
-             th:if="${properties == null}">
+    </div>
+    <div class="grid-x"
+         th:if="${properties == null}">
+        <div class="grid-x cell small-6 callout">
             <div class="cell small-1 logo blue">
                 <i class="fas fa-info-circle"></i>
             </div>
-            <div class="cell small-11 content">
+            <div class="cell auto content">
                 <p>You need to import data to configure the bot properties.</p>
             </div>
         </div>
     </div>
     <script>
         $(document).ready(function () {
-            var elem = new Foundation.Tabs($("#installation-tabs"));
+            var elem = new Foundation.Tabs($("#properties-tabs"));
         });
     </script>
 </div>

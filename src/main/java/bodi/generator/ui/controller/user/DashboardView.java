@@ -19,9 +19,19 @@ public enum DashboardView {
     IMPORT_DATA("import_data"),
 
     /**
+     * The {@code customization} page of the dashboard.
+     */
+    CUSTOMIZATION("customization"),
+
+    /**
      * The {@code fields} page of the dashboard.
      */
     FIELDS("fields"),
+
+    /**
+     * The {@code row_names} page of the dashboard.
+     */
+    ROW_NAMES("row_names"),
 
     /**
      * The {@code properties} page of the dashboard.

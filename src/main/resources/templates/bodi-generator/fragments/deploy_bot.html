@@ -12,12 +12,14 @@
                 </div>
             </form>
         </div>
-        <div class="grid-x callout cell auto"
-             th:if="${!dataImported}">
+    </div>
+    <div class="grid-x"
+         th:if="${!dataImported}">
+        <div class="grid-x cell small-6 callout">
             <div class="cell small-1 logo blue">
                 <i class="fas fa-info-circle"></i>
             </div>
-            <div class="cell small-11 content">
+            <div class="cell auto content">
                 <p>You need to import data to create a bot.</p>
             </div>
         </div>

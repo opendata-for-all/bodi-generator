@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<div class="app-dashboard-body-content off-canvas-content" data-off-canvas-content th:fragment="content">
+    <div class="grid-x"
+         th:if="${rowNames == null}">
+        <div class="grid-x cell small-6 callout">
+            <div class="cell small-1 logo blue">
+                <i class="fas fa-info-circle"></i>
+            </div>
+            <div class="cell auto content">
+                <p>You need to import data to define row names.</p>
+            </div>
+        </div>
+    </div>
+    <div class="grid-x">
+        <div class="cell small-6 callout">
+            <p><b>What are row names?</b></p>
+            <p>Row names or aliases are the different ways you could refer to the rows of the dataset.</p>
+            <p>
+                <span> Imagine a dataset where there is a row for each officer in a municipal government. Then, the
+                    user could ask</span><span style="color:#44828f; display:inline;"> "How many officers are
+                there?"</span>
+            <p>The problem here is that if we don't tell the
+                chatbot that each row represents a person, it will not know that. It will only understand generic names
+                such as "row", "entry" or "value". That is why here you can define the row names.</p>
+            <p>In this example, we could enhance the chatbot with row names such as "officer", "person", or
+                "government member"</p>
+            <img src="/images/row_names-demo.png" alt="row_names demo">
+        </div>
+        <div class="cell auto">
+            <div class="grid-x" th:if="${rowNames != null}">
+                <div class="cell small-4 card-container card"
+                     th:each="rowNames_lang : ${rowNames.entrySet()}">
+                    <div class="card-section card-header" style="max-height: 2em;">
+                        <h2 th:text="${rowNames_lang.key}"></h2>
+                    </div>
+                    <div class="card-section card-content" id="rowNames">
+                        <br>
+                        <form th:each="name : ${rowNames_lang.value}"
+                              th:action="'/bodi-generator/row_names/delete_row_name/' + ${rowNames_lang.key} + '/' +${name}"
+                              method="POST">
+                            <button type="submit">
+                                <a><i class="large fa fa-circle-xmark"></i></a>
+                            </button>
+                            <p style="display: inline;" th:text="${name}"></p>
+                        </form>
+                        <form th:action="'/bodi-generator/row_names/store_row_name/' + ${rowNames_lang.key}"
+                              method="POST">
+                            <input type="text" style="display: inline;" th:value="${newRowName}" name="newRowName"/>
+                            <button type="submit" class="button" style="display: inline;">
+                                Add
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

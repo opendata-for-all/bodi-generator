@@ -3,16 +3,12 @@
 <div class="app-dashboard-body-content off-canvas-content" data-off-canvas-content th:fragment="content">
     <div class="grid-x">
         <!-- SCHEMA TYPE -->
-        <div class="cell small-4 card-container card">
+        <div class="cell small-4 card-container card"
+             th:if="${schemaType != null}">
             <div class="card-section card-header" style="max-height: 2em;">
                 <h2>Fields</h2>
             </div>
-            <div class="card-section card-content"
-                 th:if="${schemaType == null}">
-                <p class="card-content-description">You need to import data to see the fields.</p>
-            </div>
-            <div class="card-section card-content" id="schemaType"
-                 th:if="${schemaType != null}">
+            <div class="card-section card-content" id="schemaType">
                 <form>
                     <div th:each="field : ${schemaType.getSchemaFields()}">
                         <button th:if="${schemaField != null} and ${field.getOriginalName()} == ${schemaField.getOriginalName()}"
@@ -139,6 +135,17 @@
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+    <div class="grid-x"
+         th:if="${schemaType == null}">
+        <div class="grid-x cell small-6 callout">
+            <div class="cell small-1 logo blue">
+                <i class="fas fa-info-circle"></i>
+            </div>
+            <div class="cell auto content">
+                <p>You need to import data to see the fields.</p>
             </div>
         </div>
     </div>

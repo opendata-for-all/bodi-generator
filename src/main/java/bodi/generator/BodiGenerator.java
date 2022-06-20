@@ -8,8 +8,8 @@ import bodi.generator.dataSchema.SchemaField;
 import bodi.generator.dataSchema.SchemaType;
 import bodi.generator.dataSource.Row;
 import bodi.generator.dataSource.TabularDataSource;
-import bodi.generator.ui.service.DownloadZipService;
 import bodi.generator.ui.model.Properties;
+import bodi.generator.ui.service.DownloadZipService;
 import com.xatkit.bot.library.BotProperties;
 import org.apache.commons.configuration2.BaseConfiguration;
 import org.apache.commons.configuration2.Configuration;
@@ -176,7 +176,7 @@ public final class BodiGenerator {
                 schemaField.setCategorical(false);
             }
             if (fieldsJson != null) {
-                for (String language : SchemaField.languages) {
+                for (String language : DataSchema.languages) {
                     JSONObject fieldJson = fieldsJson.getJSONObject(fieldName).getJSONObject(language);
                     schemaField.setReadableName(language, fieldJson.getString("readable_name"));
                     Set<String> synonyms = fieldJson.getJSONArray("synonyms").toList().stream()
@@ -185,7 +185,7 @@ public final class BodiGenerator {
                     schemaField.addSynonyms(language, Collections.singleton(schemaField.getReadableName(language)));
                 }
             } else {
-                for (String language : SchemaField.languages) {
+                for (String language : DataSchema.languages) {
                     schemaField.setReadableName(language, fieldName);
                 }
             }
@@ -245,7 +245,7 @@ public final class BodiGenerator {
             } else {
                 schemaField.setCategorical(false);
             }
-            for (String language : SchemaField.languages) {
+            for (String language : DataSchema.languages) {
                 schemaField.setReadableName(language, fieldName);
             }
             schemaType.addSchemaField(schemaField);
@@ -309,6 +309,11 @@ public final class BodiGenerator {
             File fieldOperatorsSource = new File("src/main/resources/fieldOperators.json");
             File fieldOperatorsDest = new File(outputFolder + "/src/main/resources/fieldOperators.json");
             FileUtils.copyFile(fieldOperatorsSource, fieldOperatorsDest);
+
+            System.out.println("Creating resource rowNames.json");
+            File rowNamesSource = new File("src/main/resources/rowNames.json");
+            File rowNamesDest = new File(outputFolder + "/src/main/resources/rowNames.json");
+            FileUtils.copyFile(rowNamesSource, rowNamesDest);
 
             System.out.println("Creating resource intents.properties");
             File intentsSource = new File("src/main/resources/intents.properties");
@@ -422,7 +427,7 @@ public final class BodiGenerator {
             }
 
             fw.write("\n# NLP Server properties\n\n");
-            fw.write(BotProperties.SERVER_URL + " = " + "127.0.0.1:5001" + "\n");
+            fw.write(BotProperties.SERVER_URL + " = " + "127.0.0.1:5002" + "\n");
             fw.write(BotProperties.TEXT_TO_TABLE_ENDPOINT + " = " + "text-to-table" + "\n");
 
             fw.write("\n# Open data resource information\n\n");
@@ -439,11 +444,12 @@ public final class BodiGenerator {
     }
 
     /**
-     * Creates the bot files.
+     * Creates the bot files and pack them as a zip file.
      *
      * @param properties the bodi-generator and bot properties
      * @param ds         the Data Schema
      * @param csv        the csv
+     * @param response   the response where to send the zip file
      */
     public static void createBot(Properties properties, DataSchema ds, InputStream csv,
                                    HttpServletResponse response) {
@@ -493,6 +499,18 @@ public final class BodiGenerator {
             File fieldOperatorsSource = new File("src/main/resources/fieldOperators.json");
             File fieldOperatorsDest = new File(outputFolder + "/src/main/resources/fieldOperators.json");
             FileUtils.copyFile(fieldOperatorsSource, fieldOperatorsDest);
+
+            String defaultRowNamesFile = "rowNames.json";
+            InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(defaultRowNamesFile);
+            JSONObject defaultRowNamesJson = null;
+            if (is == null) {
+                System.out.println("Cannot find the default row names file \"" + defaultRowNamesFile + "\"");
+            } else {
+                defaultRowNamesJson = new JSONObject(new JSONTokener(is));
+            }
+            System.out.println("Creating resource rowNames.json");
+            Path rowNamesFile = Paths.get(outputFolder + "/src/main/resources/rowNames.json");
+            Files.write(rowNamesFile, ds.generateRowNamesJson(defaultRowNamesJson).toString().getBytes());
 
             System.out.println("Creating resource intents.properties");
             File intentsSource = new File("src/main/resources/intents.properties");

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<div class="app-dashboard-body-content off-canvas-content" data-off-canvas-content th:fragment="content">
+    <div class="grid-x">
+        <ul class="tabs cell auto" data-tabs id="customization-tabs">
+            <li class="tabs-title" th:classappend="${tab.label.equals('fields') ? 'is-active': ''}">
+                <a th:href="${dashboardUrl} + '/fields'">Fields</a>
+            </li>
+            <li class="tabs-title" th:classappend="${tab.label.equals('row_names') ? 'is-active': ''}">
+                <a th:href="${dashboardUrl} + '/row_names'">Row names</a>
+            </li>
+        </ul>
+    </div>
+    <br>
+    <div class="grid-x">
+        <div class="tabs-content cell auto" data-tabs-content="customization-tabs">
+            <div class="tabs-panel" th:classappend="${tab.label.equals('fields') ? 'is-active': ''}">
+                <div th:replace="'bodi-generator/fragments/fields' :: content"></div>
+            </div>
+            <div class="tabs-panel" th:classappend="${tab.label.equals('row_names') ? 'is-active': ''}">
+                <div th:replace="'bodi-generator/fragments/row_names' :: content"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function () {
+            var elem = new Foundation.Tabs($("#customization-tabs"));
+        });
+    </script>
+</div>
+</html>
