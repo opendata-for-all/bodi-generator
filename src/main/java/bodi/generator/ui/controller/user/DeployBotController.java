@@ -1,8 +1,6 @@
 package bodi.generator.ui.controller.user;
 
 import bodi.generator.dataSchema.DataSchema;
-import bodi.generator.dataSchema.SchemaField;
-import bodi.generator.dataSchema.SchemaType;
 import bodi.generator.dataSource.TabularDataSource;
 import bodi.generator.ui.model.BodiGeneratorObjects;
 import bodi.generator.ui.model.Properties;
@@ -68,10 +66,6 @@ public class DeployBotController {
             DataSchema ds = objects.getDs();
             byte[] csv = objects.getCsv();
             Properties properties = objects.getProperties();
-            SchemaType schemaType = objects.getSchemaType();
-            for (SchemaField deletedSchemaField : schemaType.getDeletedSchemaFields()) {
-                tds.removeColumn(deletedSchemaField.getOriginalName());
-            }
             createBot(properties, ds, new ByteArrayInputStream(csv), response);
         }
     }
