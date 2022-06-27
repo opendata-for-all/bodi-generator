@@ -36,6 +36,18 @@ public final class Intents {
             .trainingSentences(BUNDLE.getStringArray("ShowData"))
             .getIntentDefinition();
     /**
+     * The intent showAllIntent.
+     */
+    public static final IntentDefinition showAllIntent = intent("ShowAll")
+            .trainingSentences(BUNDLE.getStringArray("ShowAll"))
+            .getIntentDefinition();
+    /**
+     * The intent showAllDistinctIntent.
+     */
+    public static final IntentDefinition showAllDistinctIntent = intent("ShowAllDistinct")
+            .trainingSentences(BUNDLE.getStringArray("ShowAllDistinct"))
+            .getIntentDefinition();
+    /**
      * The intent showNextPageIntent.
      */
     public static final IntentDefinition showNextPageIntent = intent("ShowNextPage")
@@ -129,6 +141,22 @@ public final class Intents {
             .trainingSentences(BUNDLE.getStringArray("Value"))
             .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(Entities.dateOperatorEntity)
             .getIntentDefinition();
+
+    /**
+     * The intent numericFunctionOperatorIntent.
+     */
+    public static final IntentDefinition numericFunctionOperatorIntent = intent("NumericFunctionOperator")
+            .trainingSentences(BUNDLE.getStringArray("Value"))
+            .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(Entities.numericFunctionOperatorEntity)
+            .getIntentDefinition();
+    /**
+     * The intent dateFunctionOperatorIntent.
+     */
+    public static final IntentDefinition dateFunctionOperatorIntent = intent("DateFunctionOperator")
+            .trainingSentences(BUNDLE.getStringArray("Value"))
+            .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(Entities.dateFunctionOperatorEntity)
+            .getIntentDefinition();
+
 
 
     /**
@@ -224,10 +252,21 @@ public final class Intents {
 
 
     /**
-     * The intent customNumericFieldFunctionIntent.
+     * The intent customRowCountIntent.
      */
     public static final IntentDefinition customRowCountIntent = intent("CustomRowCount")
             .trainingSentences(BUNDLE.getStringArray("CustomRowCount"))
+            .parameter(ContextKeys.ROW_NAME).fromFragment("ROW_NAME").entity(Entities.rowNameEntity)
+            .getIntentDefinition();
+
+
+    /**
+     * The intent customFieldOfValueIntent.
+     */
+    public static final IntentDefinition customFieldOfValueIntent = intent("CustomFieldOfValue")
+            .trainingSentences(BUNDLE.getStringArray("CustomFieldOfValue"))
+            .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(Entities.fieldEntity)
+            .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(Entities.fieldValueEntity)
             .parameter(ContextKeys.ROW_NAME).fromFragment("ROW_NAME").entity(Entities.rowNameEntity)
             .getIntentDefinition();
 }

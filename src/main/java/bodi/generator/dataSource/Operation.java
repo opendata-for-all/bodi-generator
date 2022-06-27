@@ -36,5 +36,13 @@ public enum Operation {
      * <p>
      * Given a numeric field name and an operator, this operation applies the operator in the field and gets the result.
      */
-    NUMERIC_FIELD_FUNCTION
+    NUMERIC_FIELD_FUNCTION,
+
+    /**
+     * FIELD_OF_VALUE Operation.
+     * <p>
+     * Given a field A and a value of a field B, this operation gets the field A of all entries with field B equal to
+     * the value. An optional operator con be applied (e.g. max value, unique values, etc.)
+     */
+    FIELD_OF_VALUE
 }

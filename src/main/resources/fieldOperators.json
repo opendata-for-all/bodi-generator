@@ -423,5 +423,44 @@
         ]
       }
     }
+  },
+  "dateFunctionOperatorEntity": {
+    "oldest": {
+      "en": {
+        "synonyms": [
+        ]
+      },
+      "ca": {
+        "synonyms": [
+          "més antic",
+          "més vell"
+        ]
+      },
+      "es": {
+        "synonyms": [
+          "más antiguo",
+          "más viejo"
+        ]
+      }
+    },
+    "newest": {
+      "en": {
+        "synonyms": [
+          "most recent"
+        ]
+      },
+      "ca": {
+        "synonyms": [
+          "més recent",
+          "més nou"
+        ]
+      },
+      "es": {
+        "synonyms": [
+          "más reciente",
+          "más nuevo"
+        ]
+      }
+    }
   }
 }

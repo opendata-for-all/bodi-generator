@@ -116,6 +116,11 @@ public final class Entities {
     public static final EntityDefinitionReferenceProvider numericFunctionOperatorEntity = generateEntity("numericFunctionOperatorEntity");
 
     /**
+     * The entity dateFunctionOperatorEntity.
+     */
+    public static final EntityDefinitionReferenceProvider dateFunctionOperatorEntity = generateEntity("dateFunctionOperatorEntity");
+
+    /**
      * The entity fieldValueEntity.
      */
     public static final EntityDefinitionReferenceProvider fieldValueEntity = generateFieldValueEntity();

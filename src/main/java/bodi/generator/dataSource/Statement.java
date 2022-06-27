@@ -338,6 +338,13 @@ public class Statement {
                     return valueFrequency(header, table, args[0], args[1]);
                 case NUMERIC_FIELD_FUNCTION:
                     return numericFieldFunction(header, table, args[0], args[1]);
+                case FIELD_OF_VALUE:
+                    fieldOfValue(header, table, args[0], args[1], args[2], args[3]);
+                    if (!isEmpty(args[3]) && !args[3].equals("distinct")) {
+                        return fieldFunction(header, table, args[0], args[3]);
+                    } else {
+                        return new ResultSet(header, table);
+                    }
                 default:
                     break;
             }
@@ -440,6 +447,35 @@ public class Statement {
     }
 
     /**
+     * Performs a field operation. The supported field operations are:
+     * <ul>
+     *     <li>{@link #numericFieldFunction}</li>
+     *     <li>{@link #dateFieldFunction}</li>
+     * </ul>
+     *
+     * @param header the header of a result set
+     * @param table  the table of a result set
+     * @param field the field where the operator is to be applied
+     * @param operator the operator, which can be a numeric or a date operator
+     * @return the result of the field function which can be a number or a date
+     */
+    private Object fieldFunction(List<String> header, List<Row> table, String field, String operator) {
+        switch (operator) {
+            case "max":
+            case "min":
+            case "avg":
+            case "sum":
+                return numericFieldFunction(header, table, field, operator);
+            case "oldest":
+            case "newest":
+                return dateFieldFunction(header, table, field, operator);
+            default:
+                break;
+        }
+        return null;
+    }
+
+    /**
      * Executes the {@link Operation#NUMERIC_FIELD_FUNCTION} operation.
      * <p>
      * Supported operators are:
@@ -454,7 +490,7 @@ public class Statement {
      * @param table  the table of a result set
      * @param field the field where the operator is to be applied
      * @param operator the operator
-     * @return
+     * @return the numeric result of the field function
      */
     private Float numericFieldFunction(List<String> header, List<Row> table, String field, String operator) {
         Float result = null;
@@ -492,6 +528,69 @@ public class Statement {
                 break;
         }
         return result;
+    }
+
+    /**
+     * Executes a date field function.
+     * <p>
+     * Supported operators are:
+     * <ul>
+     *     <li>{@code oldest}</li>
+     *     <li>{@code newest}</li>
+     * </ul>
+     *
+     * @param header the header of a result set
+     * @param table  the table of a result set
+     * @param field the field where the operator is to be applied
+     * @param operator the operator
+     * @return the date result of the field function
+     */
+    private Date dateFieldFunction(List<String> header, List<Row> table, String field, String operator) {
+        Date result = null;
+        switch (operator) {
+            case "oldest":
+            case "newest":
+                for (Row row : table) {
+                    String stringValue = row.getColumnValue(header.indexOf(field));
+                    if (!isEmpty(stringValue)) {
+                        for (String dateFormat : Utils.dateFormats) {
+                            try {
+                                SimpleDateFormat format = new SimpleDateFormat(dateFormat);
+                                Date value = format.parse(stringValue);
+                                if (isNull(result)
+                                        || (operator.equals("oldest") && value.before(result))
+                                        || (operator.equals("newest") && value.after(result))) {
+                                    result = value;
+                                }
+                                break;
+                            } catch (Exception ignored) { }
+                        }
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+        return result;
+    }
+
+    /**
+     * Executes the {@link Operation#FIELD_OF_VALUE} operation.
+     *
+     * @param header      the header of a result set
+     * @param table       the table of a result set
+     * @param field       the target field
+     * @param value       the target value
+     * @param valueField  the field of the target value
+     */
+    private void fieldOfValue(List<String> header, List<Row> table, String field, String value, String valueField,
+                              String method) {
+        table.removeIf(row -> !row.getColumnValue(header.indexOf(valueField)).equals(value));
+        if (method.equals("distinct")) {
+            showFieldDistinct(header, table, field);
+        } else {
+            selectField(header, table, field);
+        }
     }
 
     /**
