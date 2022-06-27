@@ -60,6 +60,11 @@ public class CustomFieldOfValue {
     private String field;
 
     /**
+     * This variable stores the {@code operator} parameter recognized from the matched intent.
+     */
+    private String operator;
+
+    /**
      * This variable stores the {@code value} parameter recognized from the matched intent.
      */
     private String value;
@@ -77,17 +82,20 @@ public class CustomFieldOfValue {
      */
     public CustomFieldOfValue(ReactPlatform reactPlatform, State returnState) {
         val processCustomFieldOfValueState = state("ProcessCustomValueOfField");
-        val customFieldOfValueShowAllState = state("CustomFieldOfValueShowAll");
-        val customFieldOfValueOperatorState = state("CustomFieldOfValueOperator");
+        val processCustomFieldOfValueShowAllState = state("ProcessCustomFieldOfValueShowAll");
+        val processCustomFieldOfValueOperatorState = state("ProcessCustomFieldOfValueOperator");
 
         processCustomFieldOfValueState
                 .body(context -> {
                     error = false;
                     stop = false;
                     field = (String) context.getIntent().getValue(ContextKeys.FIELD);
+                    operator = (String) context.getIntent().getValue(ContextKeys.OPERATOR);
                     value = (String) context.getIntent().getValue(ContextKeys.VALUE);
-                    if (!isEmpty(field) && !isEmpty(value)) {
+                    if (!isEmpty(value)) {
                         valueField = Entities.fieldValueMap.get(value);
+                    }
+                    if (!isEmpty(field) && !isEmpty(value) && isEmpty(operator)) {
                         Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
                         String[] operationArgs = {field, value, valueField, ""};
                         ResultSet resultSet = (ResultSet) statement.executeQuery(Operation.FIELD_OF_VALUE, operationArgs);
@@ -118,6 +126,13 @@ public class CustomFieldOfValue {
                                     "AskFieldOfValueOperation"), resultSet.getNumRows(), field,
                                     resultSetDistinct.getNumRows(), valueField, value), buttons);
                         }
+                    } else if (!isEmpty(operator)) {
+                        // Check that operator type matches field type
+                        if (!(Utils.getEntityValues(Entities.numericFunctionOperatorEntity).contains(operator) && Utils.getEntityValues(Entities.numericFieldEntity).contains(field))
+                                &&
+                                !(Utils.getEntityValues(Entities.dateFunctionOperatorEntity).contains(operator) && Utils.getEntityValues(Entities.dateFieldEntity).contains(field))) {
+                            error = true;
+                        }
                     } else {
                         error = true;
                     }
@@ -125,13 +140,16 @@ public class CustomFieldOfValue {
                 .next()
                 .when(context -> error).moveTo(getResult.getGenerateResultSetFromQueryState())
                 .when(context -> stop).moveTo(returnState)
-                .when(intentIs(Intents.showAllIntent)).moveTo(customFieldOfValueShowAllState)
-                .when(intentIs(Intents.showAllDistinctIntent)).moveTo(customFieldOfValueShowAllState)
-                .when(intentIs(Intents.numericFunctionOperatorIntent)).moveTo(customFieldOfValueOperatorState)
-                .when(intentIs(Intents.dateFunctionOperatorIntent)).moveTo(customFieldOfValueOperatorState)
+                .when(context -> !error && !isEmpty(operator)).moveTo(processCustomFieldOfValueOperatorState)
+                .when(intentIs(Intents.showAllIntent)).moveTo(processCustomFieldOfValueShowAllState)
+                .when(intentIs(Intents.showAllDistinctIntent)).moveTo(processCustomFieldOfValueShowAllState)
+                .when(intentIs(Intents.numericFunctionOperatorIntent)).moveTo(processCustomFieldOfValueOperatorState)
+                .when(intentIs(Intents.dateFunctionOperatorIntent)).moveTo(processCustomFieldOfValueOperatorState)
                 .when(intentIs(coreLibraryI18n.Quit)).moveTo(returnState);
 
-        customFieldOfValueShowAllState
+        this.processCustomFieldOfValueState = processCustomFieldOfValueState.getState();
+
+        processCustomFieldOfValueShowAllState
                 .body(context -> {
                     context.getSession().put(ContextKeys.OPERATION, Operation.FIELD_OF_VALUE);
                     String[] operationArgs = {field, value, valueField, ""};
@@ -144,9 +162,11 @@ public class CustomFieldOfValue {
                 .next()
                 .moveTo(getResult.getGenerateResultSetWithOperationState());
 
-        customFieldOfValueOperatorState
+        processCustomFieldOfValueOperatorState
                 .body(context -> {
-                    String operator = (String) context.getIntent().getValue(ContextKeys.VALUE);
+                    if (!context.getIntent().getDefinition().getName().equals(Intents.customFieldOfValueOperatorIntent.getName())) {
+                        operator = (String) context.getIntent().getValue(ContextKeys.VALUE);
+                    }
                     Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
                     String[] operationArgs = {field, value, valueField, operator};
                     // Result is a Date or a Float
@@ -156,9 +176,5 @@ public class CustomFieldOfValue {
                 })
                 .next()
                 .moveTo(returnState);
-
-
-        this.processCustomFieldOfValueState = processCustomFieldOfValueState.getState();
-
     }
 }

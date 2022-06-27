@@ -110,15 +110,20 @@ public final class Entities {
      * The entity dateOperatorEntity.
      */
     public static final EntityDefinitionReferenceProvider dateOperatorEntity = generateEntity("dateOperatorEntity");
+
     /**
      * The entity numericFunctionOperatorEntity.
      */
     public static final EntityDefinitionReferenceProvider numericFunctionOperatorEntity = generateEntity("numericFunctionOperatorEntity");
-
     /**
      * The entity dateFunctionOperatorEntity.
      */
     public static final EntityDefinitionReferenceProvider dateFunctionOperatorEntity = generateEntity("dateFunctionOperatorEntity");
+    /**
+     * The entity functionOperatorEntity (combines {@link #numericFunctionOperatorEntity} and
+     * {@link #dateFunctionOperatorEntity}).
+     */
+    public static final EntityDefinitionReferenceProvider functionOperatorEntity = mergeEntities("functionOperator", numericFunctionOperatorEntity, dateFunctionOperatorEntity);
 
     /**
      * The entity fieldValueEntity.

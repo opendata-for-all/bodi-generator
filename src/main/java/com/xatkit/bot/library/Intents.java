@@ -269,4 +269,14 @@ public final class Intents {
             .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(Entities.fieldValueEntity)
             .parameter(ContextKeys.ROW_NAME).fromFragment("ROW_NAME").entity(Entities.rowNameEntity)
             .getIntentDefinition();
+    /**
+     * The intent customFieldOfValueOperatorIntent.
+     */
+    public static final IntentDefinition customFieldOfValueOperatorIntent = intent("CustomFieldOfValueOperator")
+            .trainingSentences(BUNDLE.getStringArray("CustomFieldOfValueOperator"))
+            .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(Entities.fieldEntity)
+            .parameter(ContextKeys.OPERATOR).fromFragment("OPERATOR").entity(Entities.functionOperatorEntity)
+            .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(Entities.fieldValueEntity)
+            .parameter(ContextKeys.ROW_NAME).fromFragment("ROW_NAME").entity(Entities.rowNameEntity)
+            .getIntentDefinition();
 }

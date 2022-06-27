@@ -110,6 +110,7 @@ public class CustomQuery {
                 .when(intentIs(Intents.customNumericFieldFunctionIntent)).moveTo(customNumericFieldFunction.getProcessCustomNumericFieldFunctionState())
                 .when(intentIs(Intents.customRowCountIntent)).moveTo(customRowCount.getProcessCustomRowCountState())
                 .when(intentIs(Intents.customFieldOfValueIntent)).moveTo(customFieldOfValue.getProcessCustomFieldOfValueState())
+                .when(intentIs(Intents.customFieldOfValueOperatorIntent)).moveTo(customFieldOfValue.getProcessCustomFieldOfValueState())
 
                 .when(intentIs(Intents.customNumericFilterIntent)).moveTo(customFilter.getSaveCustomFilterState())
                 .when(intentIs(Intents.customDateFilterIntent)).moveTo(customFilter.getSaveCustomFilterState())
