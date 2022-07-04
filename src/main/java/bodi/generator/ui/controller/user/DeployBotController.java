@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayInputStream;
 
 import static bodi.generator.BodiGenerator.createBot;
 
@@ -64,9 +63,8 @@ public class DeployBotController {
         if (objects.isDataImported()) {
             TabularDataSource tds = objects.getTds();
             DataSchema ds = objects.getDs();
-            byte[] csv = objects.getCsv();
             Properties properties = objects.getProperties();
-            createBot(properties, ds, new ByteArrayInputStream(csv), response);
+            createBot(properties, ds, tds, response);
         }
     }
 }

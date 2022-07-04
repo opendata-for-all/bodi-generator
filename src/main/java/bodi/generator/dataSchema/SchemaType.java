@@ -1,9 +1,11 @@
 package bodi.generator.dataSchema;
+
 import bodi.generator.dataSource.TabularDataSource;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -108,6 +110,53 @@ public class SchemaType {
      */
     public void addSchemaField(SchemaField schemaField) {
         schemaFields.add(schemaField);
+    }
+
+    /**
+     * Add a new schema field to the schema type, which is a merger of other schema fields.
+     * <p>
+     * The new schema field is a {@link DataType#TEXT} schema field.
+     *
+     * @param name                 the name of the new schema field
+     * @param fieldsToMerge        the names of the schema fields to merge
+     * @param categorical          the categorical condition of the new schema field
+     * @param removeOriginalFields if true, remove the original schema fields, otherwise not
+     * @param tds                  the tabular data source containing the merged field
+     */
+    public void mergeTextualSchemaFields(String name, List<String> fieldsToMerge, boolean categorical,
+                                         boolean removeOriginalFields, TabularDataSource tds) {
+        SchemaField newSchemaField = new SchemaField();
+        newSchemaField.setType(DataType.TEXT);
+        newSchemaField.setOriginalName(name);
+        for (String language : DataSchema.languages) {
+            newSchemaField.setReadableName(language, name);
+        }
+        newSchemaField.setCategorical(categorical);
+        Set<String> mainValues = tds.getColumnUniqueValues(newSchemaField.getOriginalName());
+        newSchemaField.setNumDifferentValues(mainValues.size());
+        if (newSchemaField.isCategorical()) {
+            newSchemaField.addMainValues(tds.getColumnUniqueValues(newSchemaField.getOriginalName()));
+        }
+        if (removeOriginalFields) {
+            for (String originalField : fieldsToMerge) {
+                this.deleteSchemaField(originalField);
+            }
+        }
+        this.addSchemaField(newSchemaField);
+    }
+
+    /**
+     * Deletes a {@link SchemaField}.
+     *
+     * @param originalName the original name of the schema field to delete
+     */
+    public void deleteSchemaField(String originalName) {
+        for (SchemaField schemaField : schemaFields) {
+            if (schemaField.getOriginalName().equals(originalName)) {
+                this.deleteSchemaField(schemaField);
+                break;
+            }
+        }
     }
 
     /**

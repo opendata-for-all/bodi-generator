@@ -1,7 +1,10 @@
 <!DOCTYPE HTML>
 <html xmlns:th="https://www.thymeleaf.org">
 <div class="app-dashboard-body-content off-canvas-content" data-off-canvas-content th:fragment="content">
-    <h2 class="text-center">Manage your Xatkit bot</h2>
+    <img src="/images/bodi-logo.png" alt="bodi logo" width="200">
+    <h2 class="text-center" style="display: inline;">Bots for Open Data Interactions</h2>
+    <br>
+    <br>
     <!--<div th:replace="'user/dashboard/fragments/ui/popup'::content"></div>-->
     <div class="grid-x">
         <div class="cell small-4 card-container">
@@ -17,11 +20,11 @@
         <div class="cell small-4 card-container">
             <a th:href="${dashboardUrl} + '/fields'" class="card">
                 <div class="card-section card-header">
-                    <h2><i class="large fa fa-table-list"></i>&nbsp;<span>Fields</span></h2>
+                    <h2><i class="large fa fa-wand-magic-sparkles"></i>&nbsp;<span>Customization</span></h2>
                 </div>
                 <div class="card-section card-content">
-                    <p class="card-content-description">Edit the fields generated from the tabular data by adding
-                        synonyms, translations in different languages, etc.</p>
+                    <p class="card-content-description">Enhance the bot by adding synonyms, translations in different
+                        languages, etc.</p>
                 </div>
             </a>
         </div>

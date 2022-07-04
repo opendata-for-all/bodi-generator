@@ -448,10 +448,10 @@ public final class BodiGenerator {
      *
      * @param properties the bodi-generator and bot properties
      * @param ds         the Data Schema
-     * @param csv        the csv
+     * @param tds        the Tabular Data Source
      * @param response   the response where to send the zip file
      */
-    public static void createBot(Properties properties, DataSchema ds, InputStream csv,
+    public static void createBot(Properties properties, DataSchema ds, TabularDataSource tds,
                                    HttpServletResponse response) {
         String botName = (String) properties.getBodiGeneratorProperties().get(BodiGeneratorProperties.BOT_NAME);
         String dataName = (String) properties.getBodiGeneratorProperties().get(BodiGeneratorProperties.DATA_NAME);
@@ -488,8 +488,8 @@ public final class BodiGenerator {
             File botDest = new File(outputFolder + "/src/main/java/com/xatkit/bot/");
             FileUtils.copyDirectory(botSource, botDest);
 
-            System.out.println("Creating csv");
-            csv.transferTo(Files.newOutputStream(Path.of(outputFolder + "/src/main/resources/" + inputDocName)));
+            System.out.println("Creating " + inputDocName);
+            tds.writeCsv(outputFolder + "/src/main/resources/" + inputDocName);
 
             System.out.println("Creating resource fields.json");
             Path entitiesFile = Paths.get(outputFolder + "/src/main/resources/fields.json");

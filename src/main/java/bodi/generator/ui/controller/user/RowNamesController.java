@@ -50,7 +50,6 @@ public class RowNamesController {
     public String showRowNames(Model model) {
         if (objects.isDataImported()) {
             model.addAttribute("rowNames", objects.getDs().getRowNames());
-            model.addAttribute("newRowName", "");
         }
         return dashboard.viewCustomization(CustomizationTab.ROW_NAMES, model);
     }

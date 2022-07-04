@@ -14,6 +14,11 @@ public enum CustomizationTab {
     FIELDS("fields"),
 
     /**
+     * The {@code merge_fields} tab of the {@code customization} page.
+     */
+    MERGE_FIELDS("merge_fields"),
+
+    /**
      * The {@code row_names} tab of the {@code customization} page.
      */
     ROW_NAMES("row_names");

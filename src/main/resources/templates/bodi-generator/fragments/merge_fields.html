@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<div class="app-dashboard-body-content off-canvas-content" data-off-canvas-content th:fragment="content">
+    <div class="grid-x"
+         th:if="${mergeFields == null}">
+        <div class="grid-x cell small-6 callout">
+            <div class="cell small-1 logo blue">
+                <i class="fas fa-info-circle"></i>
+            </div>
+            <div class="cell auto content">
+                <p>You need to import data to merge fields.</p>
+            </div>
+        </div>
+    </div>
+    <div class="grid-x">
+        <div class="cell small-6 callout">
+            <p><b>What does 'merge fields' mean?</b></p>
+            <p>When you merge 2 or more fields, you are creating a new field composed of them.</p>
+            <p>Some typical cases of merging could be the 'name' and 'surname' fields, or all the fields relative to
+            an address.</p>
+            <p>If your data contains, for instance, a field for each address element, merging them allows the
+            chatbot to show them all when the user is asking about an address.</p>
+            <img src="/images/merge_fields-demo.png" alt="merge_fields demo">
+        </div>
+        <div class="cell auto">
+            <form th:if="${schemaType != null} and ${mergeFields != null}"
+                  th:object="${mergeFields}"
+                  th:action="@{/bodi-generator/merge_fields/update}"
+                  method="POST">
+                <div class="grid-x">
+                    <div class="cell small-6 card-container card">
+                        <div class="card-section card-header" style="max-height: 2em;">
+                            <h2>Fields to merge</h2>
+                        </div>
+                        <div class="card-section card-content">
+                            <div th:each="field : ${mergeFields.getFieldsToMerge()}">
+                                <button type="submit"
+                                        name="fieldToDelete"
+                                        th:value="${field}">
+                                    <a><i class="large fa fa-circle-xmark"></i></a>
+                                </button>
+                                <p style="display: inline;" th:text="${field}"></p>
+                            </div>
+                            <select th:value="${fieldToAdd}"
+                                    name="fieldToAdd">
+                                <option th:value="''"
+                                        th:text="'Select a field'"></option>
+                                <div th:each="field : ${schemaType.getSchemaFields()}">
+                                    <option th:if="!${mergeFields.getFieldsToMerge().contains(field.getOriginalName())}"
+                                            th:value="${field.getOriginalName()}"
+                                            th:text="${field.getOriginalName()}"></option>
+                                </div>
+                            </select>
+                            <button type="submit" class="button" style="display: inline;">
+                                Add
+                            </button>
+                        </div>
+                    </div>
+                    <div class="cell small-6 card-container card">
+                        <div class="card-section card-header" style="max-height: 2em;">
+                            <h2>Attributes</h2>
+                        </div>
+                        <div class="card-section card-content">
+                            <b><p>Field separator</p></b>
+                            <input type="text" th:field="*{fieldSeparator}"/>
+                            <b><p>Name</p></b>
+                            <input type="text" th:field="*{newName}"/>
+                            <b><p style="margin-right: 10px;">Categorical</p></b>
+                            <select th:field="*{categorical}">
+                                <option th:value="true">Yes</option>
+                                <option th:value="false">No</option>
+                            </select>
+                            <b><p style="margin-right: 10px;">Remove original fields?</p></b>
+                            <select th:field="*{removeOriginalFields}">
+                                <option th:value="true">Yes</option>
+                                <option th:value="false">No</option>
+                            </select>
+                            <button type="submit" class="button" style="display: inline;"
+                                    name="create"
+                                    th:value="true">
+                                Save
+                            </button>
+                            <ul th:if="${!errors.isEmpty()}">
+                                <li th:each="error : ${errors}"
+                                    style="color:darkred; font-weight: bold;"
+                                    th:text="${error}"></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</html>

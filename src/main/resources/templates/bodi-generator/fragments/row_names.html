@@ -37,7 +37,7 @@
                     <div class="card-section card-content" id="rowNames">
                         <br>
                         <form th:each="name : ${rowNames_lang.value}"
-                              th:action="'/bodi-generator/row_names/delete_row_name/' + ${rowNames_lang.key} + '/' +${name}"
+                              th:action="'/bodi-generator/row_names/delete_row_name/' + ${rowNames_lang.key} + '/' + ${name}"
                               method="POST">
                             <button type="submit">
                                 <a><i class="large fa fa-circle-xmark"></i></a>

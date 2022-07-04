@@ -6,6 +6,9 @@
             <li class="tabs-title" th:classappend="${tab.label.equals('fields') ? 'is-active': ''}">
                 <a th:href="${dashboardUrl} + '/fields'">Fields</a>
             </li>
+            <li class="tabs-title" th:classappend="${tab.label.equals('merge_fields') ? 'is-active': ''}">
+                <a th:href="${dashboardUrl} + '/merge_fields'">Merge fields</a>
+            </li>
             <li class="tabs-title" th:classappend="${tab.label.equals('row_names') ? 'is-active': ''}">
                 <a th:href="${dashboardUrl} + '/row_names'">Row names</a>
             </li>
@@ -16,6 +19,9 @@
         <div class="tabs-content cell auto" data-tabs-content="customization-tabs">
             <div class="tabs-panel" th:classappend="${tab.label.equals('fields') ? 'is-active': ''}">
                 <div th:replace="'bodi-generator/fragments/fields' :: content"></div>
+            </div>
+            <div class="tabs-panel" th:classappend="${tab.label.equals('merge_fields') ? 'is-active': ''}">
+                <div th:replace="'bodi-generator/fragments/merge_fields' :: content"></div>
             </div>
             <div class="tabs-panel" th:classappend="${tab.label.equals('row_names') ? 'is-active': ''}">
                 <div th:replace="'bodi-generator/fragments/row_names' :: content"></div>

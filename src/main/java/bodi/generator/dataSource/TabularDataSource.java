@@ -5,15 +5,19 @@ import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvException;
 
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * Representation of a tabular data structure, that is, data organized as a table.
@@ -54,18 +58,25 @@ public class TabularDataSource {
     private List<Row> table;
 
     /**
+     * The csv delimiter or separator (e.g. '{@code ,}')
+     */
+    private char delimiter;
+
+    /**
      * Instantiates a new {@link TabularDataSource} from a given csv file.
      * <p>
      * The column names are extracted from the first row of the csv file and stored in {@link #header}, and the
      * following rows are stored in {@link #table}. Everything is stored preserving the original order of the data.
      * <p>{@link #numColumns} and {@link #numRows} are also set.
      *
-     * @param filePath absolute path of a csv file
+     * @param filePath  absolute path of a csv file
+     * @param delimiter the csv delimiter or separator
      */
     public TabularDataSource(String filePath, char delimiter) {
         try {
             CSVReader reader = new CSVReaderBuilder(new FileReader(filePath))
                     .withCSVParser(new CSVParserBuilder().withSeparator(delimiter).build()).build();
+            this.delimiter = delimiter;
             List<String[]> csv = reader.readAll();
             header = new ArrayList<>(Arrays.asList(csv.get(0)));
             csv.remove(0);
@@ -75,8 +86,8 @@ public class TabularDataSource {
             numRows = table.size();
             for (int i = 0; i < table.size(); i++) {
                 if (table.get(i).getValues().size() != header.size()) {
-                    throw new IllegalArgumentException("The header size (" + header.size() + ") is not equal to size of "
-                            + "row " + i + " (" + table.get(i).getValues().size() + ")");
+                    throw new IllegalArgumentException("The header size (" + header.size() + ") is not equal to size "
+                            + "of row " + i + " (" + table.get(i).getValues().size() + ")");
                 }
             }
         } catch (IOException | CsvException e) {
@@ -91,12 +102,14 @@ public class TabularDataSource {
      * following rows are stored in {@link #table}. Everything is stored preserving the original order of the data.
      * <p>{@link #numColumns} and {@link #numRows} are also set.
      *
-     * @param is input stream of a csv file
+     * @param is        input stream of a csv file
+     * @param delimiter the csv delimiter or separator
      */
     public TabularDataSource(InputStream is, char delimiter) {
         try {
             CSVReader reader = new CSVReaderBuilder(new InputStreamReader(is))
                     .withCSVParser(new CSVParserBuilder().withSeparator(delimiter).build()).build();
+            this.delimiter = delimiter;
             List<String[]> csv = reader.readAll();
             header = new ArrayList<>(Arrays.asList(csv.get(0)));
             csv.remove(0);
@@ -106,8 +119,8 @@ public class TabularDataSource {
             numRows = table.size();
             for (int i = 0; i < table.size(); i++) {
                 if (table.get(i).getValues().size() != header.size()) {
-                    throw new IllegalArgumentException("The header size (" + header.size() + ") is not equal to size of "
-                            + "row " + i + " (" + table.get(i).getValues().size() + ")");
+                    throw new IllegalArgumentException("The header size (" + header.size() + ") is not equal to size "
+                            + "of row " + i + " (" + table.get(i).getValues().size() + ")");
                 }
             }
         } catch (IOException | CsvException e) {
@@ -222,4 +235,52 @@ public class TabularDataSource {
         return values;
     }
 
+    /**
+     * Add a new column (in the last position), which is a merger of other columns.
+     *
+     * @param name           the name of the new column
+     * @param columnsToMerge the columns to merge
+     * @param separator      the separator, i.e. the string that will join the columns
+     * @param removeColumns  if true, remove the original columns, otherwise not
+     */
+    public void mergeColumns(String name, List<String> columnsToMerge, String separator,
+                             boolean removeColumns) {
+        header.add(name);
+        ++numColumns;
+        for (Row row : table) {
+            List<String> selectedValues = new ArrayList<>();
+            for (String columnName : columnsToMerge) {
+                String value = row.getColumnValue(header.indexOf(columnName));
+                if (!isEmpty(value)) {
+                    selectedValues.add(value);
+                }
+            }
+            row.getValues().add(String.join(separator, selectedValues));
+        }
+        if (removeColumns) {
+            for (String columnName : columnsToMerge) {
+                this.removeColumn(columnName);
+            }
+        }
+    }
+
+    /**
+     * Write the {@link TabularDataSource} as csv file.
+     *
+     * @param path the path where to write the csv
+     * @throws FileNotFoundException the file not found exception
+     */
+    public void writeCsv(String path) throws FileNotFoundException {
+        PrintWriter out = new PrintWriter(path);
+        out.println(String.join(String.valueOf(delimiter), header));
+        for (Row row : table) {
+            String firstLastQuotes = "";
+            if (row.getValues().size() > 0) {
+                firstLastQuotes = "\"";
+            }
+            System.out.println(firstLastQuotes + String.join("\"" + delimiter + "\"", row.getValues()) + firstLastQuotes);
+            out.println(firstLastQuotes + String.join("\"" + delimiter + "\"", row.getValues()) + firstLastQuotes);
+        }
+        out.close();
+    }
 }

@@ -50,4 +50,14 @@ public class DashboardService {
     public String redirect(DashboardView view) {
         return "redirect:/bodi-generator/" + view.label;
     }
+
+    /**
+     * Redirects to an endpoint, with a request parameter.
+     *
+     * @param view the dashboard view
+     * @return the name of the endpoint to redirect
+     */
+    public String redirectRequestParam(DashboardView view, String name, String value) {
+        return "redirect:/bodi-generator/" + view.label + "?" + name + "=" + value;
+    }
 }

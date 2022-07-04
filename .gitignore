@@ -52,5 +52,6 @@ hs_err_pid*
 # .DS_Store Mac files
 *.DS_Store
 
-# TabularSemanticparsing folder
-TabularSemanticParsing/
+# bodi repositories
+**/bodi-nlp-server/
+**/bodi-example-bots/

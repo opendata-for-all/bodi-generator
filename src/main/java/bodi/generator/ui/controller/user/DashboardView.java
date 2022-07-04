@@ -29,6 +29,11 @@ public enum DashboardView {
     FIELDS("fields"),
 
     /**
+     * The {@code merge_fields} page of the dashboard.
+     */
+    MERGE_FIELDS("merge_fields"),
+
+    /**
      * The {@code row_names} page of the dashboard.
      */
     ROW_NAMES("row_names"),
