@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
+<!--/*@thymesVar id="fileName" type="java.lang.String"*/-->
+<!--/*@thymesVar id="tds" type="bodi.generator.dataSource.TabularDataSource"*/-->
 <div class="app-dashboard-body-content off-canvas-content" data-off-canvas-content th:fragment="content">
     <h2 class="text-left" th:text="'Import data'"></h2>
     <form th:action="@{/bodi-generator/import_data/store_file}"

@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<div class="app-dashboard-body-content off-canvas-content" data-off-canvas-content th:fragment="content">
+<!--/*@thymesVar id="rowNames" type="java.util.Map<java.lang.String, java.util.Set<java.lang.String>>"*/-->
+<!--/*@thymesVar id="newRowName" type="java.lang.String"*/-->
+    <div class="app-dashboard-body-content off-canvas-content" data-off-canvas-content th:fragment="content">
     <div class="grid-x"
          th:if="${rowNames == null}">
         <div class="grid-x cell small-6 callout">
