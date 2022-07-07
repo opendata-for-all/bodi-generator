@@ -92,6 +92,7 @@ public class FieldsController {
                 schemaField.resetMainValues();
             }
             schemaField.setCategorical(updatedSchemaField.isCategorical());
+            schemaField.setKey(updatedSchemaField.isKey());
         }
         return dashboard.redirect(DashboardView.FIELDS);
     }

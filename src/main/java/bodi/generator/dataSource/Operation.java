@@ -44,5 +44,13 @@ public enum Operation {
      * Given a field A and a value of a field B, this operation gets the field A of all entries with field B equal to
      * the value. An optional operator con be applied (e.g. max value, unique values, etc.)
      */
-    FIELD_OF_VALUE
+    FIELD_OF_VALUE,
+
+    /**
+     * ROW_OF_VALUES Operation.
+     * <p>
+     * Given 1 or 2 field values, this operation gets all the entries that match these values in their respective
+     * fields.
+     */
+    ROW_OF_VALUES
 }

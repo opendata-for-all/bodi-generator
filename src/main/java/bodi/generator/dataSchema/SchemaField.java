@@ -78,6 +78,13 @@ public class SchemaField {
     private boolean categorical;
 
     /**
+     * Indicates weather this field is a key field or not.
+     * <p>
+     * Key fields can be used, for instance, to show only key fields instead of an entire entry of a data source.
+     */
+    private boolean key;
+
+    /**
      * Instantiates a new empty {@link SchemaField}.
      */
     public SchemaField() {
@@ -88,6 +95,7 @@ public class SchemaField {
             synonyms.put(language, new HashSet<>());
         }
         this.resetMainValues();
+        key = false;
     }
 
     /**
@@ -109,21 +117,22 @@ public class SchemaField {
     }
 
     /**
-     * Gets the readable name of the field in a specific language.
-     *
-     * @return the readable name in a specific language
-     */
-    public String getReadableName(String language) {
-        return readableName.get(language);
-    }
-
-    /**
      * Gets the readable name of the field.
      *
      * @return the readable name
      */
     public Map<String, String> getReadableName() {
         return readableName;
+    }
+
+    /**
+     * Gets the readable name of the field in a specific language.
+     *
+     * @param language the language of the readable name
+     * @return the readable name in a specific language
+     */
+    public String getReadableName(String language) {
+        return readableName.get(language);
     }
 
     /**
@@ -280,6 +289,24 @@ public class SchemaField {
     }
 
     /**
+     * Gets the value of the key attribute.
+     *
+     * @return true if the field is a key field, false otherwise
+     */
+    public boolean isKey() {
+        return key;
+    }
+
+    /**
+     * Sets the value of the key attribute.
+     *
+     * @param key the new value of the key attribute
+     */
+    public void setKey(boolean key) {
+        this.key = key;
+    }
+
+    /**
      * Generates a JSON object containing all the information of the SchemaField.
      *
      * @return the json object containing the SchemaField information
@@ -293,6 +320,7 @@ public class SchemaField {
             entity.put(language, languageEntity);
         }
         entity.put("numDifferentValues", this.numDifferentValues);
+        entity.put("key", this.key);
         JSONObject valuesEntity = new JSONObject();
         for (var entry : mainValues.entrySet()) {
             JSONObject languagesEntity = new JSONObject();

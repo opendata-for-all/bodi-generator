@@ -13,7 +13,9 @@ import org.json.JSONTokener;
 
 import java.io.InputStream;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.xatkit.dsl.DSL.mapping;
@@ -53,6 +55,13 @@ public final class Entities {
      * we need this to know which field they belong to.
      */
     public static Map<String, String> fieldValueMap;
+
+    /**
+     * The list of {@link #fieldEntity} considered as key fields.
+     * <p>
+     * It is used to display these fields in some bot answers, instead of an entire row.
+     */
+    public static List<String> keyFields = new ArrayList<>();
 
     // Merge the json files containing bot entities
     static {
@@ -148,6 +157,12 @@ public final class Entities {
             for (Object synonym : entityJson.getJSONObject(entry).getJSONObject(Bot.language).getJSONArray("synonyms")) {
                 synonymStep.synonym((String) synonym);
             }
+            try {
+                boolean key = entityJson.getJSONObject(entry).getBoolean("key");
+                if (key) {
+                    keyFields.add(entry);
+                }
+            } catch (Exception ignored) { }
         }
         return (EntityDefinitionReferenceProvider) entity;
     }

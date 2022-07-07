@@ -1,6 +1,7 @@
 package bodi.generator.dataSource;
 
 import com.xatkit.bot.Bot;
+import com.xatkit.bot.library.Entities;
 import com.xatkit.bot.library.Utils;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -345,6 +346,9 @@ public class Statement {
                     } else {
                         return new ResultSet(header, table);
                     }
+                case ROW_OF_VALUES:
+                    rowOfValues(header, table, args);
+                    return new ResultSet(header, table);
                 default:
                     break;
             }
@@ -360,12 +364,35 @@ public class Statement {
      * @param field  the field to preserve in the header and the table
      */
     private void selectField(List<String> header, List<Row> table, String field) {
+        selectFields(header, table, List.of(field));
+    }
+
+    /**
+     * Updates a header and a table, removing all the fields (columns) except the ones passed as arguments.
+     *
+     * @param header  the header
+     * @param table   the table
+     * @param fields  the fields to preserve in the header and the table
+     */
+    private void selectFields(List<String> header, List<Row> table, List<String> fields) {
         List<String> fieldsToDelete = tds.getHeaderCopy();
-        fieldsToDelete.remove(field);
+        fieldsToDelete.removeAll(fields);
         for (String fieldToDelete : fieldsToDelete) {
             table.forEach(row -> row.removeValue(header.indexOf(fieldToDelete)));
             header.remove(fieldToDelete);
         }
+    }
+
+    /**
+     * Updates a table, removing all the entries (rows) that do not match a value in a given field.
+     *
+     * @param header  the header
+     * @param table   the table
+     * @param field   the field that the value belongs to
+     * @param value   the value that a row must match in the given field to be preserved
+     */
+    private void selectValue(List<String> header, List<Row> table, String field, String value) {
+        table.removeIf(row -> !(row.getColumnValue(header.indexOf(field)).equals(value)));
     }
 
     /**
@@ -582,14 +609,32 @@ public class Statement {
      * @param field       the target field
      * @param value       the target value
      * @param valueField  the field of the target value
+     * @param method      the field of the target value
      */
     private void fieldOfValue(List<String> header, List<Row> table, String field, String value, String valueField,
                               String method) {
-        table.removeIf(row -> !row.getColumnValue(header.indexOf(valueField)).equals(value));
+        selectValue(header, table, valueField, value);
         if (method.equals("distinct")) {
             showFieldDistinct(header, table, field);
         } else {
             selectField(header, table, field);
+        }
+    }
+
+    /**
+     * Executes the {@link Operation#ROW_OF_VALUES} operation.
+     *
+     * @param header      the header of a result set
+     * @param table       the table of a result set
+     * @param args       the operation arguments
+     */
+    private void rowOfValues(List<String> header, List<Row> table, String... args) {
+        selectValue(header, table, args[0], args[1]);
+        if (args.length == 4) {
+            selectValue(header, table, args[2], args[3]);
+        }
+        if (!Entities.keyFields.isEmpty()) {
+            selectFields(header, table, Entities.keyFields);
         }
     }
 
@@ -677,5 +722,4 @@ public class Statement {
         }
         return sqlFields;
     }
-
 }

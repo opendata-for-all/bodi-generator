@@ -79,6 +79,11 @@ public class CustomQuery {
     public CustomFieldOfValue customFieldOfValue;
 
     /**
+     * The Custom Row Of Values workflow.
+     */
+    public CustomRowOfValues customRowOfValues;
+
+    /**
      * Instantiates a new Custom Query workflow.
      *
      * @param reactPlatform the react platform of a chatbot
@@ -93,6 +98,7 @@ public class CustomQuery {
         customNumericFieldFunction = new CustomNumericFieldFunction(reactPlatform, returnState);
         customRowCount = new CustomRowCount(reactPlatform, returnState);
         customFieldOfValue = new CustomFieldOfValue(reactPlatform, returnState);
+        customRowOfValues = new CustomRowOfValues(reactPlatform, returnState);
 
         val awaitingCustomQueryState = state("AwaitingCustomQuery");
 
@@ -111,6 +117,7 @@ public class CustomQuery {
                 .when(intentIs(Intents.customRowCountIntent)).moveTo(customRowCount.getProcessCustomRowCountState())
                 .when(intentIs(Intents.customFieldOfValueIntent)).moveTo(customFieldOfValue.getProcessCustomFieldOfValueState())
                 .when(intentIs(Intents.customFieldOfValueOperatorIntent)).moveTo(customFieldOfValue.getProcessCustomFieldOfValueState())
+                .when(intentIs(Intents.customRowOfValuesIntent)).moveTo(customRowOfValues.getProcessCustomRowOfValuesState())
 
                 .when(intentIs(Intents.customNumericFilterIntent)).moveTo(customFilter.getSaveCustomFilterState())
                 .when(intentIs(Intents.customDateFilterIntent)).moveTo(customFilter.getSaveCustomFilterState())

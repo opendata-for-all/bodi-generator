@@ -24,6 +24,7 @@
                                 th:name="field"
                                 th:value="${field.getOriginalName()}">
                         </button>
+                        <i th:if="${field.isKey()}" class="large fa fa-key" style="color: royalblue;"></i>
                     </div>
                 </form>
             </div>
@@ -47,15 +48,19 @@
                                 <br>
                                 <b><p th:text="'Data type: ' + *{getType()}"></p></b>
                                 <br>
-                                <div class="form-group" style="display: flex">
-                                    <b><p style="margin-right: 10px;">Categorical</p></b>
-                                    <br>
-                                    <select id="categorical"
-                                            th:field="*{categorical}">
-                                        <option th:value="true">Yes</option>
-                                        <option th:value="false">No</option>
-                                    </select>
-                                </div>
+                                <b><p style="margin-right: 10px;">Categorical</p></b>
+                                <select id="categorical"
+                                        th:field="*{categorical}">
+                                    <option th:value="true">Yes</option>
+                                    <option th:value="false">No</option>
+                                </select>
+                                <br>
+                                <b><p style="margin-right: 10px;">Key field</p></b>
+                                <select id="key"
+                                        th:field="*{key}">
+                                    <option th:value="true">Yes</option>
+                                    <option th:value="false">No</option>
+                                </select>
                                 <b><p>Readable name</p></b>
                                 <br>
                                 <div th:each="entry : *{readableName.entrySet()}"

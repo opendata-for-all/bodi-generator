@@ -279,4 +279,15 @@ public final class Intents {
             .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(Entities.fieldValueEntity)
             .parameter(ContextKeys.ROW_NAME).fromFragment("ROW_NAME").entity(Entities.rowNameEntity)
             .getIntentDefinition();
+
+    /**
+     * The intent customRowOfValuesIntent.
+     */
+    public static final IntentDefinition customRowOfValuesIntent = intent("CustomRowOfValues")
+            .trainingSentences(BUNDLE.getStringArray("CustomRowOfValues"))
+            .parameter(ContextKeys.ROW_NAME).fromFragment("ROW_NAME").entity(Entities.rowNameEntity)
+            .parameter(ContextKeys.VALUE + "1").fromFragment("VALUE1").entity(Entities.fieldValueEntity)
+            .parameter(ContextKeys.VALUE + "2").fromFragment("VALUE2").entity(Entities.fieldValueEntity)
+            .parameter(ContextKeys.VALUE + "3").fromFragment("VALUE3").entity(Entities.fieldValueEntity)
+            .getIntentDefinition();
 }
