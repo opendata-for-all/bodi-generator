@@ -19,6 +19,7 @@ import static com.xatkit.bot.Bot.nlpServerClient;
 import static com.xatkit.bot.Bot.pageLimit;
 import static com.xatkit.dsl.DSL.intentIs;
 import static com.xatkit.dsl.DSL.state;
+import static java.util.Objects.isNull;
 
 /**
  * The Get Result workflow of a chatbot.
@@ -88,6 +89,9 @@ public class GetResult {
                 .body(context -> {
                     Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
                     resultSet = (ResultSet) statement.executeQuery(Operation.NO_OPERATION);
+                    if (isNull(resultSet)) {
+                        resultSet = new ResultSet();
+                    }
                 })
                 .next()
                 .moveTo(showDataState);
@@ -100,6 +104,9 @@ public class GetResult {
                     Operation operation = (Operation) context.getSession().get(ContextKeys.OPERATION);
                     String[] operationArgs = (String[]) context.getSession().get(ContextKeys.OPERATION_ARGS);
                     resultSet = (ResultSet) statement.executeQuery(operation, operationArgs);
+                    if (isNull(resultSet)) {
+                        resultSet = new ResultSet();
+                    }
                 })
                 .next()
                 .moveTo(showDataState);

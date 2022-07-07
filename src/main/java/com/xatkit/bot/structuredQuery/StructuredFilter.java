@@ -22,6 +22,7 @@ import static com.xatkit.bot.Bot.maxEntriesToDisplay;
 import static com.xatkit.bot.Bot.messages;
 import static com.xatkit.dsl.DSL.intentIs;
 import static com.xatkit.dsl.DSL.state;
+import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
@@ -176,9 +177,13 @@ public class StructuredFilter {
                         Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
                         statement.addFilter(field, operator, value);
                         ResultSet resultSet = (ResultSet) statement.executeQuery(Operation.NO_OPERATION);
-                        resultSetNumRows = resultSet.getNumRows();
+                        if (isNull(resultSet)) {
+                            resultSetNumRows = 0;
+                        } else {
+                            resultSetNumRows = resultSet.getNumRows();
+                        }
                         reactPlatform.reply(context, MessageFormat.format(messages.getString("FilterAdded"),
-                                field, operator, value, resultSet.getNumRows()));
+                                field, operator, value, resultSetNumRows));
                     } else {
                         reactPlatform.reply(context, messages.getString("SomethingWentWrong"));
                     }
