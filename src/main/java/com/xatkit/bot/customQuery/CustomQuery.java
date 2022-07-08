@@ -25,8 +25,10 @@ import static com.xatkit.dsl.DSL.state;
  *     <li>{@link CustomValueFrequency}</li>
  *     <li>{@link CustomValue1vsValue2}</li>
  *     <li>{@link CustomNumericFieldFunction}</li>
+ *     <li>{@link CustomRowOfNumericFieldFunction}</li>
  *     <li>{@link CustomRowCount}</li>
  *     <li>{@link CustomFieldOfValue}</li>
+ *     <li>{@link CustomRowOfValues}</li>
  * </ul>
  * When no pre-defined query is matched, it is executed {@link GetResult#getGenerateResultSetFromQueryState()}
  */
@@ -69,6 +71,11 @@ public class CustomQuery {
     public CustomNumericFieldFunction customNumericFieldFunction;
 
     /**
+     * The Custom Row Of Numeric Field Function workflow.
+     */
+    public CustomRowOfNumericFieldFunction customRowOfNumericFieldFunction;
+
+    /**
      * The Custom Row Count workflow.
      */
     public CustomRowCount customRowCount;
@@ -96,6 +103,7 @@ public class CustomQuery {
         customValueFrequency = new CustomValueFrequency(reactPlatform, returnState);
         customValue1vsValue2 = new CustomValue1vsValue2(reactPlatform, returnState);
         customNumericFieldFunction = new CustomNumericFieldFunction(reactPlatform, returnState);
+        customRowOfNumericFieldFunction = new CustomRowOfNumericFieldFunction(reactPlatform, returnState);
         customRowCount = new CustomRowCount(reactPlatform, returnState);
         customFieldOfValue = new CustomFieldOfValue(reactPlatform, returnState);
         customRowOfValues = new CustomRowOfValues(reactPlatform, returnState);
@@ -114,6 +122,7 @@ public class CustomQuery {
                 .when(intentIs(Intents.customValue1MoreThanValue2Intent)).moveTo(customValue1vsValue2.getProcessCustomValue1MoreThanValue2State())
                 .when(intentIs(Intents.customValue1LessThanValue2Intent)).moveTo(customValue1vsValue2.getProcessCustomValue1LessThanValue2State())
                 .when(intentIs(Intents.customNumericFieldFunctionIntent)).moveTo(customNumericFieldFunction.getProcessCustomNumericFieldFunctionState())
+                .when(intentIs(Intents.customRowOfNumericFieldFunctionIntent)).moveTo(customRowOfNumericFieldFunction.getProcessCustomRowOfNumericFieldFunctionState())
                 .when(intentIs(Intents.customRowCountIntent)).moveTo(customRowCount.getProcessCustomRowCountState())
                 .when(intentIs(Intents.customFieldOfValueIntent)).moveTo(customFieldOfValue.getProcessCustomFieldOfValueState())
                 .when(intentIs(Intents.customFieldOfValueOperatorIntent)).moveTo(customFieldOfValue.getProcessCustomFieldOfValueState())

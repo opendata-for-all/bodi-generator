@@ -58,8 +58,8 @@ public class CustomRowOfValues {
                     String value2 = (String) context.getIntent().getValue(ContextKeys.VALUE + "2");
                     String value3 = (String) context.getIntent().getValue(ContextKeys.VALUE + "3");
                     if (!isEmpty(value1)) {
-                        String value1Field = Entities.fieldValueMap.get(value1);
                         context.getSession().put(ContextKeys.OPERATION, Operation.ROW_OF_VALUES);
+                        String value1Field = Entities.fieldValueMap.get(value1);
                         String[] operationArgs = {value1Field, value1};
                         context.getSession().put(ContextKeys.OPERATION_ARGS, operationArgs);
                         reactPlatform.reply(context, MessageFormat.format(messages.getString("RowOfValue1"),

@@ -339,6 +339,9 @@ public class Statement {
                     return valueFrequency(header, table, args[0], args[1]);
                 case NUMERIC_FIELD_FUNCTION:
                     return numericFieldFunction(header, table, args[0], args[1]);
+                case ROW_OF_NUMERIC_FIELD_FUNCTION:
+                    rowOfNumericFieldFunction(header, table, args[0], args[1]);
+                    return new ResultSet(header, table);
                 case FIELD_OF_VALUE:
                     fieldOfValue(header, table, args[0], args[1], args[2], args[3]);
                     if (!isEmpty(args[3]) && !args[3].equals("distinct")) {
@@ -513,9 +516,9 @@ public class Statement {
      *     <li>{@code sum}</li>
      * </ul>
      *
-     * @param header the header of a result set
-     * @param table  the table of a result set
-     * @param field the field where the operator is to be applied
+     * @param header   the header of a result set
+     * @param table    the table of a result set
+     * @param field    the field where the operator is to be applied
      * @param operator the operator
      * @return the numeric result of the field function
      */
@@ -599,6 +602,52 @@ public class Statement {
                 break;
         }
         return result;
+    }
+
+    /**
+     * Executes the {@link Operation#ROW_OF_NUMERIC_FIELD_FUNCTION} operation.
+     * <p>
+     * Supported operators are:
+     * <ul>
+     *     <li>{@code max}</li>
+     *     <li>{@code min}</li>
+     * </ul>
+     *
+     * @param header   the header of a result set
+     * @param table    the table of a result set
+     * @param field    the field where the operator is to be applied
+     * @param operator the operator
+     */
+    private void rowOfNumericFieldFunction(List<String> header, List<Row> table, String field, String operator) {
+        Float result = null;
+        String stringResult = null;
+        switch (operator) {
+            case "max":
+            case "min":
+                for (Row row : table) {
+                    String stringValue = row.getColumnValue(header.indexOf(field));
+                    if (!isEmpty(stringValue)) {
+                        float value = Float.parseFloat(stringValue);
+                        if (isNull(result)
+                                || (operator.equals("max") && value > result)
+                                || (operator.equals("min") && value < result)) {
+                            result = value;
+                            stringResult = stringValue;
+                        }
+                    }
+                }
+                if (!isNull(stringResult)) {
+                    selectValue(header, table, field, stringResult);
+                } else {
+                    table.clear();
+                }
+                if (!Entities.keyFields.isEmpty()) {
+                    selectFields(header, table, Entities.keyFields);
+                }
+                break;
+            default:
+                break;
+        }
     }
 
     /**

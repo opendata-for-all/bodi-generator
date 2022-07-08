@@ -252,6 +252,17 @@ public final class Intents {
 
 
     /**
+     * The intent customRowOfNumericFieldFunctionIntent.
+     */
+    public static final IntentDefinition customRowOfNumericFieldFunctionIntent = intent("CustomRowOfNumericFieldFunction")
+            .trainingSentences(BUNDLE.getStringArray("CustomRowOfNumericFieldFunction"))
+            .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(Entities.numericFieldEntity)
+            .parameter(ContextKeys.OPERATOR).fromFragment("OPERATOR").entity(Entities.numericFunctionOperatorEntity)
+            .parameter(ContextKeys.ROW_NAME).fromFragment("ROW_NAME").entity(Entities.rowNameEntity)
+            .getIntentDefinition();
+
+
+    /**
      * The intent customRowCountIntent.
      */
     public static final IntentDefinition customRowCountIntent = intent("CustomRowCount")

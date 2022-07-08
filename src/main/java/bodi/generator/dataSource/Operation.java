@@ -39,6 +39,14 @@ public enum Operation {
     NUMERIC_FIELD_FUNCTION,
 
     /**
+     * ROW_OF_NUMERIC_FIELD_FUNCTION Operation.
+     * <p>
+     * Given a numeric field name and an operator, this operation gets all the entries that match the field value with
+     * the value obtained when applying the operator.
+     */
+    ROW_OF_NUMERIC_FIELD_FUNCTION,
+
+    /**
      * FIELD_OF_VALUE Operation.
      * <p>
      * Given a field A and a value of a field B, this operation gets the field A of all entries with field B equal to
