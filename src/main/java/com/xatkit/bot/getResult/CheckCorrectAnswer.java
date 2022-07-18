@@ -1,11 +1,11 @@
 package com.xatkit.bot.getResult;
 
-import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Intents;
 import com.xatkit.bot.library.Utils;
 import com.xatkit.execution.State;
 import com.xatkit.plugins.react.platform.ReactPlatform;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.val;
 
 import static com.xatkit.bot.Bot.coreLibraryI18n;
@@ -29,6 +29,12 @@ public class CheckCorrectAnswer {
     private final State processCheckCorrectAnswerState;
 
     /**
+     * This variable stores the last SQL query used by the bot to obtain an answer.
+     */
+    @Setter
+    private String lastSqlQuery;
+
+    /**
      * Instantiates a new Check Correct Answer Function workflow.
      *
      * @param reactPlatform the react platform of a chatbot
@@ -39,7 +45,6 @@ public class CheckCorrectAnswer {
 
         processCheckCorrectAnswerState
                 .body(context -> {
-                    String lastSqlQuery = (String) context.getSession().get(ContextKeys.LAST_SQL_QUERY);
                     if (!isEmpty(lastSqlQuery)) {
                         reactPlatform.reply(context, messages.getString("ShowSQL"));
                         reactPlatform.reply(context, lastSqlQuery);
@@ -47,7 +52,7 @@ public class CheckCorrectAnswer {
                     reactPlatform.reply(context, messages.getString("AskCorrectAnswer"),
                             Utils.getFirstTrainingSentences(
                                     coreLibraryI18n.Yes, coreLibraryI18n.No, Intents.iDontKnowIntent));
-                    context.getSession().put(ContextKeys.LAST_SQL_QUERY, null);
+                    lastSqlQuery = null;
                 })
                 .next()
                 .when(intentIs(coreLibraryI18n.Yes)).moveTo(returnState)

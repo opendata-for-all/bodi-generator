@@ -1,6 +1,6 @@
 package com.xatkit.bot.customQuery;
 
-import bodi.generator.dataSource.TabularDataSource;
+import bodi.generator.dataSource.ResultSet;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Entities;
 import com.xatkit.execution.State;
@@ -12,6 +12,7 @@ import java.text.MessageFormat;
 
 import static com.xatkit.bot.Bot.getResult;
 import static com.xatkit.bot.Bot.messages;
+import static com.xatkit.bot.Bot.sql;
 import static com.xatkit.dsl.DSL.state;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -52,7 +53,9 @@ public class CustomRowCount {
                     error = false;
                     String rowName = (String) context.getIntent().getValue(ContextKeys.ROW_NAME);
                     if (!isEmpty(rowName)) {
-                        int rowCount = ((TabularDataSource) context.getSession().get(ContextKeys.TABULAR_DATA_SOURCE)).getNumRows();
+                        String sqlQuery = sql.queries.rowCount();
+                        ResultSet resultSet = sql.runSqlQuery(sqlQuery);
+                        int rowCount = Integer.parseInt(resultSet.getRow(0).getColumnValue(0));
                         reactPlatform.reply(context, MessageFormat.format(messages.getString("ShowRowCount"),
                                 rowCount, rowName));
                     } else {

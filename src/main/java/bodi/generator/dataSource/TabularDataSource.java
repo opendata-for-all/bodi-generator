@@ -166,11 +166,9 @@ public class TabularDataSource {
     }
 
     /**
-     * Gets a deep copy of {@link #table}. This is useful to manipulate the content of the {@link TabularDataSource}
-     * using a {@link Statement} (reminder that the {@link TabularDataSource} content is immutable)
+     * Gets a deep copy of {@link #table} (reminder that the {@link TabularDataSource} content is immutable).
      *
      * @return the table copy
-     * @see Statement
      * @see ResultSet
      */
     public List<Row> getTableCopy() {
@@ -179,16 +177,6 @@ public class TabularDataSource {
             tableCopy.add(new Row(new ArrayList<>(row.getValues())));
         }
         return tableCopy;
-    }
-
-    /**
-     * Create a {@link Statement} linked to the caller {@link TabularDataSource}.
-     *
-     * @return the statement
-     * @see Statement
-     */
-    public Statement createStatement() {
-        return new Statement(this);
     }
 
     /**

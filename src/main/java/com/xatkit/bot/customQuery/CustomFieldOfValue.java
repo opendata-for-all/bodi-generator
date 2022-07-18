@@ -1,8 +1,6 @@
 package com.xatkit.bot.customQuery;
 
-import bodi.generator.dataSource.Operation;
 import bodi.generator.dataSource.ResultSet;
-import bodi.generator.dataSource.Statement;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Entities;
 import com.xatkit.bot.library.Intents;
@@ -19,6 +17,7 @@ import java.util.List;
 import static com.xatkit.bot.Bot.coreLibraryI18n;
 import static com.xatkit.bot.Bot.getResult;
 import static com.xatkit.bot.Bot.messages;
+import static com.xatkit.bot.Bot.sql;
 import static com.xatkit.dsl.DSL.intentIs;
 import static com.xatkit.dsl.DSL.state;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -96,11 +95,8 @@ public class CustomFieldOfValue {
                         valueField = Entities.fieldValueMap.get(value);
                     }
                     if (!isEmpty(field) && !isEmpty(value) && isEmpty(operator)) {
-                        Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
-                        String[] operationArgs = {field, value, valueField, ""};
-                        ResultSet resultSet = (ResultSet) statement.executeQuery(Operation.FIELD_OF_VALUE, operationArgs);
-                        operationArgs[3] = "distinct";
-                        ResultSet resultSetDistinct = (ResultSet) statement.executeQuery(Operation.FIELD_OF_VALUE, operationArgs);
+                        String sqlQuery = sql.queries.fieldOfValue(field, valueField, value, false);
+                        ResultSet resultSet = sql.runSqlQuery(sqlQuery);
                         if (resultSet.getNumRows() == 0) {
                             reactPlatform.reply(context, MessageFormat.format(messages.getString(
                                             "FieldOfValue0"), field, valueField, value));
@@ -121,6 +117,8 @@ public class CustomFieldOfValue {
                             } else if (Utils.getEntityValues(Entities.textualFieldEntity).contains(field)) {
                                 // textual operators here
                             }
+                            sqlQuery = sql.queries.fieldOfValue(field, valueField, value, true);
+                            ResultSet resultSetDistinct = sql.runSqlQuery(sqlQuery);
                             buttons.add(Utils.getFirstTrainingSentences(coreLibraryI18n.Quit).get(0));
                             reactPlatform.reply(context, MessageFormat.format(messages.getString(
                                     "AskFieldOfValueOperation"), resultSet.getNumRows(), field,
@@ -151,26 +149,23 @@ public class CustomFieldOfValue {
 
         processCustomFieldOfValueShowAllState
                 .body(context -> {
-                    context.getSession().put(ContextKeys.OPERATION, Operation.FIELD_OF_VALUE);
-                    String[] operationArgs = {field, value, valueField, ""};
-                    if (context.getIntent().getDefinition().getName().equals(Intents.showAllDistinctIntent.getName())) {
-                        operationArgs[3] = "distinct";
-                    }
-                    context.getSession().put(ContextKeys.OPERATION_ARGS, operationArgs);
+                    boolean isDistinct = (context.getIntent().getDefinition().getName().equals(Intents.showAllDistinctIntent.getName()));
+                    String sqlQuery = sql.queries.fieldOfValue(field, valueField, value, isDistinct);
+                    ResultSet resultSet = sql.runSqlQuery(sqlQuery);
+                    getResult.setResultSet(resultSet);
 
                 })
                 .next()
-                .moveTo(getResult.getGenerateResultSetWithOperationState());
+                .moveTo(getResult.getShowDataState());
 
         processCustomFieldOfValueOperatorState
                 .body(context -> {
                     if (!context.getIntent().getDefinition().getName().equals(Intents.customFieldOfValueOperatorIntent.getName())) {
                         operator = (String) context.getIntent().getValue(ContextKeys.VALUE);
                     }
-                    Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
-                    String[] operationArgs = {field, value, valueField, operator};
-                    // Result is a Date or a Float
-                    Object result = statement.executeQuery(Operation.FIELD_OF_VALUE, operationArgs);
+                    String sqlQuery = sql.queries.fieldOfValueOperator(field, valueField, value, operator);
+                    ResultSet resultSet = sql.runSqlQuery(sqlQuery);
+                    String result = resultSet.getRow(0).getColumnValue(0);
                     reactPlatform.reply(context, MessageFormat.format(messages.getString(
                                     "FieldOfValueWithOperation"), operator, field, valueField, value, result));
                 })

@@ -1,6 +1,6 @@
 package com.xatkit.bot.customQuery;
 
-import bodi.generator.dataSource.Operation;
+import bodi.generator.dataSource.ResultSet;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Entities;
 import com.xatkit.bot.library.Utils;
@@ -10,9 +10,12 @@ import lombok.Getter;
 import lombok.val;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.xatkit.bot.Bot.getResult;
 import static com.xatkit.bot.Bot.messages;
+import static com.xatkit.bot.Bot.sql;
 import static com.xatkit.dsl.DSL.state;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -60,9 +63,10 @@ public class CustomRowOfNumericFieldFunction {
                     String field = (String) context.getIntent().getValue(ContextKeys.FIELD);
                     String operator = (String) context.getIntent().getValue(ContextKeys.OPERATOR);
                     if (!isEmpty(field) && !isEmpty(operator) && (operator.equals("max") || operator.equals("min"))) {
-                        context.getSession().put(ContextKeys.OPERATION, Operation.ROW_OF_NUMERIC_FIELD_FUNCTION);
-                        String[] operationArgs = {field, operator};
-                        context.getSession().put(ContextKeys.OPERATION_ARGS, operationArgs);
+                        List<String> keyFields = new ArrayList<>(Entities.keyFields);
+                        String sqlQuery = sql.queries.rowOfNumericFieldFunction(keyFields, field, operator);
+                        ResultSet resultSet = sql.runSqlQuery(sqlQuery);
+                        getResult.setResultSet(resultSet);
                         reactPlatform.reply(context, MessageFormat.format(messages.getString("CustomRowOfNumericFieldFunction"),
                                 rowName, operator, field));
                     } else {
@@ -71,7 +75,7 @@ public class CustomRowOfNumericFieldFunction {
                 })
                 .next()
                 .when(context -> error).moveTo(getResult.getGenerateResultSetFromQueryState())
-                .when(context -> !error).moveTo(getResult.getGenerateResultSetWithOperationState());
+                .when(context -> !error).moveTo(getResult.getShowDataState());
 
         this.processCustomRowOfNumericFieldFunctionState = processCustomRowOfNumericFieldFunctionState.getState();
     }

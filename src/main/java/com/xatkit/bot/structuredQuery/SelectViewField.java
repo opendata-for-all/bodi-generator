@@ -1,6 +1,5 @@
 package com.xatkit.bot.structuredQuery;
 
-import bodi.generator.dataSource.Statement;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Intents;
 import com.xatkit.execution.State;
@@ -52,8 +51,7 @@ public class SelectViewField {
         saveViewFieldState
                 .body(context -> {
                     String fieldName = (String) context.getIntent().getValue(ContextKeys.VALUE);
-                    Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
-                    statement.addField(fieldName);
+                    // sqlQueries.addField(fieldName);
                     List<String> viewFieldOptions =
                             (List<String>) context.getSession().get(ContextKeys.VIEW_FIELD_OPTIONS);
                     viewFieldOptions.remove(fieldName);

@@ -1,6 +1,6 @@
 package com.xatkit.bot.customQuery;
 
-import bodi.generator.dataSource.Operation;
+import bodi.generator.dataSource.ResultSet;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.execution.State;
 import com.xatkit.plugins.react.platform.ReactPlatform;
@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.val;
 
 import static com.xatkit.bot.Bot.getResult;
+import static com.xatkit.bot.Bot.sql;
 import static com.xatkit.dsl.DSL.state;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -47,16 +48,16 @@ public class CustomShowFieldDistinct {
                     error = false;
                     String field = (String) context.getIntent().getValue(ContextKeys.FIELD);
                     if (!isEmpty(field)) {
-                        context.getSession().put(ContextKeys.OPERATION, Operation.SHOW_FIELD_DISTINCT);
-                        String[] operationArgs = {field};
-                        context.getSession().put(ContextKeys.OPERATION_ARGS, operationArgs);
+                        String sqlQuery = sql.queries.showFieldDistinct(field);
+                        ResultSet resultSet = sql.runSqlQuery(sqlQuery);
+                        getResult.setResultSet(resultSet);
                     } else {
                         error = true;
                     }
                 })
                 .next()
                 .when(context -> error).moveTo(getResult.getGenerateResultSetFromQueryState())
-                .when(context -> !error).moveTo(getResult.getGenerateResultSetWithOperationState());
+                .when(context -> !error).moveTo(getResult.getShowDataState());
 
         this.processCustomShowFieldDistinctState = processCustomShowFieldDistinctState.getState();
     }

@@ -61,14 +61,14 @@ public class StructuredQuery {
                             Utils.getFirstTrainingSentences(
                                     Intents.addFilterIntent,
                                     Intents.removeFilterIntent,
-                                    Intents.addFieldToViewIntent,
+                                    //Intents.addFieldToViewIntent,
                                     Intents.showDataIntent,
                                     coreLibraryI18n.Quit));
                 })
                 .next()
                 .when(intentIs(Intents.addFilterIntent)).moveTo(structuredFilter.getSelectFieldState())
                 .when(intentIs(Intents.removeFilterIntent)).moveTo(structuredFilter.getSelectFilterToRemoveState())
-                .when(intentIs(Intents.addFieldToViewIntent)).moveTo(selectViewField.getSelectViewFieldState())
+                //.when(intentIs(Intents.addFieldToViewIntent)).moveTo(selectViewField.getSelectViewFieldState())
                 .when(intentIs(Intents.showDataIntent)).moveTo(getResult.getGenerateResultSetState())
                 .when(intentIs(coreLibraryI18n.Quit)).moveTo(returnState);
 

@@ -1,6 +1,5 @@
 package com.xatkit.bot;
 
-import bodi.generator.dataSource.TabularDataSource;
 import com.xatkit.bot.customQuery.CustomQuery;
 import com.xatkit.bot.getResult.CheckCorrectAnswer;
 import com.xatkit.bot.getResult.GetResult;
@@ -10,6 +9,7 @@ import com.xatkit.bot.library.Entities;
 import com.xatkit.bot.library.Intents;
 import com.xatkit.bot.library.Utils;
 import com.xatkit.bot.nlp.NLPServerClient;
+import com.xatkit.bot.sql.SqlEngine;
 import com.xatkit.bot.structuredQuery.StructuredQuery;
 import com.xatkit.core.XatkitBot;
 import com.xatkit.plugins.core.library.CoreLibraryI18n;
@@ -25,7 +25,6 @@ import org.apache.commons.configuration2.ex.ConfigurationException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.ResourceBundle;
 
 import static com.xatkit.dsl.DSL.eventIs;
@@ -124,7 +123,12 @@ public final class Bot {
     /**
      * The client that interacts with the server that deploys the NLP models to answer the questions.
      */
-    public static NLPServerClient nlpServerClient = new NLPServerClient();
+    public static NLPServerClient nlpServerClient;
+
+    /**
+     * The engine that performs the SQL related part of the bot.
+     */
+    public static SqlEngine sql;
 
     /**
      * Creates the {@link XatkitBot}.
@@ -188,6 +192,12 @@ public final class Bot {
         }
 
         /*
+         * Initialize the NLP Server Client and the SQL engine of the bot
+         */
+        nlpServerClient = new NLPServerClient();
+        sql = new SqlEngine(inputDoc, delimiter);
+
+        /*
          * Specify the content of the bot states (i.e. the behavior of the bot).
          */
         init
@@ -195,20 +205,10 @@ public final class Bot {
                 .when(eventIs(ReactEventProvider.ClientReady)).moveTo(awaitingInput);
         awaitingInput
                 .body(context -> {
-                    if (!context.getSession().containsKey(ContextKeys.TABULAR_DATA_SOURCE)) {
-                        context.getSession().put(ContextKeys.TABULAR_DATA_SOURCE,
-                                new TabularDataSource(Objects.requireNonNull(Thread.currentThread()
-                                .getContextClassLoader().getResource(inputDoc)).getPath(), delimiter));
-                    }
                     List<String> fields = new ArrayList<>();
                     fields.addAll(Utils.getEntityValues(Entities.numericFieldEntity));
                     fields.addAll(Utils.getEntityValues(Entities.textualFieldEntity));
                     fields.addAll(Utils.getEntityValues(Entities.dateFieldEntity));
-                    TabularDataSource tds =
-                            (TabularDataSource) context.getSession().get(ContextKeys.TABULAR_DATA_SOURCE);
-                    context.getSession().put(ContextKeys.STATEMENT, tds.createStatement());
-                    // Uncomment to disable case-sensitivity in filter values
-                        //.setIgnoreCaseFilterValue(true));
                     List<String> filterFieldOptions = new ArrayList<>(fields);
                     context.getSession().put(ContextKeys.FILTER_FIELD_OPTIONS, filterFieldOptions);
                     List<String> viewFieldOptions = new ArrayList<>(fields);

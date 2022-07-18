@@ -1,7 +1,6 @@
 package com.xatkit.bot.customQuery;
 
-import bodi.generator.dataSource.Operation;
-import bodi.generator.dataSource.Statement;
+import bodi.generator.dataSource.ResultSet;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.execution.State;
 import com.xatkit.plugins.react.platform.ReactPlatform;
@@ -12,6 +11,7 @@ import java.text.MessageFormat;
 
 import static com.xatkit.bot.Bot.getResult;
 import static com.xatkit.bot.Bot.messages;
+import static com.xatkit.bot.Bot.sql;
 import static com.xatkit.dsl.DSL.state;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -54,8 +54,9 @@ public class CustomNumericFieldFunction {
                     String field = (String) context.getIntent().getValue(ContextKeys.FIELD);
                     String operator = (String) context.getIntent().getValue(ContextKeys.OPERATOR);
                     if (!isEmpty(field) && !isEmpty(operator)) {
-                        Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
-                        Float result = (Float) statement.executeQuery(Operation.NUMERIC_FIELD_FUNCTION, field, operator);
+                        String sqlQuery = sql.queries.numericFieldFunction(field, operator);
+                        ResultSet resultSet = sql.runSqlQuery(sqlQuery);
+                        float result = Float.parseFloat(resultSet.getRow(0).getColumnValue(0));
                         reactPlatform.reply(context, MessageFormat.format(messages.getString("CustomNumericFieldFunction"),
                                 operator, field, result));
                     } else {

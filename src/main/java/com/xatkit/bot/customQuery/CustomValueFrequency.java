@@ -1,7 +1,6 @@
 package com.xatkit.bot.customQuery;
 
-import bodi.generator.dataSource.Operation;
-import bodi.generator.dataSource.Statement;
+import bodi.generator.dataSource.ResultSet;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Entities;
 import com.xatkit.execution.State;
@@ -13,6 +12,7 @@ import java.text.MessageFormat;
 
 import static com.xatkit.bot.Bot.getResult;
 import static com.xatkit.bot.Bot.messages;
+import static com.xatkit.bot.Bot.sql;
 import static com.xatkit.dsl.DSL.state;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -57,8 +57,9 @@ public class CustomValueFrequency {
                     String value = (String) context.getIntent().getValue(ContextKeys.VALUE);
                     if (!isEmpty(value)) {
                         String field = Entities.fieldValueMap.get(value);
-                        Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
-                        int valueFrequency = (int) statement.executeQuery(Operation.VALUE_FREQUENCY, field, value);
+                        String sqlQuery = sql.queries.valueFrequency(field, value);
+                        ResultSet resultSet = sql.runSqlQuery(sqlQuery);
+                        int valueFrequency = Integer.parseInt(resultSet.getRow(0).getColumnValue(0));
                         reactPlatform.reply(context, MessageFormat.format(messages.getString("ShowValueFrequency"),
                                 valueFrequency, field, value));
                     } else {

@@ -1,14 +1,13 @@
 package com.xatkit.bot.getResult;
 
-import bodi.generator.dataSource.Operation;
 import bodi.generator.dataSource.ResultSet;
-import bodi.generator.dataSource.Statement;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Intents;
 import com.xatkit.bot.library.Utils;
 import com.xatkit.execution.State;
 import com.xatkit.plugins.react.platform.ReactPlatform;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.val;
 
 import java.text.MessageFormat;
@@ -17,9 +16,9 @@ import static com.xatkit.bot.Bot.coreLibraryI18n;
 import static com.xatkit.bot.Bot.messages;
 import static com.xatkit.bot.Bot.nlpServerClient;
 import static com.xatkit.bot.Bot.pageLimit;
+import static com.xatkit.bot.Bot.sql;
 import static com.xatkit.dsl.DSL.intentIs;
 import static com.xatkit.dsl.DSL.state;
-import static java.util.Objects.isNull;
 
 /**
  * The Get Result workflow of a chatbot.
@@ -49,28 +48,27 @@ public class GetResult {
     /**
      * One of the entry points for the Get Result workflow.
      * <p>
-     * This state applies the necessary filters and/or operations in the table (previously specified by the user) and
-     * gets the resulting table.
-     */
-    @Getter
-    private final State generateResultSetWithOperationState;
-
-    /**
-     * One of the entry points for the Get Result workflow.
-     * <p>
      * When no intent is recognized from a user question, this state is executed to try to obtain a tabular answer to
      * that question, using {@link com.xatkit.bot.Bot#nlpServerClient}.
      * <p>
      * The filters previously applied by the user are also added to
-     * the query (see
-     * {@link com.xatkit.bot.nlp.NLPServerClient#runQuery(com.xatkit.execution.StateContext, String, Statement)}
+     * the query (see {@link com.xatkit.bot.nlp.NLPServerClient#runQuery(String)}
      */
     @Getter
     private final State generateResultSetFromQueryState;
 
     /**
+     * One of the entry points for the Get Result workflow.
+     * <p>
+     * This state shows the result set stored in {@link #resultSet} (previously set by another workflow)
+     */
+    @Getter
+    private final State showDataState;
+
+    /**
      * This {@link ResultSet} stores the result to be printed.
      */
+    @Setter
     private ResultSet resultSet;
 
     /**
@@ -81,43 +79,23 @@ public class GetResult {
      */
     public GetResult(ReactPlatform reactPlatform, State returnState) {
         val generateResultSetState = state("GenerateResultSet");
-        val generateResultSetWithOperationState = state("GenerateResultSetWithOperation");
         val generateResultSetFromQueryState = state("GenerateResultSetFromQuery");
         val showDataState = state("ShowData");
 
         generateResultSetState
                 .body(context -> {
-                    Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
-                    resultSet = (ResultSet) statement.executeQuery(Operation.NO_OPERATION);
-                    if (isNull(resultSet)) {
-                        resultSet = new ResultSet();
-                    }
+                    String sqlQuery = sql.queries.selectAll();
+                    resultSet = sql.runSqlQuery(sqlQuery);
                 })
                 .next()
                 .moveTo(showDataState);
 
         this.generateResultSetState = generateResultSetState.getState();
 
-        generateResultSetWithOperationState
-                .body(context -> {
-                    Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
-                    Operation operation = (Operation) context.getSession().get(ContextKeys.OPERATION);
-                    String[] operationArgs = (String[]) context.getSession().get(ContextKeys.OPERATION_ARGS);
-                    resultSet = (ResultSet) statement.executeQuery(operation, operationArgs);
-                    if (isNull(resultSet)) {
-                        resultSet = new ResultSet();
-                    }
-                })
-                .next()
-                .moveTo(showDataState);
-
-        this.generateResultSetWithOperationState = generateResultSetWithOperationState.getState();
-
         generateResultSetFromQueryState
                 .body(context -> {
-                    Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
                     String query = context.getIntent().getMatchedInput();
-                    resultSet = nlpServerClient.runQuery(context, query, statement);
+                    resultSet = nlpServerClient.runQuery(query);
                 })
                 .next()
                 .moveTo(showDataState);
@@ -166,5 +144,7 @@ public class GetResult {
                 .when(context -> (resultSet.getNumRows() <= pageLimit)).moveTo(returnState)
                 .when(intentIs(Intents.showNextPageIntent)).moveTo(showDataState)
                 .when(intentIs(coreLibraryI18n.Quit)).moveTo(returnState);
+
+        this.showDataState = showDataState.getState();
     }
 }

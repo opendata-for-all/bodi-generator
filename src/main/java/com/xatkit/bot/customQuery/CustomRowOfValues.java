@@ -1,6 +1,6 @@
 package com.xatkit.bot.customQuery;
 
-import bodi.generator.dataSource.Operation;
+import bodi.generator.dataSource.ResultSet;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Entities;
 import com.xatkit.bot.library.Utils;
@@ -10,9 +10,12 @@ import lombok.Getter;
 import lombok.val;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.xatkit.bot.Bot.getResult;
 import static com.xatkit.bot.Bot.messages;
+import static com.xatkit.bot.Bot.sql;
 import static com.xatkit.dsl.DSL.state;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -57,28 +60,29 @@ public class CustomRowOfValues {
                     String value1 = (String) context.getIntent().getValue(ContextKeys.VALUE + "1");
                     String value2 = (String) context.getIntent().getValue(ContextKeys.VALUE + "2");
                     String value3 = (String) context.getIntent().getValue(ContextKeys.VALUE + "3");
+                    List<String> keyFields = new ArrayList<>(Entities.keyFields);
                     if (!isEmpty(value1)) {
-                        context.getSession().put(ContextKeys.OPERATION, Operation.ROW_OF_VALUES);
-                        String value1Field = Entities.fieldValueMap.get(value1);
-                        String[] operationArgs = {value1Field, value1};
-                        context.getSession().put(ContextKeys.OPERATION_ARGS, operationArgs);
+                        String field1 = Entities.fieldValueMap.get(value1);
+                        String sqlQuery = sql.queries.rowOfValues1(keyFields, field1, value1);
+                        ResultSet resultSet = sql.runSqlQuery(sqlQuery);
+                        getResult.setResultSet(resultSet);
                         reactPlatform.reply(context, MessageFormat.format(messages.getString("RowOfValue1"),
-                                rowName, value1Field, value1));
+                                rowName, field1, value1));
                     } else if (!isEmpty(value2) && !isEmpty(value3)) {
-                        String value2Field = Entities.fieldValueMap.get(value2);
-                        String value3Field = Entities.fieldValueMap.get(value3);
-                        context.getSession().put(ContextKeys.OPERATION, Operation.ROW_OF_VALUES);
-                        String[] operationArgs = {value2Field, value2, value3Field, value3};
-                        context.getSession().put(ContextKeys.OPERATION_ARGS, operationArgs);
+                        String field2 = Entities.fieldValueMap.get(value2);
+                        String field3 = Entities.fieldValueMap.get(value3);
+                        String sqlQuery = sql.queries.rowOfValues2(keyFields, field2, value2, field3, value3);
+                        ResultSet resultSet = sql.runSqlQuery(sqlQuery);
+                        getResult.setResultSet(resultSet);
                         reactPlatform.reply(context, MessageFormat.format(messages.getString("RowOfValue2AndValue3"),
-                                rowName, value2Field, value2, value3Field, value3));
+                                rowName, field2, value2, field3, value3));
                     } else {
                         error = true;
                     }
                 })
                 .next()
                 .when(context -> error).moveTo(getResult.getGenerateResultSetFromQueryState())
-                .when(context -> !error).moveTo(getResult.getGenerateResultSetWithOperationState());
+                .when(context -> !error).moveTo(getResult.getShowDataState());
 
         this.processCustomRowOfValuesState = processCustomRowOfValuesState.getState();
     }

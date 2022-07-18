@@ -2,12 +2,9 @@ package com.xatkit.bot.nlp;
 
 import bodi.generator.dataSource.ResultSet;
 import bodi.generator.dataSource.Row;
-import bodi.generator.dataSource.Statement;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.xatkit.bot.Bot;
-import com.xatkit.bot.library.ContextKeys;
-import com.xatkit.execution.StateContext;
 import fr.inria.atlanmod.commons.log.Log;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
@@ -21,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.xatkit.bot.Bot.checkCorrectAnswer;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
@@ -72,29 +70,9 @@ public class NLPServerClient {
     /**
      * Gets the response from the server endpoint.
      *
-     * @param input     the input of the server
-     * @param statement the statement containing information to add to the request
+     * @param input the input of the server
      * @return the server response
-     * @throws UnirestException
-     */
-    private JSONObject getResponse(String input, Statement statement) throws UnirestException {
-        JSONObject request = new JSONObject();
-        request.put("input", input);
-        request.put("language", Bot.language);
-        request.put("fields", statement.getFieldsAsSqlVariables());
-        request.put("filters", statement.getFiltersAsSqlConditions());
-        request.put("ignoreCase", statement.isIgnoreCaseFilterValue());
-        return Unirest.post(serverUrl + textToTableEndpoint)
-                .header("Content-Type", "application/json")
-                .body(request).asJson().getBody().getObject();
-    }
-
-    /**
-     * Gets the response from the server endpoint.
-     *
-     * @param input     the input of the server
-     * @return the server response
-     * @throws UnirestException
+     * @throws UnirestException the unirest exception
      */
     private JSONObject getResponse(String input) throws UnirestException {
         JSONObject request = new JSONObject();
@@ -102,14 +80,14 @@ public class NLPServerClient {
         request.put("language", Bot.language);
         request.put("fields", (Collection<?>) null);
         request.put("filters", (Collection<?>) null);
-        request.put("ignoreCase", (Collection<?>) null);
+        request.put("ignoreCase", true);
         return Unirest.post(serverUrl + textToTableEndpoint)
                 .header("Content-Type", "application/json")
                 .body(request).asJson().getBody().getObject();
     }
 
     /**
-     * Makes a query to the server and obtains the translation of the server input.
+     * Makes a query to the server and obtains the translations of the server input.
      *
      * @param input the input of the server
      * @return if successful, a map containing the language-translation entries, otherwise null
@@ -132,17 +110,14 @@ public class NLPServerClient {
     /**
      * Makes a query to the server and obtains a {@link bodi.generator.dataSource.ResultSet} containing the response.
      *
-     * @param context   the chatbot context to store the sql query
-     * @param input     the input of the server
-     * @param statement the statement containing information to add to the request
+     * @param input the input of the server
      * @return if successful, the {@link bodi.generator.dataSource.ResultSet} containing the result of the server,
      * otherwise an empty {@link bodi.generator.dataSource.ResultSet}.
      */
-    public ResultSet runQuery(StateContext context, String input, Statement statement) {
+    public ResultSet runQuery(String input) {
         try {
-            JSONObject response = getResponse(input, statement);
+            JSONObject response = getResponse(input);
             String sqlQuery = response.getString("sql");
-            context.getSession().put(ContextKeys.LAST_SQL_QUERY, sqlQuery);
             JSONArray headerJson = response.getJSONArray("header");
             JSONArray tableJson = response.getJSONArray("table");
             if (isEmpty(sqlQuery)) {
@@ -167,10 +142,11 @@ public class NLPServerClient {
                 }
                 table.add(new Row(values));
             }
+            checkCorrectAnswer.setLastSqlQuery(sqlQuery);
             return new ResultSet(header, table);
         } catch (Exception e) {
             Log.error(e, "An error occurred while getting the SQL result, see the attached exception");
-            return new ResultSet();
         }
+        return new ResultSet();
     }
 }

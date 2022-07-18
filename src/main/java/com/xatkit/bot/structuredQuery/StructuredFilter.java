@@ -1,8 +1,6 @@
 package com.xatkit.bot.structuredQuery;
 
-import bodi.generator.dataSource.Operation;
 import bodi.generator.dataSource.ResultSet;
-import bodi.generator.dataSource.Statement;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Entities;
 import com.xatkit.bot.library.Intents;
@@ -20,9 +18,9 @@ import static com.xatkit.bot.Bot.coreLibraryI18n;
 import static com.xatkit.bot.Bot.getResult;
 import static com.xatkit.bot.Bot.maxEntriesToDisplay;
 import static com.xatkit.bot.Bot.messages;
+import static com.xatkit.bot.Bot.sql;
 import static com.xatkit.dsl.DSL.intentIs;
 import static com.xatkit.dsl.DSL.state;
-import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
@@ -66,6 +64,22 @@ public class StructuredFilter {
     private int resultSetNumRows;
 
     /**
+     * Used to store the field data type when selecting the field. Later, in SaveOperator, it is used to transition
+     * to the datatype-dependant proper state.
+     */
+    private String fieldIntentName;
+
+    /**
+     * This variable stores the {@code field} parameter recognized from the matched intent.
+     */
+    private String field;
+
+    /**
+     * This variable stores the {@code operator} parameter recognized from the matched intent.
+     */
+    private String operator;
+
+    /**
      * Instantiates a new Structured Filter workflow.
      *
      * @param reactPlatform the react platform of a chatbot
@@ -75,7 +89,7 @@ public class StructuredFilter {
         val selectFieldState = state("SelectField");
         val saveFieldState = state("SaveField");
 
-        val writeOperatorState = state("WriteOperator");
+        val selectOperatorState = state("SelectOperator");
         val saveOperatorState = state("SaveOperator");
 
         val writeDateValueState = state("WriteDateValue");
@@ -83,10 +97,6 @@ public class StructuredFilter {
         val writeNumericValueState = state("WriteNumericValue");
 
         val saveStructuredFilterState = state("SaveStructuredFilter");
-
-        // Used to store the field data type when selecting the field. Later, in SaveOperator, it is used to
-        // transition to the datatype-dependant proper state.
-        final String[] fieldIntentName = new String[1];
 
         // Input the FIELD name
 
@@ -104,23 +114,22 @@ public class StructuredFilter {
 
         saveFieldState
                 .body(context -> {
-                    String fieldName = (String) context.getIntent().getValue(ContextKeys.VALUE);
-                    context.getSession().put(ContextKeys.LAST_FIELD, fieldName);
-                    fieldIntentName[0] = context.getIntent().getDefinition().getName();
+                    field = (String) context.getIntent().getValue(ContextKeys.VALUE);
+                    fieldIntentName = context.getIntent().getDefinition().getName();
                 })
                 .next()
-                .moveTo(writeOperatorState);
+                .moveTo(selectOperatorState);
 
         // Input the OPERATOR name
 
-        writeOperatorState
+        selectOperatorState
                 .body(context -> {
                     List<String> operators = new ArrayList<>();
-                    if (fieldIntentName[0].equals(Intents.textualFieldIntent.getName())) {
+                    if (fieldIntentName.equals(Intents.textualFieldIntent.getName())) {
                         operators = Utils.getEntityValues(Entities.textualOperatorEntity);
-                    } else if (fieldIntentName[0].equals(Intents.numericFieldIntent.getName())) {
+                    } else if (fieldIntentName.equals(Intents.numericFieldIntent.getName())) {
                         operators = Utils.getEntityValues(Entities.numericOperatorEntity);
-                    } else if (fieldIntentName[0].equals(Intents.dateFieldIntent.getName())) {
+                    } else if (fieldIntentName.equals(Intents.dateFieldIntent.getName())) {
                         operators = Utils.getEntityValues(Entities.dateOperatorEntity);
                     }
                     reactPlatform.reply(context, messages.getString("SelectOperator"), operators);
@@ -134,13 +143,12 @@ public class StructuredFilter {
 
         saveOperatorState
                 .body(context -> {
-                    String operatorName = (String) context.getIntent().getValue(ContextKeys.VALUE);
-                    context.getSession().put(ContextKeys.LAST_OPERATOR, operatorName);
+                    operator = (String) context.getIntent().getValue(ContextKeys.VALUE);
                 })
                 .next()
-                .when(context -> fieldIntentName[0].equals(Intents.textualFieldIntent.getName())).moveTo(writeTextualValueState)
-                .when(context -> fieldIntentName[0].equals(Intents.numericFieldIntent.getName())).moveTo(writeNumericValueState)
-                .when(context -> fieldIntentName[0].equals(Intents.dateFieldIntent.getName())).moveTo(writeDateValueState);
+                .when(context -> fieldIntentName.equals(Intents.textualFieldIntent.getName())).moveTo(writeTextualValueState)
+                .when(context -> fieldIntentName.equals(Intents.numericFieldIntent.getName())).moveTo(writeNumericValueState)
+                .when(context -> fieldIntentName.equals(Intents.dateFieldIntent.getName())).moveTo(writeDateValueState);
 
         // Input the VALUE
         // Divided by data types for safety (e.g. a date may be recognized as a text if we don't separate data types)
@@ -170,18 +178,13 @@ public class StructuredFilter {
 
         saveStructuredFilterState
                 .body(context -> {
-                    String field = (String) context.getSession().get(ContextKeys.LAST_FIELD);
-                    String operator = (String) context.getSession().get(ContextKeys.LAST_OPERATOR);
                     String value = (String) context.getIntent().getValue(ContextKeys.VALUE);
                     if (!isEmpty(field) && !isEmpty(operator) && !isEmpty(value)) {
-                        Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
-                        statement.addFilter(field, operator, value);
-                        ResultSet resultSet = (ResultSet) statement.executeQuery(Operation.NO_OPERATION);
-                        if (isNull(resultSet)) {
-                            resultSetNumRows = 0;
-                        } else {
-                            resultSetNumRows = resultSet.getNumRows();
-                        }
+                        sql.queries.addFilter(field, operator, value);
+                        String sqlQuery =  sql.queries.selectAll();
+                        ResultSet resultSet = sql.runSqlQuery(sqlQuery);
+                        getResult.setResultSet(resultSet);
+                        resultSetNumRows = resultSet.getNumRows();
                         reactPlatform.reply(context, MessageFormat.format(messages.getString("FilterAdded"),
                                 field, operator, value, resultSetNumRows));
                     } else {
@@ -189,7 +192,7 @@ public class StructuredFilter {
                     }
                 })
                 .next()
-                .when(context -> resultSetNumRows <= maxEntriesToDisplay).moveTo(getResult.getGenerateResultSetState())
+                .when(context -> resultSetNumRows <= maxEntriesToDisplay).moveTo(getResult.getShowDataState())
                 .when(context -> resultSetNumRows > maxEntriesToDisplay).moveTo(returnState);
 
         this.selectFieldState = selectFieldState.getState();
@@ -201,8 +204,7 @@ public class StructuredFilter {
 
         selectFilterToRemoveState
                 .body(context -> {
-                    Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
-                    List<String> currentFilters = statement.getFiltersAsStrings();
+                    List<String> currentFilters = sql.queries.getFiltersAsStrings();
                     if (currentFilters.isEmpty()) {
                         reactPlatform.reply(context, messages.getString("NoFilters"),
                                 Utils.getFirstTrainingSentences(coreLibraryI18n.Quit));
@@ -223,9 +225,9 @@ public class StructuredFilter {
                     String operator = (String) context.getIntent().getValue(ContextKeys.OPERATOR);
                     String value = (String) context.getIntent().getValue(ContextKeys.VALUE);
                     if (!isEmpty(field) && !isEmpty(operator) && !isEmpty(value)) {
-                        Statement statement = (Statement) context.getSession().get(ContextKeys.STATEMENT);
-                        statement.removeFilter(field, operator, value);
-                        ResultSet resultSet = (ResultSet) statement.executeQuery(Operation.NO_OPERATION);
+                        sql.queries.removeFilter(field, operator, value);
+                        String sqlQuery =  sql.queries.selectAll();
+                        ResultSet resultSet = sql.runSqlQuery(sqlQuery);
                         reactPlatform.reply(context, MessageFormat.format(messages.getString("FilterRemoved"),
                                 field, operator, value, resultSet.getNumRows()));
                     } else {
