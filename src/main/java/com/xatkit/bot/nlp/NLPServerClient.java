@@ -93,18 +93,19 @@ public class NLPServerClient {
      * @return if successful, a map containing the language-translation entries, otherwise null
      */
     public Map<String, String> getTranslations(String input) {
+        Map<String, String> translations = new HashMap<>();
         try {
             JSONObject response = getResponse(input);
             String sqlQuery = response.getString("sql");
             String inputInEnglish = response.getString("input_en");
-            Map<String, String> translations = new HashMap<>();
             translations.put("sql", sqlQuery);
             translations.put("english", inputInEnglish);
-            return translations;
         } catch (Exception e) {
             Log.error(e, "An error occurred while getting the SQL result, see the attached exception");
-            return null;
+            translations.put("sql", "");
+            translations.put("english", "");
         }
+        return translations;
     }
 
     /**
