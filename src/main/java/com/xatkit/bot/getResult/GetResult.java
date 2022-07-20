@@ -108,6 +108,9 @@ public class GetResult {
                     if (context.getIntent().getMatchedInput()
                             .equals(Intents.showNextPageIntent.getTrainingSentences().get(0))) {
                         pageCount = (int) context.getSession().get(ContextKeys.PAGE_COUNT) + 1;
+                    } else if (context.getIntent().getMatchedInput()
+                            .equals(Intents.showPreviousPageIntent.getTrainingSentences().get(0))) {
+                        pageCount = (int) context.getSession().get(ContextKeys.PAGE_COUNT) - 1;
                     }
                     int totalEntries = resultSet.getNumRows();
                     int totalPages = totalEntries / pageLimit;
@@ -117,6 +120,9 @@ public class GetResult {
                     if (pageCount > totalPages) {
                         // Page overflow
                         pageCount = 1;
+                    } else if (pageCount < 1) {
+                        // Page overflow
+                        pageCount = totalPages;
                     }
                     int offset = (pageCount - 1) * pageLimit;
                     context.getSession().put(ContextKeys.PAGE_COUNT, pageCount);
@@ -131,6 +137,7 @@ public class GetResult {
                             reactPlatform.reply(context, MessageFormat.format(
                                     messages.getString("PageCount"), pageCount, totalPages));
                             reactPlatform.reply(context, resultSetString, Utils.getFirstTrainingSentences(
+                                    Intents.showPreviousPageIntent,
                                     Intents.showNextPageIntent,
                                     coreLibraryI18n.Quit));
                         } else {
@@ -142,6 +149,7 @@ public class GetResult {
                 })
                 .next()
                 .when(context -> (resultSet.getNumRows() <= pageLimit)).moveTo(returnState)
+                .when(intentIs(Intents.showPreviousPageIntent)).moveTo(showDataState)
                 .when(intentIs(Intents.showNextPageIntent)).moveTo(showDataState)
                 .when(intentIs(coreLibraryI18n.Quit)).moveTo(returnState);
 

@@ -54,6 +54,12 @@ public final class Intents {
             .trainingSentences(BUNDLE.getStringArray("ShowNextPage"))
             .getIntentDefinition();
     /**
+     * The intent showPreviousPageIntent.
+     */
+    public static final IntentDefinition showPreviousPageIntent = intent("ShowPreviousPage")
+            .trainingSentences(BUNDLE.getStringArray("ShowPreviousPage"))
+            .getIntentDefinition();
+    /**
      * The intent addFilterIntent.
      */
     public static final IntentDefinition addFilterIntent = intent("AddFilter")
