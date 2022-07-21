@@ -197,6 +197,9 @@ public final class Bot {
         nlpServerClient = new NLPServerClient();
         sql = new SqlEngine(inputDoc, delimiter);
 
+        List<String> fields = new ArrayList<>(Utils.getEntityValues(Entities.fieldEntity));
+        sql.queries.getAllFields().addAll(fields);
+
         /*
          * Specify the content of the bot states (i.e. the behavior of the bot).
          */
@@ -205,10 +208,6 @@ public final class Bot {
                 .when(eventIs(ReactEventProvider.ClientReady)).moveTo(awaitingInput);
         awaitingInput
                 .body(context -> {
-                    List<String> fields = new ArrayList<>();
-                    fields.addAll(Utils.getEntityValues(Entities.numericFieldEntity));
-                    fields.addAll(Utils.getEntityValues(Entities.textualFieldEntity));
-                    fields.addAll(Utils.getEntityValues(Entities.dateFieldEntity));
                     List<String> filterFieldOptions = new ArrayList<>(fields);
                     context.getSession().put(ContextKeys.FILTER_FIELD_OPTIONS, filterFieldOptions);
                     List<String> viewFieldOptions = new ArrayList<>(fields);

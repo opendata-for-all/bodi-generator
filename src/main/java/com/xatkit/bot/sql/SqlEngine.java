@@ -46,9 +46,6 @@ public class SqlEngine {
         try {
             Connection conn = DriverManager.getConnection(url);
             statement = conn.createStatement();
-            String sqlQuery = queries.selectAll();
-            bodi.generator.dataSource.ResultSet resultSet = this.runSqlQuery(sqlQuery);
-            queries.getAllFields().addAll(resultSet.getHeader());
         } catch (SQLException e) {
             Log.error(e, "An error occurred while connecting to {0}, see the attached exception", url);
         }

@@ -77,6 +77,10 @@ public class SqlQueries {
         filters.remove(new ImmutableTriple<>(field, operator, value));
     }
 
+    public void clearFilters() {
+        filters.clear();
+    }
+
     /**
      * Gets the collection of filters as Strings.
      *

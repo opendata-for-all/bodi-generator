@@ -24,10 +24,10 @@ public final class Intents {
 
 
     /**
-     * The intent restartIntent.
+     * The intent resetIntent.
      */
-    public static final IntentDefinition restartIntent = intent("Restart")
-            .trainingSentences(BUNDLE.getStringArray("Restart"))
+    public static final IntentDefinition resetIntent = intent("Reset")
+            .trainingSentences(BUNDLE.getStringArray("Reset"))
             .getIntentDefinition();
     /**
      * The intent showDataIntent.

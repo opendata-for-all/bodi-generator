@@ -42,6 +42,11 @@ public class StructuredQuery {
      */
     public static SelectViewField selectViewField;
 
+    /**
+     * The Reset Bot workflow.
+     */
+    public static ResetBot resetBot;
+
 
     /**
      * Instantiates a new Structured Query workflow.
@@ -52,6 +57,7 @@ public class StructuredQuery {
     public StructuredQuery(ReactPlatform reactPlatform, State returnState) {
         structuredFilter = new StructuredFilter(reactPlatform, returnState);
         selectViewField = new SelectViewField(reactPlatform, returnState);
+        resetBot = new ResetBot(reactPlatform, returnState);
 
         val awaitingStructuredQueryState = state("AwaitingStructuredQuery");
 
@@ -63,6 +69,7 @@ public class StructuredQuery {
                                     Intents.removeFilterIntent,
                                     //Intents.addFieldToViewIntent,
                                     Intents.showDataIntent,
+                                    Intents.resetIntent,
                                     coreLibraryI18n.Quit));
                 })
                 .next()
@@ -70,6 +77,7 @@ public class StructuredQuery {
                 .when(intentIs(Intents.removeFilterIntent)).moveTo(structuredFilter.getSelectFilterToRemoveState())
                 //.when(intentIs(Intents.addFieldToViewIntent)).moveTo(selectViewField.getSelectViewFieldState())
                 .when(intentIs(Intents.showDataIntent)).moveTo(getResult.getGenerateResultSetState())
+                .when(intentIs(Intents.resetIntent)).moveTo(resetBot.getResetBotState())
                 .when(intentIs(coreLibraryI18n.Quit)).moveTo(returnState);
 
 
