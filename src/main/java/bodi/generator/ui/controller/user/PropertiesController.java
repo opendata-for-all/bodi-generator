@@ -1,6 +1,7 @@
 package bodi.generator.ui.controller.user;
 
 import bodi.generator.dataSchema.BodiGeneratorProperties;
+import bodi.generator.dataSchema.DataSchema;
 import bodi.generator.ui.model.BodiGeneratorObjects;
 import bodi.generator.ui.model.Properties;
 import bodi.generator.ui.service.DashboardService;
@@ -9,10 +10,19 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 /**
  * The controller for the {@code properties} functionalities of the bodi-generator UI.
@@ -30,6 +40,21 @@ public class PropertiesController {
      * The dashboard service of the controller.
      */
     private final DashboardService dashboard = new DashboardService();
+
+    /**
+     * The list of errors to display in the {@code properties} page.
+     */
+    private List<String> errors = new ArrayList<>();
+
+    /**
+     * The current selected language to edit the language-dependant properties.
+     */
+    private String selectedLanguage = "en";
+
+    /**
+     * The current selected tab to display in the {@code properties} page.
+     */
+    private PropertiesTab tab = PropertiesTab.GENERAL;
 
     /**
      * Creates a new {@link PropertiesController}.
@@ -50,31 +75,64 @@ public class PropertiesController {
     public String showProperties(Model model) {
         if (objects.isDataImported()) {
             model.addAttribute("properties", objects.getProperties());
+            Map<String, Boolean> enabledLanguages = new HashMap<>();
+            Set<String> enabledLanguagesSet = (Set<String>) objects.getProperties().getBotProperties().get(BotProperties.BOT_LANGUAGES);
+            for (String lang : DataSchema.languages) {
+                enabledLanguages.put(lang, enabledLanguagesSet.contains(lang));
+            }
+            model.addAttribute("enabledLanguages", enabledLanguages);
+            model.addAttribute("selectedLanguage", selectedLanguage);
+            model.addAttribute("errors", errors);
         }
-        return dashboard.view(DashboardView.PROPERTIES, model);
+        return dashboard.viewProperties(tab, model);
+    }
+
+    /**
+     * Change the selected language in the {@code properties} page.
+     *
+     * @param currentTab the current tab in the properties page
+     * @param language the selected language
+     * @return the name of the endpoint to redirect
+     */
+    @PostMapping("/change_selected_language/{currentTab}")
+    public String changeSelectedLanguage(@PathVariable String currentTab,
+                                         @RequestParam(value = "language") String language) {
+        selectedLanguage = language;
+        tab = PropertiesTab.valueOf(currentTab);
+        return dashboard.redirect(DashboardView.PROPERTIES);
     }
 
     /**
      * Store the general properties.
      *
      * @param updatedProperties the updated properties
+     * @param enabledLanguages  the enabled languages of the bot
      * @return the name of the endpoint to redirect
      */
     @PostMapping("/store_properties_general")
-    public String storePropertiesGeneral(@Valid @ModelAttribute("properties") Properties updatedProperties) {
+    public String storePropertiesGeneral(@Valid @ModelAttribute("properties") Properties updatedProperties,
+                                         @Valid @RequestParam(value = "enabledLanguages", required = false) Set<String> enabledLanguages) {
         Properties properties = objects.getProperties();
 
         // bodi-generator.properties
         properties.getBodiGeneratorProperties().put(BodiGeneratorProperties.BOT_NAME, updatedProperties.getBodiGeneratorProperties().get(BodiGeneratorProperties.BOT_NAME));
         properties.getBodiGeneratorProperties().put(BodiGeneratorProperties.ENABLE_TESTING, Boolean.valueOf(updatedProperties.getBodiGeneratorProperties().get(BodiGeneratorProperties.ENABLE_TESTING).toString()));
-        // bot.properties
-        properties.getBotProperties().put(BotProperties.XATKIT_SERVER_PORT, Integer.valueOf(updatedProperties.getBotProperties().get(BotProperties.XATKIT_SERVER_PORT).toString()));
-        properties.getBotProperties().put(BotProperties.XATKIT_REACT_PORT, Integer.valueOf(updatedProperties.getBotProperties().get(BotProperties.XATKIT_REACT_PORT).toString()));
-        properties.getBotProperties().put(BotProperties.BOT_LANGUAGE, updatedProperties.getBotProperties().get(BotProperties.BOT_LANGUAGE));
+        // config.properties
         properties.getBotProperties().put(BotProperties.BOT_PAGE_LIMIT, Integer.valueOf(updatedProperties.getBotProperties().get(BotProperties.BOT_PAGE_LIMIT).toString()));
         properties.getBotProperties().put(BotProperties.BOT_MAX_ENTRIES_TO_DISPLAY, Integer.valueOf(updatedProperties.getBotProperties().get(BotProperties.BOT_MAX_ENTRIES_TO_DISPLAY).toString()));
         properties.getBotProperties().put(BotProperties.BOT_ENABLE_CHECK_CORRECT_ANSWER, Boolean.valueOf(updatedProperties.getBotProperties().get(BotProperties.BOT_ENABLE_CHECK_CORRECT_ANSWER).toString()));
 
+        errors = new ArrayList<>();
+
+        if (!isEmpty(enabledLanguages)) {
+            properties.getBotProperties().put(BotProperties.BOT_LANGUAGES, enabledLanguages);
+            if (!enabledLanguages.contains(selectedLanguage)) {
+                selectedLanguage = enabledLanguages.iterator().next();
+            }
+        } else {
+            errors.add("You need to select at least 1 language");
+        }
+        tab = PropertiesTab.GENERAL;
         return dashboard.redirect(DashboardView.PROPERTIES);
     }
 
@@ -87,10 +145,12 @@ public class PropertiesController {
     @PostMapping("/set_intent_provider")
     public String setIntentProvider(@Valid @ModelAttribute("properties") Properties updatedProperties) {
         Properties properties = objects.getProperties();
+        Map<String, Object> botPropertiesLang = properties.getBotPropertiesLang().get(selectedLanguage);
+        Map<String, Object> updatedBotPropertiesLang = updatedProperties.getBotPropertiesLang().get(selectedLanguage);
 
-        properties.getBodiGeneratorProperties().put(BodiGeneratorProperties.XATKIT_INTENT_PROVIDER, updatedProperties.getBodiGeneratorProperties().get(BodiGeneratorProperties.XATKIT_INTENT_PROVIDER));
-        properties.getBotProperties().put(BotProperties.XATKIT_INTENT_PROVIDER, updatedProperties.getBodiGeneratorProperties().get(BodiGeneratorProperties.XATKIT_INTENT_PROVIDER));
+        botPropertiesLang.put(BotProperties.XATKIT_INTENT_PROVIDER, updatedBotPropertiesLang.get(BotProperties.XATKIT_INTENT_PROVIDER));
 
+        tab = PropertiesTab.INTENT_PROVIDER;
         return dashboard.redirect(DashboardView.PROPERTIES);
     }
 
@@ -103,17 +163,36 @@ public class PropertiesController {
     @PostMapping("/store_properties_intent_provider")
     public String storePropertiesIntentProvider(@Valid @ModelAttribute("properties") Properties updatedProperties) {
         Properties properties = objects.getProperties();
-
-        if (properties.getBotProperties().get(BotProperties.XATKIT_INTENT_PROVIDER).equals("com.xatkit.core.recognition.dialogflow.DialogFlowIntentRecognitionProvider")) {
-            properties.getBotProperties().put(BotProperties.XATKIT_DIALOGFLOW_PROJECT_ID, updatedProperties.getBotProperties().get(BotProperties.XATKIT_DIALOGFLOW_PROJECT_ID));
-            properties.getBotProperties().put(BotProperties.XATKIT_DIALOGFLOW_CREDENTIALS_PATH, updatedProperties.getBotProperties().get(BotProperties.XATKIT_DIALOGFLOW_CREDENTIALS_PATH));
-            properties.getBotProperties().put(BotProperties.XATKIT_DIALOGFLOW_LANGUAGE, updatedProperties.getBotProperties().get(BotProperties.XATKIT_DIALOGFLOW_LANGUAGE));
-            properties.getBotProperties().put(BotProperties.XATKIT_DIALOGFLOW_CLEAN_ON_STARTUP, Boolean.valueOf(updatedProperties.getBotProperties().get(BotProperties.XATKIT_DIALOGFLOW_CLEAN_ON_STARTUP).toString()));
-        } else if (properties.getBotProperties().get(BotProperties.XATKIT_INTENT_PROVIDER).equals("com.xatkit.core.recognition.nlpjs.NlpjsIntentRecognitionProvider")) {
-            properties.getBotProperties().put(BotProperties.XATKIT_NLPJS_AGENTID, updatedProperties.getBotProperties().get(BotProperties.XATKIT_NLPJS_AGENTID));
-            properties.getBotProperties().put(BotProperties.XATKIT_NLPJS_LANGUAGE, updatedProperties.getBotProperties().get(BotProperties.XATKIT_NLPJS_LANGUAGE));
-            properties.getBotProperties().put(BotProperties.XATKIT_NLPJS_SERVER, updatedProperties.getBotProperties().get(BotProperties.XATKIT_NLPJS_SERVER));
+        Map<String, Object> botPropertiesLang = properties.getBotPropertiesLang().get(selectedLanguage);
+        Map<String, Object> updatedBotPropertiesLang = updatedProperties.getBotPropertiesLang().get(selectedLanguage);
+        if (botPropertiesLang.get(BotProperties.XATKIT_INTENT_PROVIDER).equals("com.xatkit.core.recognition.dialogflow.DialogFlowIntentRecognitionProvider")) {
+            botPropertiesLang.put(BotProperties.XATKIT_DIALOGFLOW_PROJECT_ID, updatedBotPropertiesLang.get(BotProperties.XATKIT_DIALOGFLOW_PROJECT_ID));
+            botPropertiesLang.put(BotProperties.XATKIT_DIALOGFLOW_CREDENTIALS_PATH, updatedBotPropertiesLang.get(BotProperties.XATKIT_DIALOGFLOW_CREDENTIALS_PATH));
+            botPropertiesLang.put(BotProperties.XATKIT_DIALOGFLOW_LANGUAGE, updatedBotPropertiesLang.get(BotProperties.XATKIT_DIALOGFLOW_LANGUAGE));
+            botPropertiesLang.put(BotProperties.XATKIT_DIALOGFLOW_CLEAN_ON_STARTUP, Boolean.valueOf(updatedBotPropertiesLang.get(BotProperties.XATKIT_DIALOGFLOW_CLEAN_ON_STARTUP).toString()));
+        } else if (botPropertiesLang.get(BotProperties.XATKIT_INTENT_PROVIDER).equals("com.xatkit.core.recognition.nlpjs.NlpjsIntentRecognitionProvider")) {
+            botPropertiesLang.put(BotProperties.XATKIT_NLPJS_AGENTID, updatedBotPropertiesLang.get(BotProperties.XATKIT_NLPJS_AGENTID));
+            botPropertiesLang.put(BotProperties.XATKIT_NLPJS_LANGUAGE, updatedBotPropertiesLang.get(BotProperties.XATKIT_NLPJS_LANGUAGE));
+            botPropertiesLang.put(BotProperties.XATKIT_NLPJS_SERVER, updatedBotPropertiesLang.get(BotProperties.XATKIT_NLPJS_SERVER));
         }
+        tab = PropertiesTab.INTENT_PROVIDER;
+        return dashboard.redirect(DashboardView.PROPERTIES);
+    }
+
+    /**
+     * Store the bot properties.
+     *
+     * @param updatedProperties the updated properties
+     * @return the name of the endpoint to redirect
+     */
+    @PostMapping("/store_properties_bot")
+    public String storePropertiesBot(@Valid @ModelAttribute("properties") Properties updatedProperties) {
+        Properties properties = objects.getProperties();
+        Map<String, Object> botPropertiesLang = properties.getBotPropertiesLang().get(selectedLanguage);
+        Map<String, Object> updatedBotPropertiesLang = updatedProperties.getBotPropertiesLang().get(selectedLanguage);
+        botPropertiesLang.put(BotProperties.XATKIT_SERVER_PORT, updatedBotPropertiesLang.get(BotProperties.XATKIT_SERVER_PORT));
+        botPropertiesLang.put(BotProperties.XATKIT_REACT_PORT, updatedBotPropertiesLang.get(BotProperties.XATKIT_REACT_PORT));
+        tab = PropertiesTab.BOT;
         return dashboard.redirect(DashboardView.PROPERTIES);
     }
 
@@ -126,10 +205,11 @@ public class PropertiesController {
     @PostMapping("/set_database")
     public String setDatabase(@Valid @ModelAttribute("properties") Properties updatedProperties) {
         Properties properties = objects.getProperties();
+        Map<String, Object> botPropertiesLang = properties.getBotPropertiesLang().get(selectedLanguage);
+        Map<String, Object> updatedBotPropertiesLang = updatedProperties.getBotPropertiesLang().get(selectedLanguage);
 
-        properties.getBodiGeneratorProperties().put(BodiGeneratorProperties.XATKIT_LOGS_DATABASE, updatedProperties.getBodiGeneratorProperties().get(BodiGeneratorProperties.XATKIT_LOGS_DATABASE));
-        properties.getBotProperties().put(BotProperties.XATKIT_LOGS_DATABASE, updatedProperties.getBodiGeneratorProperties().get(BodiGeneratorProperties.XATKIT_LOGS_DATABASE));
-
+        botPropertiesLang.put(BotProperties.XATKIT_LOGS_DATABASE, updatedBotPropertiesLang.get(BotProperties.XATKIT_LOGS_DATABASE));
+        tab = PropertiesTab.DATABASE;
         return dashboard.redirect(DashboardView.PROPERTIES);
     }
 
@@ -142,15 +222,17 @@ public class PropertiesController {
     @PostMapping("/store_properties_database")
     public String storePropertiesDatabase(@Valid @ModelAttribute("properties") Properties updatedProperties) {
         Properties properties = objects.getProperties();
-
-        if (properties.getBotProperties().get(BotProperties.XATKIT_LOGS_DATABASE).equals("com.xatkit.core.recognition.RecognitionMonitorPostgreSQL")) {
-            // properties.getBotProperties().put(BotProperties.XATKIT_DATABASE_MODEL, updatedProperties.getBotProperties().get(BotProperties.XATKIT_DATABASE_MODEL));
-            properties.getBotProperties().put(BotProperties.XATKIT_RECOGNITION_ENABLE_MONITORING, Boolean.valueOf(updatedProperties.getBotProperties().get(BotProperties.XATKIT_RECOGNITION_ENABLE_MONITORING).toString()));
-            properties.getBotProperties().put(BotProperties.XATKIT_POSTGRESQL_URL, updatedProperties.getBotProperties().get(BotProperties.XATKIT_POSTGRESQL_URL));
-            properties.getBotProperties().put(BotProperties.XATKIT_POSTGRESQL_USER, updatedProperties.getBotProperties().get(BotProperties.XATKIT_POSTGRESQL_USER));
-            properties.getBotProperties().put(BotProperties.XATKIT_POSTGRESQL_PASSWORD, updatedProperties.getBotProperties().get(BotProperties.XATKIT_POSTGRESQL_PASSWORD));
-            properties.getBotProperties().put(BotProperties.XATKIT_POSTGRESQL_BOT_ID, Integer.valueOf(updatedProperties.getBotProperties().get(BotProperties.XATKIT_POSTGRESQL_BOT_ID).toString()));
+        Map<String, Object> botPropertiesLang = properties.getBotPropertiesLang().get(selectedLanguage);
+        Map<String, Object> updatedBotPropertiesLang = updatedProperties.getBotPropertiesLang().get(selectedLanguage);
+        if (botPropertiesLang.get(BotProperties.XATKIT_LOGS_DATABASE).equals("com.xatkit.core.recognition.RecognitionMonitorPostgreSQL")) {
+            // properties.getBotProperties().put(BotProperties.XATKIT_DATABASE_MODEL, updatedBotPropertiesLang.get(BotProperties.XATKIT_DATABASE_MODEL));
+            botPropertiesLang.put(BotProperties.XATKIT_RECOGNITION_ENABLE_MONITORING, Boolean.valueOf(updatedBotPropertiesLang.get(BotProperties.XATKIT_RECOGNITION_ENABLE_MONITORING).toString()));
+            botPropertiesLang.put(BotProperties.XATKIT_POSTGRESQL_URL, updatedBotPropertiesLang.get(BotProperties.XATKIT_POSTGRESQL_URL));
+            botPropertiesLang.put(BotProperties.XATKIT_POSTGRESQL_USER, updatedBotPropertiesLang.get(BotProperties.XATKIT_POSTGRESQL_USER));
+            botPropertiesLang.put(BotProperties.XATKIT_POSTGRESQL_PASSWORD, updatedBotPropertiesLang.get(BotProperties.XATKIT_POSTGRESQL_PASSWORD));
+            botPropertiesLang.put(BotProperties.XATKIT_POSTGRESQL_BOT_ID, Integer.valueOf(updatedBotPropertiesLang.get(BotProperties.XATKIT_POSTGRESQL_BOT_ID).toString()));
         }
+        tab = PropertiesTab.DATABASE;
         return dashboard.redirect(DashboardView.PROPERTIES);
     }
 
@@ -167,6 +249,7 @@ public class PropertiesController {
         properties.getBotProperties().put(BotProperties.SERVER_URL, updatedProperties.getBotProperties().get(BotProperties.SERVER_URL));
         properties.getBotProperties().put(BotProperties.TEXT_TO_TABLE_ENDPOINT, updatedProperties.getBotProperties().get(BotProperties.TEXT_TO_TABLE_ENDPOINT));
 
+        tab = PropertiesTab.NLP_SERVER;
         return dashboard.redirect(DashboardView.PROPERTIES);
     }
 
@@ -179,14 +262,13 @@ public class PropertiesController {
     @PostMapping("/store_properties_open_data")
     public String storePropertiesOpenData(@Valid @ModelAttribute("properties") Properties updatedProperties) {
         Properties properties = objects.getProperties();
+        Map<String, Object> botPropertiesLang = properties.getBotPropertiesLang().get(selectedLanguage);
+        Map<String, Object> updatedBotPropertiesLang = updatedProperties.getBotPropertiesLang().get(selectedLanguage);
 
-        properties.getBotProperties().put(BotProperties.BOT_ODATA_TITLE_EN, updatedProperties.getBotProperties().get(BotProperties.BOT_ODATA_TITLE_EN));
-        properties.getBotProperties().put(BotProperties.BOT_ODATA_TITLE_CA, updatedProperties.getBotProperties().get(BotProperties.BOT_ODATA_TITLE_CA));
-        properties.getBotProperties().put(BotProperties.BOT_ODATA_TITLE_ES, updatedProperties.getBotProperties().get(BotProperties.BOT_ODATA_TITLE_ES));
-        properties.getBotProperties().put(BotProperties.BOT_ODATA_URL_EN, updatedProperties.getBotProperties().get(BotProperties.BOT_ODATA_URL_EN));
-        properties.getBotProperties().put(BotProperties.BOT_ODATA_URL_CA, updatedProperties.getBotProperties().get(BotProperties.BOT_ODATA_URL_CA));
-        properties.getBotProperties().put(BotProperties.BOT_ODATA_URL_ES, updatedProperties.getBotProperties().get(BotProperties.BOT_ODATA_URL_ES));
+        botPropertiesLang.put(BotProperties.BOT_ODATA_TITLE, updatedBotPropertiesLang.get(BotProperties.BOT_ODATA_TITLE));
+        botPropertiesLang.put(BotProperties.BOT_ODATA_URL, updatedBotPropertiesLang.get(BotProperties.BOT_ODATA_URL));
 
+        tab = PropertiesTab.OPEN_DATA;
         return dashboard.redirect(DashboardView.PROPERTIES);
     }
 }

@@ -1,17 +1,15 @@
 package com.xatkit.bot.customQuery;
 
 import bodi.generator.dataSource.ResultSet;
+import com.xatkit.bot.Bot;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.execution.State;
-import com.xatkit.plugins.react.platform.ReactPlatform;
 import lombok.Getter;
 import lombok.val;
 
 import java.text.MessageFormat;
 
-import static com.xatkit.bot.Bot.getResult;
-import static com.xatkit.bot.Bot.messages;
-import static com.xatkit.bot.Bot.sql;
+import static com.xatkit.bot.App.sql;
 import static com.xatkit.dsl.DSL.state;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -42,10 +40,10 @@ public class CustomNumericFieldFunction {
     /**
      * Instantiates a new Custom Numeric Field Function workflow.
      *
-     * @param reactPlatform the react platform of a chatbot
-     * @param returnState   the state where the chatbot ends up arriving once the workflow is finished
+     * @param bot         the chatbot that uses this workflow
+     * @param returnState the state where the chatbot ends up arriving once the workflow is finished
      */
-    public CustomNumericFieldFunction(ReactPlatform reactPlatform, State returnState) {
+    public CustomNumericFieldFunction(Bot bot, State returnState) {
         val processCustomNumericFieldFunctionState = state("ProcessCustomNumericFieldFunction");
 
         processCustomNumericFieldFunctionState
@@ -54,17 +52,17 @@ public class CustomNumericFieldFunction {
                     String field = (String) context.getIntent().getValue(ContextKeys.FIELD);
                     String operator = (String) context.getIntent().getValue(ContextKeys.OPERATOR);
                     if (!isEmpty(field) && !isEmpty(operator)) {
-                        String sqlQuery = sql.queries.numericFieldFunction(field, operator);
+                        String sqlQuery = bot.sqlQueries.numericFieldFunction(field, operator);
                         ResultSet resultSet = sql.runSqlQuery(sqlQuery);
                         float result = Float.parseFloat(resultSet.getRow(0).getColumnValue(0));
-                        reactPlatform.reply(context, MessageFormat.format(messages.getString("CustomNumericFieldFunction"),
+                        bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("CustomNumericFieldFunction"),
                                 operator, field, result));
                     } else {
                         error = true;
                     }
                 })
                 .next()
-                .when(context -> error).moveTo(getResult.getGenerateResultSetFromQueryState())
+                .when(context -> error).moveTo(bot.getResult.getGenerateResultSetFromQueryState())
                 .when(context -> !error).moveTo(returnState);
 
         this.processCustomNumericFieldFunctionState = processCustomNumericFieldFunctionState.getState();

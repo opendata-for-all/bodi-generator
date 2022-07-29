@@ -77,6 +77,9 @@ public class SqlQueries {
         filters.remove(new ImmutableTriple<>(field, operator, value));
     }
 
+    /**
+     * Remove all stored filters in {@link #filters}.
+     */
     public void clearFilters() {
         filters.clear();
     }

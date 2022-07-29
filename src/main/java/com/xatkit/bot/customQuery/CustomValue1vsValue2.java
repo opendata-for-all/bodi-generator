@@ -1,19 +1,15 @@
 package com.xatkit.bot.customQuery;
 
 import bodi.generator.dataSource.ResultSet;
+import com.xatkit.bot.Bot;
 import com.xatkit.bot.library.ContextKeys;
-import com.xatkit.bot.library.Entities;
-import com.xatkit.bot.library.Intents;
 import com.xatkit.execution.State;
-import com.xatkit.plugins.react.platform.ReactPlatform;
 import lombok.Getter;
 import lombok.val;
 
 import java.text.MessageFormat;
 
-import static com.xatkit.bot.Bot.getResult;
-import static com.xatkit.bot.Bot.messages;
-import static com.xatkit.bot.Bot.sql;
+import static com.xatkit.bot.App.sql;
 import static com.xatkit.dsl.DSL.state;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -42,10 +38,10 @@ public class CustomValue1vsValue2 {
     /**
      * Instantiates a new Custom Value1 vs Value2 workflow.
      *
-     * @param reactPlatform the react platform of a chatbot
-     * @param returnState   the state where the chatbot ends up arriving once the workflow is finished
+     * @param bot         the chatbot that uses this workflow
+     * @param returnState the state where the chatbot ends up arriving once the workflow is finished
      */
-    public CustomValue1vsValue2(ReactPlatform reactPlatform, State returnState) {
+    public CustomValue1vsValue2(Bot bot, State returnState) {
         val processCustomValue1vsValue2State = state("ProcessCustomValue1vsValue2");
 
         processCustomValue1vsValue2State
@@ -54,37 +50,37 @@ public class CustomValue1vsValue2 {
                     String value1 = (String) context.getIntent().getValue(ContextKeys.VALUE + "1");
                     String value2 = (String) context.getIntent().getValue(ContextKeys.VALUE + "2");
                     if (!isEmpty(value1) && !isEmpty(value2)) {
-                        String field1 = Entities.fieldValueMap.get(value1);
-                        String field2 = Entities.fieldValueMap.get(value2);
+                        String field1 = bot.entities.fieldValueMap.get(value1);
+                        String field2 = bot.entities.fieldValueMap.get(value2);
 
-                        String sqlQuery = sql.queries.valueFrequency(field1, value1);
+                        String sqlQuery = bot.sqlQueries.valueFrequency(field1, value1);
                         ResultSet resultSet = sql.runSqlQuery(sqlQuery);
                         int value1Freq = Integer.parseInt(resultSet.getRow(0).getColumnValue(0));
 
-                        sqlQuery = sql.queries.valueFrequency(field1, value1);
+                        sqlQuery = bot.sqlQueries.valueFrequency(field1, value1);
                         resultSet = sql.runSqlQuery(sqlQuery);
                         int value2Freq = Integer.parseInt(resultSet.getRow(0).getColumnValue(0));
 
-                        if (context.getIntent().getDefinition().getName().equals(Intents.customValue1MoreThanValue2Intent.getName())) {
+                        if (context.getIntent().getDefinition().getName().equals(bot.intents.customValue1MoreThanValue2Intent.getName())) {
                             if (value1Freq > value2Freq) {
-                                reactPlatform.reply(context, MessageFormat.format(messages.getString("CustomValue1MoreThanValue2"),
+                                bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("CustomValue1MoreThanValue2"),
                                         value1, value1Freq, field1, value2, value2Freq, field2));
                             } else if (value2Freq > value1Freq) {
-                                reactPlatform.reply(context, MessageFormat.format(messages.getString("CustomValue1MoreThanValue2"),
+                                bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("CustomValue1MoreThanValue2"),
                                         value2, value2Freq, field2, value1, value1Freq, field1));
                             } else {
-                                reactPlatform.reply(context, MessageFormat.format(messages.getString("CustomValue1EqualToValue2"),
+                                bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("CustomValue1EqualToValue2"),
                                         value1, field1, value2, field2, value1Freq));
                             }
                         } else {
                             if (value1Freq < value2Freq) {
-                                reactPlatform.reply(context, MessageFormat.format(messages.getString("CustomValue1LessThanValue2"),
+                                bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("CustomValue1LessThanValue2"),
                                         value1, value1Freq, field1, value2, value2Freq, field2));
                             } else if (value2Freq < value1Freq) {
-                                reactPlatform.reply(context, MessageFormat.format(messages.getString("CustomValue1LessThanValue2"),
+                                bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("CustomValue1LessThanValue2"),
                                         value2, value2Freq, field2, value1, value1Freq, field1));
                             } else {
-                                reactPlatform.reply(context, MessageFormat.format(messages.getString("CustomValue1EqualToValue2"),
+                                bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("CustomValue1EqualToValue2"),
                                         value1, field1, value2, field2, value1Freq));
                             }
                         }
@@ -93,7 +89,7 @@ public class CustomValue1vsValue2 {
                     }
                 })
                 .next()
-                .when(context -> error).moveTo(getResult.getGenerateResultSetFromQueryState())
+                .when(context -> error).moveTo(bot.getResult.getGenerateResultSetFromQueryState())
                 .when(context -> !error).moveTo(returnState);
 
         this.processCustomValue1vsValue2State = processCustomValue1vsValue2State.getState();

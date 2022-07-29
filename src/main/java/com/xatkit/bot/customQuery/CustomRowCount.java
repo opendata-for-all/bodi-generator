@@ -1,18 +1,16 @@
 package com.xatkit.bot.customQuery;
 
 import bodi.generator.dataSource.ResultSet;
+import com.xatkit.bot.Bot;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Entities;
 import com.xatkit.execution.State;
-import com.xatkit.plugins.react.platform.ReactPlatform;
 import lombok.Getter;
 import lombok.val;
 
 import java.text.MessageFormat;
 
-import static com.xatkit.bot.Bot.getResult;
-import static com.xatkit.bot.Bot.messages;
-import static com.xatkit.bot.Bot.sql;
+import static com.xatkit.bot.App.sql;
 import static com.xatkit.dsl.DSL.state;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -42,10 +40,10 @@ public class CustomRowCount {
     /**
      * Instantiates a new Custom Row Count workflow.
      *
-     * @param reactPlatform the react platform of a chatbot
-     * @param returnState   the state where the chatbot ends up arriving once the workflow is finished
+     * @param bot         the chatbot that uses this workflow
+     * @param returnState the state where the chatbot ends up arriving once the workflow is finished
      */
-    public CustomRowCount(ReactPlatform reactPlatform, State returnState) {
+    public CustomRowCount(Bot bot, State returnState) {
         val processCustomRowCountState = state("ProcessCustomRowCount");
 
         processCustomRowCountState
@@ -53,17 +51,17 @@ public class CustomRowCount {
                     error = false;
                     String rowName = (String) context.getIntent().getValue(ContextKeys.ROW_NAME);
                     if (!isEmpty(rowName)) {
-                        String sqlQuery = sql.queries.rowCount();
+                        String sqlQuery = bot.sqlQueries.rowCount();
                         ResultSet resultSet = sql.runSqlQuery(sqlQuery);
                         int rowCount = Integer.parseInt(resultSet.getRow(0).getColumnValue(0));
-                        reactPlatform.reply(context, MessageFormat.format(messages.getString("ShowRowCount"),
+                        bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("ShowRowCount"),
                                 rowCount, rowName));
                     } else {
                         error = true;
                     }
                 })
                 .next()
-                .when(context -> error).moveTo(getResult.getGenerateResultSetFromQueryState())
+                .when(context -> error).moveTo(bot.getResult.getGenerateResultSetFromQueryState())
                 .when(context -> !error).moveTo(returnState);
 
         this.processCustomRowCountState = processCustomRowCountState.getState();

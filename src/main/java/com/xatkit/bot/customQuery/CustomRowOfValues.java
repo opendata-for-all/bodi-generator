@@ -1,11 +1,10 @@
 package com.xatkit.bot.customQuery;
 
 import bodi.generator.dataSource.ResultSet;
+import com.xatkit.bot.Bot;
 import com.xatkit.bot.library.ContextKeys;
-import com.xatkit.bot.library.Entities;
 import com.xatkit.bot.library.Utils;
 import com.xatkit.execution.State;
-import com.xatkit.plugins.react.platform.ReactPlatform;
 import lombok.Getter;
 import lombok.val;
 
@@ -13,9 +12,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.xatkit.bot.Bot.getResult;
-import static com.xatkit.bot.Bot.messages;
-import static com.xatkit.bot.Bot.sql;
+import static com.xatkit.bot.App.sql;
 import static com.xatkit.dsl.DSL.state;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -44,10 +41,10 @@ public class CustomRowOfValues {
     /**
      * Instantiates a new Custom Row Of Values workflow.
      *
-     * @param reactPlatform the react platform of a chatbot
-     * @param returnState   the state where the chatbot ends up arriving once the workflow is finished
+     * @param bot         the chatbot that uses this workflow
+     * @param returnState the state where the chatbot ends up arriving once the workflow is finished
      */
-    public CustomRowOfValues(ReactPlatform reactPlatform, State returnState) {
+    public CustomRowOfValues(Bot bot, State returnState) {
         val processCustomRowOfValuesState = state("ProcessCustomRowOfValues");
 
         processCustomRowOfValuesState
@@ -55,34 +52,34 @@ public class CustomRowOfValues {
                     error = false;
                     String rowName = (String) context.getIntent().getValue(ContextKeys.ROW_NAME);
                     if (isEmpty(rowName)) {
-                        rowName = Utils.getEntityValues(Entities.rowNameEntity).get(0);
+                        rowName = Utils.getEntityValues(bot.entities.rowNameEntity).get(0);
                     }
                     String value1 = (String) context.getIntent().getValue(ContextKeys.VALUE + "1");
                     String value2 = (String) context.getIntent().getValue(ContextKeys.VALUE + "2");
                     String value3 = (String) context.getIntent().getValue(ContextKeys.VALUE + "3");
-                    List<String> keyFields = new ArrayList<>(Entities.keyFields);
+                    List<String> keyFields = new ArrayList<>(bot.entities.keyFields);
                     if (!isEmpty(value1)) {
-                        String field1 = Entities.fieldValueMap.get(value1);
-                        String sqlQuery = sql.queries.rowOfValues1(keyFields, field1, value1);
+                        String field1 = bot.entities.fieldValueMap.get(value1);
+                        String sqlQuery = bot.sqlQueries.rowOfValues1(keyFields, field1, value1);
                         ResultSet resultSet = sql.runSqlQuery(sqlQuery);
-                        getResult.setResultSet(resultSet);
-                        reactPlatform.reply(context, MessageFormat.format(messages.getString("RowOfValue1"),
+                        bot.getResult.setResultSet(resultSet);
+                        bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("RowOfValue1"),
                                 rowName, field1, value1));
                     } else if (!isEmpty(value2) && !isEmpty(value3)) {
-                        String field2 = Entities.fieldValueMap.get(value2);
-                        String field3 = Entities.fieldValueMap.get(value3);
-                        String sqlQuery = sql.queries.rowOfValues2(keyFields, field2, value2, field3, value3);
+                        String field2 = bot.entities.fieldValueMap.get(value2);
+                        String field3 = bot.entities.fieldValueMap.get(value3);
+                        String sqlQuery = bot.sqlQueries.rowOfValues2(keyFields, field2, value2, field3, value3);
                         ResultSet resultSet = sql.runSqlQuery(sqlQuery);
-                        getResult.setResultSet(resultSet);
-                        reactPlatform.reply(context, MessageFormat.format(messages.getString("RowOfValue2AndValue3"),
+                        bot.getResult.setResultSet(resultSet);
+                        bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("RowOfValue2AndValue3"),
                                 rowName, field2, value2, field3, value3));
                     } else {
                         error = true;
                     }
                 })
                 .next()
-                .when(context -> error).moveTo(getResult.getGenerateResultSetFromQueryState())
-                .when(context -> !error).moveTo(getResult.getShowDataState());
+                .when(context -> error).moveTo(bot.getResult.getGenerateResultSetFromQueryState())
+                .when(context -> !error).moveTo(bot.getResult.getShowDataState());
 
         this.processCustomRowOfValuesState = processCustomRowOfValuesState.getState();
     }

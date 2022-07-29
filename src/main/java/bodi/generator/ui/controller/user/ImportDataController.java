@@ -1,6 +1,7 @@
 package bodi.generator.ui.controller.user;
 
 import bodi.generator.dataSchema.BodiGeneratorProperties;
+import bodi.generator.dataSchema.DataSchema;
 import bodi.generator.dataSource.TabularDataSource;
 import bodi.generator.ui.model.BodiGeneratorObjects;
 import bodi.generator.ui.model.Properties;
@@ -17,6 +18,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 import static bodi.generator.BodiGenerator.tabularDataSourceToDataSchema;
 
@@ -93,43 +96,47 @@ public class ImportDataController {
         properties.getBodiGeneratorProperties().put(BodiGeneratorProperties.DATA_NAME, objects.getDataName().replace(".csv", ""));
         properties.getBodiGeneratorProperties().put(BodiGeneratorProperties.CSV_DELIMITER, objects.getCsvDelimiter());
         properties.getBodiGeneratorProperties().put(BodiGeneratorProperties.ENABLE_TESTING, true);
-        // properties.getBodiGeneratorProperties().put(BodiGeneratorProperties.MAX_NUM_DIFFERENT_VALUES, 15);
-        properties.getBodiGeneratorProperties().put(BodiGeneratorProperties.XATKIT_INTENT_PROVIDER, "com.xatkit.core.recognition.dialogflow.DialogFlowIntentRecognitionProvider");
-        properties.getBodiGeneratorProperties().put(BodiGeneratorProperties.XATKIT_LOGS_DATABASE, "com.xatkit.core.recognition.RecognitionMonitorPostgreSQL");
 
         properties.setBotProperties(new HashMap<>());
 
-        properties.getBotProperties().put(BotProperties.DATA_NAME, "carrecs_govern_bcn");
+        properties.getBotProperties().put(BotProperties.DATA_NAME, objects.getDataName().replace(".csv", ""));
         properties.getBotProperties().put(BotProperties.CSV_DELIMITER, objects.getCsvDelimiter());
-        properties.getBotProperties().put(BotProperties.XATKIT_SERVER_PORT, 5000);
-        properties.getBotProperties().put(BotProperties.XATKIT_REACT_PORT, 5001);
-        properties.getBotProperties().put(BotProperties.BOT_LANGUAGE, "es");
         properties.getBotProperties().put(BotProperties.BOT_PAGE_LIMIT, 10);
         properties.getBotProperties().put(BotProperties.BOT_MAX_ENTRIES_TO_DISPLAY, 7);
         properties.getBotProperties().put(BotProperties.BOT_ENABLE_CHECK_CORRECT_ANSWER, true);
-        properties.getBotProperties().put(BotProperties.XATKIT_INTENT_PROVIDER, "com.xatkit.core.recognition.dialogflow.DialogFlowIntentRecognitionProvider");
-        properties.getBotProperties().put(BotProperties.XATKIT_DIALOGFLOW_PROJECT_ID, "<your project id>");
-        properties.getBotProperties().put(BotProperties.XATKIT_DIALOGFLOW_CREDENTIALS_PATH, "<path to your credentials file>");
-        properties.getBotProperties().put(BotProperties.XATKIT_DIALOGFLOW_LANGUAGE, "es");
-        properties.getBotProperties().put(BotProperties.XATKIT_DIALOGFLOW_CLEAN_ON_STARTUP, false);
-        properties.getBotProperties().put(BotProperties.XATKIT_NLPJS_AGENTID, "default");
-        properties.getBotProperties().put(BotProperties.XATKIT_NLPJS_LANGUAGE, "es");
-        properties.getBotProperties().put(BotProperties.XATKIT_NLPJS_SERVER, "http://localhost:8080");
-        properties.getBotProperties().put(BotProperties.XATKIT_LOGS_DATABASE, "com.xatkit.core.recognition.RecognitionMonitorPostgreSQL");
-        properties.getBotProperties().put(BotProperties.XATKIT_DATABASE_MODEL, "postgresql");
-        properties.getBotProperties().put(BotProperties.XATKIT_RECOGNITION_ENABLE_MONITORING, true);
-        properties.getBotProperties().put(BotProperties.XATKIT_POSTGRESQL_URL, "jdbc:postgresql://your-url");
-        properties.getBotProperties().put(BotProperties.XATKIT_POSTGRESQL_USER, "username");
-        properties.getBotProperties().put(BotProperties.XATKIT_POSTGRESQL_PASSWORD, "password");
-        properties.getBotProperties().put(BotProperties.XATKIT_POSTGRESQL_BOT_ID, 1);
+        properties.getBotProperties().put(BotProperties.BOT_LANGUAGES, (new HashSet<>(DataSchema.languages)));
         properties.getBotProperties().put(BotProperties.SERVER_URL, "127.0.0.1:5002");
         properties.getBotProperties().put(BotProperties.TEXT_TO_TABLE_ENDPOINT, "text-to-table");
-        properties.getBotProperties().put(BotProperties.BOT_ODATA_TITLE_EN, "title-in-english");
-        properties.getBotProperties().put(BotProperties.BOT_ODATA_TITLE_CA, "title-in-catalan");
-        properties.getBotProperties().put(BotProperties.BOT_ODATA_TITLE_ES, "title-in-spanish");
-        properties.getBotProperties().put(BotProperties.BOT_ODATA_URL_EN, "url-english-source");
-        properties.getBotProperties().put(BotProperties.BOT_ODATA_URL_CA, "url-catalan-source");
-        properties.getBotProperties().put(BotProperties.BOT_ODATA_URL_ES, "url-spanish-source");
+
+        properties.setBotPropertiesLang(new HashMap<>());
+
+        int portCount = 5000;
+        for (String language : DataSchema.languages) {
+            properties.getBotPropertiesLang().put(language, new HashMap<>());
+
+            Map<String, Object> botPropertiesLang = properties.getBotPropertiesLang().get(language);
+
+            botPropertiesLang.put(BotProperties.XATKIT_SERVER_PORT, portCount++);
+            botPropertiesLang.put(BotProperties.XATKIT_REACT_PORT, portCount++);
+            botPropertiesLang.put(BotProperties.BOT_LANGUAGE, language);
+            botPropertiesLang.put(BotProperties.XATKIT_INTENT_PROVIDER, "com.xatkit.core.recognition.dialogflow.DialogFlowIntentRecognitionProvider");
+            botPropertiesLang.put(BotProperties.XATKIT_DIALOGFLOW_PROJECT_ID, "<your project id>");
+            botPropertiesLang.put(BotProperties.XATKIT_DIALOGFLOW_CREDENTIALS_PATH, "<path to your credentials file>");
+            botPropertiesLang.put(BotProperties.XATKIT_DIALOGFLOW_LANGUAGE, language);
+            botPropertiesLang.put(BotProperties.XATKIT_DIALOGFLOW_CLEAN_ON_STARTUP, false);
+            botPropertiesLang.put(BotProperties.XATKIT_NLPJS_AGENTID, "default");
+            botPropertiesLang.put(BotProperties.XATKIT_NLPJS_LANGUAGE, language);
+            botPropertiesLang.put(BotProperties.XATKIT_NLPJS_SERVER, "http://localhost:8080");
+            botPropertiesLang.put(BotProperties.XATKIT_LOGS_DATABASE, "com.xatkit.core.recognition.RecognitionMonitorPostgreSQL");
+            botPropertiesLang.put(BotProperties.XATKIT_DATABASE_MODEL, "postgresql");
+            botPropertiesLang.put(BotProperties.XATKIT_RECOGNITION_ENABLE_MONITORING, true);
+            botPropertiesLang.put(BotProperties.XATKIT_POSTGRESQL_URL, "jdbc:postgresql://your-url");
+            botPropertiesLang.put(BotProperties.XATKIT_POSTGRESQL_USER, "username");
+            botPropertiesLang.put(BotProperties.XATKIT_POSTGRESQL_PASSWORD, "password");
+            botPropertiesLang.put(BotProperties.XATKIT_POSTGRESQL_BOT_ID, 1);
+            botPropertiesLang.put(BotProperties.BOT_ODATA_TITLE, "title");
+            botPropertiesLang.put(BotProperties.BOT_ODATA_URL, "url");
+        }
 
         objects.setDataImported(true);
 

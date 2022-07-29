@@ -8,8 +8,7 @@ import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Entities;
 import com.xatkit.bot.library.Intents;
 import com.xatkit.bot.library.Utils;
-import com.xatkit.bot.nlp.NLPServerClient;
-import com.xatkit.bot.sql.SqlEngine;
+import com.xatkit.bot.sql.SqlQueries;
 import com.xatkit.bot.structuredQuery.StructuredQuery;
 import com.xatkit.core.XatkitBot;
 import com.xatkit.plugins.core.library.CoreLibraryI18n;
@@ -17,10 +16,7 @@ import com.xatkit.plugins.react.platform.ReactPlatform;
 import com.xatkit.plugins.react.platform.io.ReactEventProvider;
 import com.xatkit.plugins.react.platform.io.ReactIntentProvider;
 import lombok.val;
-import org.apache.commons.configuration2.BaseConfiguration;
 import org.apache.commons.configuration2.Configuration;
-import org.apache.commons.configuration2.builder.fluent.Configurations;
-import org.apache.commons.configuration2.ex.ConfigurationException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,25 +30,14 @@ import static com.xatkit.dsl.DSL.model;
 import static com.xatkit.dsl.DSL.state;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
-/**
- * The entry point of the application.
- */
-public final class Bot {
-
-    private Bot() {
-    }
-
-    /**
-     * The name of the bot properties file.
-     */
-    public static String botPropertiesFile = "bot.properties";
+public class Bot {
 
     /**
      * The chatbot language
      * <p>
      * It must be set within the main method, after the bot properties file is loaded.
      */
-    public static String language = null;
+    public final String language;
 
     /**
      * The chatbot locale, which is used to define the chatbot language.
@@ -61,7 +46,7 @@ public final class Bot {
      * <p>
      * The locale language is specified by {@link #language}
      */
-    public static Locale locale = null;
+    public final Locale locale;
 
     /**
      * The container of the chatbot messages.
@@ -70,25 +55,25 @@ public final class Bot {
      * <p>
      * The messages' language is specified by the {@link #locale}
      */
-    public static ResourceBundle messages = null;
+    public final ResourceBundle messages;
 
     /**
      * The name of the chatbot input document, which must be a tabular data file (a {@code .csv}).
      * <p>
      * It must be set within the main method, after the bot properties file is loaded.
      */
-    public static String inputDoc = null;
+    public final String inputDoc;
 
     /**
      * The maximum number of entries of a table that are displayed at once in the chatbot chat box (i.e. the page size).
      */
-    public static int pageLimit;
+    public final int pageLimit;
 
     /**
      * If the number of entries of a result set generated after a chatbot query is less or equal than this number,
      * the result set is displayed immediately afterwards.
      */
-    public static int maxEntriesToDisplay;
+    public final int maxEntriesToDisplay;
 
     /**
      * This library contains useful objects to use within chatbots.
@@ -98,61 +83,64 @@ public final class Bot {
      *
      * It supports different languages, such as English, Spanish and Catalan.
      */
-    public static CoreLibraryI18n coreLibraryI18n;
+    public final CoreLibraryI18n coreLibraryI18n;
 
     /**
      * The Check Correct Answer workflow.
      */
-    public static CheckCorrectAnswer checkCorrectAnswer;
+    public final CheckCorrectAnswer checkCorrectAnswer;
 
     /**
      * The Get Result workflow.
      */
-    public static GetResult getResult;
+    public final GetResult getResult;
 
     /**
      * The Structured Query workflow.
      */
-    public static StructuredQuery structuredQuery;
+    public final StructuredQuery structuredQuery;
 
     /**
      * The Custom Query workflow.
      */
-    public static CustomQuery customQuery;
+    public final CustomQuery customQuery;
 
     /**
-     * The client that interacts with the server that deploys the NLP models to answer the questions.
+     * The system that generates the SQL queries.
      */
-    public static NLPServerClient nlpServerClient;
+    public final SqlQueries sqlQueries;
 
     /**
-     * The engine that performs the SQL related part of the bot.
+     * The set of intents the chatbot can recognize.
      */
-    public static SqlEngine sql;
+    public final Intents intents;
 
     /**
-     * Creates the {@link XatkitBot}.
-     *
-     * @return the xatkit chatbot
+     * The set of entities the chatbot can recognize.
      */
-    public static XatkitBot createBot() {
+    public final Entities entities;
+
+    /**
+     * The {@link XatkitBot}.
+     */
+    public final XatkitBot xatkitBot;
+
+    /**
+     * The {@link ReactPlatform} of the chatbot.
+     */
+    public final ReactPlatform reactPlatform;
+
+    public Bot(Configuration botConfiguration) {
 
         /*
          * Add configuration properties (e.g. authentication tokens, platform tuning, intent provider to use).
          * Check the corresponding platform's wiki page for further information on optional/mandatory parameters and
          * their values.
          */
-        Configuration botConfiguration = new BaseConfiguration();
-        Configurations configurations = new Configurations();
-        try {
-            botConfiguration = configurations.properties(Thread.currentThread().getContextClassLoader().getResource(
-                    botPropertiesFile));
-        } catch (ConfigurationException e) {
-            e.printStackTrace();
-            System.out.println("Configuration file not found");
-        }
         language = botConfiguration.getString(BotProperties.BOT_LANGUAGE, "en");
         locale = new Locale(language);
+        entities = new Entities(language);
+        intents = new Intents(entities, locale);
         messages = ResourceBundle.getBundle("messages", locale);
         inputDoc = botConfiguration.getString(BotProperties.DATA_NAME, "data") + ".csv";
         pageLimit = botConfiguration.getInt(BotProperties.BOT_PAGE_LIMIT, 10);
@@ -160,13 +148,17 @@ public final class Bot {
         coreLibraryI18n = new CoreLibraryI18n(locale);
         char delimiter = botConfiguration.getString(BotProperties.CSV_DELIMITER, ",").charAt(0);
         boolean enableCheckCorrectAnswer = botConfiguration.getBoolean(BotProperties.BOT_ENABLE_CHECK_CORRECT_ANSWER, false);
-        String odataTitle = botConfiguration.getString("bot.odata.title." + language, null);
-        String odataUrl = botConfiguration.getString("bot.odata.url." + language, null);
+        String odataTitle = botConfiguration.getString(BotProperties.BOT_ODATA_TITLE, null);
+        String odataUrl = botConfiguration.getString(BotProperties.BOT_ODATA_URL, null);
+
+        sqlQueries = new SqlQueries(inputDoc, delimiter);
+        List<String> fields = new ArrayList<>(Utils.getEntityValues(entities.fieldEntity));
+        sqlQueries.getAllFields().addAll(fields);
 
         /*
          * Instantiate the platform and providers we will use in the bot definition.
          */
-        ReactPlatform reactPlatform = new ReactPlatform();
+        reactPlatform = new ReactPlatform();
         ReactEventProvider reactEventProvider = reactPlatform.getReactEventProvider();
         ReactIntentProvider reactIntentProvider = reactPlatform.getReactIntentProvider();
 
@@ -181,24 +173,16 @@ public final class Bot {
          * Initialize the chatbot workflows.
          */
         if (enableCheckCorrectAnswer) {
-            checkCorrectAnswer = new CheckCorrectAnswer(reactPlatform, startState.getState());
-            getResult = new GetResult(reactPlatform, checkCorrectAnswer.getProcessCheckCorrectAnswerState());
-            structuredQuery = new StructuredQuery(reactPlatform, startState.getState());
-            customQuery = new CustomQuery(reactPlatform, checkCorrectAnswer.getProcessCheckCorrectAnswerState());
+            checkCorrectAnswer = new CheckCorrectAnswer(this, startState.getState());
+            getResult = new GetResult(this, checkCorrectAnswer.getProcessCheckCorrectAnswerState());
+            structuredQuery = new StructuredQuery(this, startState.getState());
+            customQuery = new CustomQuery(this, checkCorrectAnswer.getProcessCheckCorrectAnswerState());
         } else {
-            getResult = new GetResult(reactPlatform, startState.getState());
-            structuredQuery = new StructuredQuery(reactPlatform, startState.getState());
-            customQuery = new CustomQuery(reactPlatform, startState.getState());
+            checkCorrectAnswer = null;
+            getResult = new GetResult(this, startState.getState());
+            structuredQuery = new StructuredQuery(this, startState.getState());
+            customQuery = new CustomQuery(this, startState.getState());
         }
-
-        /*
-         * Initialize the NLP Server Client and the SQL engine of the bot
-         */
-        nlpServerClient = new NLPServerClient();
-        sql = new SqlEngine(inputDoc, delimiter);
-
-        List<String> fields = new ArrayList<>(Utils.getEntityValues(Entities.fieldEntity));
-        sql.queries.getAllFields().addAll(fields);
 
         /*
          * Specify the content of the bot states (i.e. the behavior of the bot).
@@ -227,12 +211,12 @@ public final class Bot {
                 .body(context -> {
                     reactPlatform.reply(context, messages.getString("SelectAction"),
                             Utils.getFirstTrainingSentences(
-                                    Intents.structuredQueryIntent,
-                                    Intents.customQueryIntent));
+                                    intents.structuredQueryIntent,
+                                    intents.customQueryIntent));
                 })
                 .next()
-                .when(intentIs(Intents.structuredQueryIntent)).moveTo(structuredQuery.getAwaitingStructuredQueryState())
-                .when(intentIs(Intents.customQueryIntent)).moveTo(customQuery.getAwaitingCustomQueryState());
+                .when(intentIs(intents.structuredQueryIntent)).moveTo(structuredQuery.getAwaitingStructuredQueryState())
+                .when(intentIs(intents.customQueryIntent)).moveTo(customQuery.getAwaitingCustomQueryState());
 
         /*
          * The state that is executed if the engine doesn't find any navigable transition in a state and the state
@@ -253,20 +237,13 @@ public final class Bot {
                 .initState(init)
                 .defaultFallbackState(defaultFallback);
 
-
-        return new XatkitBot(botModel, botConfiguration);
+        xatkitBot = new XatkitBot(botModel, botConfiguration);
     }
 
     /**
-     * The entry point of application.
-     *
-     * @param args the input arguments
+     * Run the {@link #xatkitBot}.
      */
-    public static void main(String[] args) {
-        XatkitBot xatkitBot = createBot();
-        xatkitBot.run();
-        /*
-         * The bot is now started.
-         */
+    public void run() {
+        this.xatkitBot.run();
     }
 }

@@ -1,16 +1,14 @@
 package com.xatkit.bot.structuredQuery;
 
+import com.xatkit.bot.Bot;
 import com.xatkit.bot.library.ContextKeys;
-import com.xatkit.bot.library.Intents;
 import com.xatkit.execution.State;
-import com.xatkit.plugins.react.platform.ReactPlatform;
 import lombok.Getter;
 import lombok.val;
 
 import java.text.MessageFormat;
 import java.util.List;
 
-import static com.xatkit.bot.Bot.messages;
 import static com.xatkit.dsl.DSL.intentIs;
 import static com.xatkit.dsl.DSL.state;
 
@@ -31,22 +29,22 @@ public class SelectViewField {
     /**
      * Instantiates a new Select View Field workflow.
      *
-     * @param reactPlatform the react platform of a chatbot
-     * @param returnState   the state where the chatbot ends up arriving once the workflow is finished
+     * @param bot         the chatbot that uses this workflow
+     * @param returnState the state where the chatbot ends up arriving once the workflow is finished
      */
-    public SelectViewField(ReactPlatform reactPlatform, State returnState) {
+    public SelectViewField(Bot bot, State returnState) {
         val selectViewFieldState = state("SelectViewField");
         val saveViewFieldState = state("SaveViewField");
 
         selectViewFieldState
                 .body(context -> {
-                    reactPlatform.reply(context, messages.getString("SelectField"),
+                    bot.reactPlatform.reply(context, bot.messages.getString("SelectField"),
                             (List<String>) context.getSession().get(ContextKeys.VIEW_FIELD_OPTIONS));
                 })
                 .next()
-                .when(intentIs(Intents.textualFieldIntent)).moveTo(saveViewFieldState)
-                .when(intentIs(Intents.numericFieldIntent)).moveTo(saveViewFieldState)
-                .when(intentIs(Intents.dateFieldIntent)).moveTo(saveViewFieldState);
+                .when(intentIs(bot.intents.textualFieldIntent)).moveTo(saveViewFieldState)
+                .when(intentIs(bot.intents.numericFieldIntent)).moveTo(saveViewFieldState)
+                .when(intentIs(bot.intents.dateFieldIntent)).moveTo(saveViewFieldState);
 
         saveViewFieldState
                 .body(context -> {
@@ -55,8 +53,8 @@ public class SelectViewField {
                     List<String> viewFieldOptions =
                             (List<String>) context.getSession().get(ContextKeys.VIEW_FIELD_OPTIONS);
                     viewFieldOptions.remove(fieldName);
-                    reactPlatform.reply(context,
-                            MessageFormat.format(messages.getString("FieldAddedToView"), fieldName));
+                    bot.reactPlatform.reply(context,
+                            MessageFormat.format(bot.messages.getString("FieldAddedToView"), fieldName));
                 })
                 .next()
                 .moveTo(returnState);

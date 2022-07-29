@@ -1,16 +1,12 @@
 package com.xatkit.bot.structuredQuery;
 
+import com.xatkit.bot.Bot;
 import com.xatkit.bot.getResult.GetResult;
-import com.xatkit.bot.library.Intents;
 import com.xatkit.bot.library.Utils;
 import com.xatkit.execution.State;
-import com.xatkit.plugins.react.platform.ReactPlatform;
 import lombok.Getter;
 import lombok.val;
 
-import static com.xatkit.bot.Bot.coreLibraryI18n;
-import static com.xatkit.bot.Bot.getResult;
-import static com.xatkit.bot.Bot.messages;
 import static com.xatkit.dsl.DSL.intentIs;
 import static com.xatkit.dsl.DSL.state;
 
@@ -51,34 +47,34 @@ public class StructuredQuery {
     /**
      * Instantiates a new Structured Query workflow.
      *
-     * @param reactPlatform the react platform of a chatbot
-     * @param returnState   the state where the chatbot ends up arriving once the workflow is finished
+     * @param bot         the chatbot that uses this workflow
+     * @param returnState the state where the chatbot ends up arriving once the workflow is finished
      */
-    public StructuredQuery(ReactPlatform reactPlatform, State returnState) {
-        structuredFilter = new StructuredFilter(reactPlatform, returnState);
-        selectViewField = new SelectViewField(reactPlatform, returnState);
-        resetBot = new ResetBot(reactPlatform, returnState);
+    public StructuredQuery(Bot bot, State returnState) {
+        structuredFilter = new StructuredFilter(bot, returnState);
+        selectViewField = new SelectViewField(bot, returnState);
+        resetBot = new ResetBot(bot, returnState);
 
         val awaitingStructuredQueryState = state("AwaitingStructuredQuery");
 
         awaitingStructuredQueryState
                 .body(context -> {
-                    reactPlatform.reply(context, messages.getString("SelectAction"),
+                    bot.reactPlatform.reply(context, bot.messages.getString("SelectAction"),
                             Utils.getFirstTrainingSentences(
-                                    Intents.addFilterIntent,
-                                    Intents.removeFilterIntent,
-                                    //Intents.addFieldToViewIntent,
-                                    Intents.showDataIntent,
-                                    Intents.resetIntent,
-                                    coreLibraryI18n.Quit));
+                                    bot.intents.addFilterIntent,
+                                    bot.intents.removeFilterIntent,
+                                    //bot.intents.addFieldToViewIntent,
+                                    bot.intents.showDataIntent,
+                                    bot.intents.resetIntent,
+                                    bot.coreLibraryI18n.Quit));
                 })
                 .next()
-                .when(intentIs(Intents.addFilterIntent)).moveTo(structuredFilter.getSelectFieldState())
-                .when(intentIs(Intents.removeFilterIntent)).moveTo(structuredFilter.getSelectFilterToRemoveState())
-                //.when(intentIs(Intents.addFieldToViewIntent)).moveTo(selectViewField.getSelectViewFieldState())
-                .when(intentIs(Intents.showDataIntent)).moveTo(getResult.getGenerateResultSetState())
-                .when(intentIs(Intents.resetIntent)).moveTo(resetBot.getResetBotState())
-                .when(intentIs(coreLibraryI18n.Quit)).moveTo(returnState);
+                .when(intentIs(bot.intents.addFilterIntent)).moveTo(structuredFilter.getSelectFieldState())
+                .when(intentIs(bot.intents.removeFilterIntent)).moveTo(structuredFilter.getSelectFilterToRemoveState())
+                //.when(intentIs(bot.intents.addFieldToViewIntent)).moveTo(selectViewField.getSelectViewFieldState())
+                .when(intentIs(bot.intents.showDataIntent)).moveTo(bot.getResult.getGenerateResultSetState())
+                .when(intentIs(bot.intents.resetIntent)).moveTo(resetBot.getResetBotState())
+                .when(intentIs(bot.coreLibraryI18n.Quit)).moveTo(returnState);
 
 
         this.awaitingStructuredQueryState = awaitingStructuredQueryState.getState();

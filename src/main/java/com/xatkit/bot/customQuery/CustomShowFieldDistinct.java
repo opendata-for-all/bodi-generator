@@ -1,14 +1,13 @@
 package com.xatkit.bot.customQuery;
 
 import bodi.generator.dataSource.ResultSet;
+import com.xatkit.bot.Bot;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.execution.State;
-import com.xatkit.plugins.react.platform.ReactPlatform;
 import lombok.Getter;
 import lombok.val;
 
-import static com.xatkit.bot.Bot.getResult;
-import static com.xatkit.bot.Bot.sql;
+import static com.xatkit.bot.App.sql;
 import static com.xatkit.dsl.DSL.state;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -37,10 +36,10 @@ public class CustomShowFieldDistinct {
     /**
      * Instantiates a new Custom Show Field Distinct workflow.
      *
-     * @param reactPlatform the react platform of a chatbot
-     * @param returnState   the state where the chatbot ends up arriving once the workflow is finished
+     * @param bot         the chatbot that uses this workflow
+     * @param returnState the state where the chatbot ends up arriving once the workflow is finished
      */
-    public CustomShowFieldDistinct(ReactPlatform reactPlatform, State returnState) {
+    public CustomShowFieldDistinct(Bot bot, State returnState) {
         val processCustomShowFieldDistinctState = state("ProcessCustomShowFieldDistinct");
 
         processCustomShowFieldDistinctState
@@ -48,16 +47,16 @@ public class CustomShowFieldDistinct {
                     error = false;
                     String field = (String) context.getIntent().getValue(ContextKeys.FIELD);
                     if (!isEmpty(field)) {
-                        String sqlQuery = sql.queries.showFieldDistinct(field);
+                        String sqlQuery = bot.sqlQueries.showFieldDistinct(field);
                         ResultSet resultSet = sql.runSqlQuery(sqlQuery);
-                        getResult.setResultSet(resultSet);
+                        bot.getResult.setResultSet(resultSet);
                     } else {
                         error = true;
                     }
                 })
                 .next()
-                .when(context -> error).moveTo(getResult.getGenerateResultSetFromQueryState())
-                .when(context -> !error).moveTo(getResult.getShowDataState());
+                .when(context -> error).moveTo(bot.getResult.getGenerateResultSetFromQueryState())
+                .when(context -> !error).moveTo(bot.getResult.getShowDataState());
 
         this.processCustomShowFieldDistinctState = processCustomShowFieldDistinctState.getState();
     }

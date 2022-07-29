@@ -1,12 +1,10 @@
 package com.xatkit.bot.structuredQuery;
 
 import bodi.generator.dataSource.ResultSet;
+import com.xatkit.bot.Bot;
 import com.xatkit.bot.library.ContextKeys;
-import com.xatkit.bot.library.Entities;
-import com.xatkit.bot.library.Intents;
 import com.xatkit.bot.library.Utils;
 import com.xatkit.execution.State;
-import com.xatkit.plugins.react.platform.ReactPlatform;
 import lombok.Getter;
 import lombok.val;
 
@@ -14,11 +12,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.xatkit.bot.Bot.coreLibraryI18n;
-import static com.xatkit.bot.Bot.getResult;
-import static com.xatkit.bot.Bot.maxEntriesToDisplay;
-import static com.xatkit.bot.Bot.messages;
-import static com.xatkit.bot.Bot.sql;
+import static com.xatkit.bot.App.sql;
 import static com.xatkit.dsl.DSL.intentIs;
 import static com.xatkit.dsl.DSL.state;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -82,10 +76,10 @@ public class StructuredFilter {
     /**
      * Instantiates a new Structured Filter workflow.
      *
-     * @param reactPlatform the react platform of a chatbot
-     * @param returnState   the state where the chatbot ends up arriving once the workflow is finished
+     * @param bot         the chatbot that uses this workflow
+     * @param returnState the state where the chatbot ends up arriving once the workflow is finished
      */
-    public StructuredFilter(ReactPlatform reactPlatform, State returnState) {
+    public StructuredFilter(Bot bot, State returnState) {
         val selectFieldState = state("SelectField");
         val saveFieldState = state("SaveField");
 
@@ -102,13 +96,13 @@ public class StructuredFilter {
 
         selectFieldState
                 .body(context -> {
-                    reactPlatform.reply(context, messages.getString("SelectField"),
+                    bot.reactPlatform.reply(context, bot.messages.getString("SelectField"),
                             (List<String>) context.getSession().get(ContextKeys.FILTER_FIELD_OPTIONS));
                 })
                 .next()
-                .when(intentIs(Intents.numericFieldIntent)).moveTo(saveFieldState)
-                .when(intentIs(Intents.textualFieldIntent)).moveTo(saveFieldState)
-                .when(intentIs(Intents.dateFieldIntent)).moveTo(saveFieldState);
+                .when(intentIs(bot.intents.numericFieldIntent)).moveTo(saveFieldState)
+                .when(intentIs(bot.intents.textualFieldIntent)).moveTo(saveFieldState)
+                .when(intentIs(bot.intents.dateFieldIntent)).moveTo(saveFieldState);
 
         // Save the FIELD name
 
@@ -125,19 +119,19 @@ public class StructuredFilter {
         selectOperatorState
                 .body(context -> {
                     List<String> operators = new ArrayList<>();
-                    if (fieldIntentName.equals(Intents.textualFieldIntent.getName())) {
-                        operators = Utils.getEntityValues(Entities.textualOperatorEntity);
-                    } else if (fieldIntentName.equals(Intents.numericFieldIntent.getName())) {
-                        operators = Utils.getEntityValues(Entities.numericOperatorEntity);
-                    } else if (fieldIntentName.equals(Intents.dateFieldIntent.getName())) {
-                        operators = Utils.getEntityValues(Entities.dateOperatorEntity);
+                    if (fieldIntentName.equals(bot.intents.textualFieldIntent.getName())) {
+                        operators = Utils.getEntityValues(bot.entities.textualOperatorEntity);
+                    } else if (fieldIntentName.equals(bot.intents.numericFieldIntent.getName())) {
+                        operators = Utils.getEntityValues(bot.entities.numericOperatorEntity);
+                    } else if (fieldIntentName.equals(bot.intents.dateFieldIntent.getName())) {
+                        operators = Utils.getEntityValues(bot.entities.dateOperatorEntity);
                     }
-                    reactPlatform.reply(context, messages.getString("SelectOperator"), operators);
+                    bot.reactPlatform.reply(context, bot.messages.getString("SelectOperator"), operators);
                 })
                 .next()
-                .when(intentIs(Intents.textualOperatorIntent)).moveTo(saveOperatorState)
-                .when(intentIs(Intents.numericOperatorIntent)).moveTo(saveOperatorState)
-                .when(intentIs(Intents.dateOperatorIntent)).moveTo(saveOperatorState);
+                .when(intentIs(bot.intents.textualOperatorIntent)).moveTo(saveOperatorState)
+                .when(intentIs(bot.intents.numericOperatorIntent)).moveTo(saveOperatorState)
+                .when(intentIs(bot.intents.dateOperatorIntent)).moveTo(saveOperatorState);
 
         // Save the OPERATOR name
 
@@ -146,33 +140,33 @@ public class StructuredFilter {
                     operator = (String) context.getIntent().getValue(ContextKeys.VALUE);
                 })
                 .next()
-                .when(context -> fieldIntentName.equals(Intents.textualFieldIntent.getName())).moveTo(writeTextualValueState)
-                .when(context -> fieldIntentName.equals(Intents.numericFieldIntent.getName())).moveTo(writeNumericValueState)
-                .when(context -> fieldIntentName.equals(Intents.dateFieldIntent.getName())).moveTo(writeDateValueState);
+                .when(context -> fieldIntentName.equals(bot.intents.textualFieldIntent.getName())).moveTo(writeTextualValueState)
+                .when(context -> fieldIntentName.equals(bot.intents.numericFieldIntent.getName())).moveTo(writeNumericValueState)
+                .when(context -> fieldIntentName.equals(bot.intents.dateFieldIntent.getName())).moveTo(writeDateValueState);
 
         // Input the VALUE
         // Divided by data types for safety (e.g. a date may be recognized as a text if we don't separate data types)
 
         writeTextualValueState
                 .body(context -> {
-                    reactPlatform.reply(context, messages.getString("WriteTextualValue"));
+                    bot.reactPlatform.reply(context, bot.messages.getString("WriteTextualValue"));
                 })
                 .next()
-                .when(intentIs(coreLibraryI18n.AnyValue)).moveTo(saveStructuredFilterState);
+                .when(intentIs(bot.coreLibraryI18n.AnyValue)).moveTo(saveStructuredFilterState);
 
         writeNumericValueState
                 .body(context -> {
-                    reactPlatform.reply(context, messages.getString("WriteNumericValue"));
+                    bot.reactPlatform.reply(context, bot.messages.getString("WriteNumericValue"));
                 })
                 .next()
-                .when(intentIs(coreLibraryI18n.NumberValue)).moveTo(saveStructuredFilterState);
+                .when(intentIs(bot.coreLibraryI18n.NumberValue)).moveTo(saveStructuredFilterState);
 
         writeDateValueState
                 .body(context -> {
-                    reactPlatform.reply(context, messages.getString("WriteDateValue"));
+                    bot.reactPlatform.reply(context, bot.messages.getString("WriteDateValue"));
                 })
                 .next()
-                .when(intentIs(coreLibraryI18n.DateValue)).moveTo(saveStructuredFilterState);
+                .when(intentIs(bot.coreLibraryI18n.DateValue)).moveTo(saveStructuredFilterState);
 
         // Finally, save the filter, composed by a FIELD, an OPERATOR, and a VALUE
 
@@ -180,20 +174,20 @@ public class StructuredFilter {
                 .body(context -> {
                     String value = (String) context.getIntent().getValue(ContextKeys.VALUE);
                     if (!isEmpty(field) && !isEmpty(operator) && !isEmpty(value)) {
-                        sql.queries.addFilter(field, operator, value);
-                        String sqlQuery =  sql.queries.selectAll();
+                        bot.sqlQueries.addFilter(field, operator, value);
+                        String sqlQuery =  bot.sqlQueries.selectAll();
                         ResultSet resultSet = sql.runSqlQuery(sqlQuery);
-                        getResult.setResultSet(resultSet);
+                        bot.getResult.setResultSet(resultSet);
                         resultSetNumRows = resultSet.getNumRows();
-                        reactPlatform.reply(context, MessageFormat.format(messages.getString("FilterAdded"),
+                        bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("FilterAdded"),
                                 field, operator, value, resultSetNumRows));
                     } else {
-                        reactPlatform.reply(context, messages.getString("SomethingWentWrong"));
+                        bot.reactPlatform.reply(context, bot.messages.getString("SomethingWentWrong"));
                     }
                 })
                 .next()
-                .when(context -> resultSetNumRows <= maxEntriesToDisplay).moveTo(getResult.getShowDataState())
-                .when(context -> resultSetNumRows > maxEntriesToDisplay).moveTo(returnState);
+                .when(context -> resultSetNumRows <= bot.maxEntriesToDisplay).moveTo(bot.getResult.getShowDataState())
+                .when(context -> resultSetNumRows > bot.maxEntriesToDisplay).moveTo(returnState);
 
         this.selectFieldState = selectFieldState.getState();
 
@@ -204,20 +198,20 @@ public class StructuredFilter {
 
         selectFilterToRemoveState
                 .body(context -> {
-                    List<String> currentFilters = sql.queries.getFiltersAsStrings();
+                    List<String> currentFilters = bot.sqlQueries.getFiltersAsStrings();
                     if (currentFilters.isEmpty()) {
-                        reactPlatform.reply(context, messages.getString("NoFilters"),
-                                Utils.getFirstTrainingSentences(coreLibraryI18n.Quit));
+                        bot.reactPlatform.reply(context, bot.messages.getString("NoFilters"),
+                                Utils.getFirstTrainingSentences(bot.coreLibraryI18n.Quit));
                     } else {
-                        currentFilters.add(Utils.getFirstTrainingSentences(coreLibraryI18n.Quit).get(0));
-                        reactPlatform.reply(context, messages.getString("SelectFilter"), currentFilters);
+                        currentFilters.add(Utils.getFirstTrainingSentences(bot.coreLibraryI18n.Quit).get(0));
+                        bot.reactPlatform.reply(context, bot.messages.getString("SelectFilter"), currentFilters);
                     }
                 })
                 .next()
-                .when(intentIs(Intents.customNumericFilterIntent)).moveTo(removeFilterState)
-                .when(intentIs(Intents.customDateFilterIntent)).moveTo(removeFilterState)
-                .when(intentIs(Intents.customTextualFilterIntent)).moveTo(removeFilterState)
-                .when(intentIs(coreLibraryI18n.Quit)).moveTo(returnState);
+                .when(intentIs(bot.intents.customNumericFilterIntent)).moveTo(removeFilterState)
+                .when(intentIs(bot.intents.customDateFilterIntent)).moveTo(removeFilterState)
+                .when(intentIs(bot.intents.customTextualFilterIntent)).moveTo(removeFilterState)
+                .when(intentIs(bot.coreLibraryI18n.Quit)).moveTo(returnState);
 
         removeFilterState
                 .body(context -> {
@@ -225,13 +219,13 @@ public class StructuredFilter {
                     String operator = (String) context.getIntent().getValue(ContextKeys.OPERATOR);
                     String value = (String) context.getIntent().getValue(ContextKeys.VALUE);
                     if (!isEmpty(field) && !isEmpty(operator) && !isEmpty(value)) {
-                        sql.queries.removeFilter(field, operator, value);
-                        String sqlQuery =  sql.queries.selectAll();
+                        bot.sqlQueries.removeFilter(field, operator, value);
+                        String sqlQuery =  bot.sqlQueries.selectAll();
                         ResultSet resultSet = sql.runSqlQuery(sqlQuery);
-                        reactPlatform.reply(context, MessageFormat.format(messages.getString("FilterRemoved"),
+                        bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("FilterRemoved"),
                                 field, operator, value, resultSet.getNumRows()));
                     } else {
-                        reactPlatform.reply(context, messages.getString("SomethingWentWrong"));
+                        bot.reactPlatform.reply(context, bot.messages.getString("SomethingWentWrong"));
                     }
                 })
                 .next()

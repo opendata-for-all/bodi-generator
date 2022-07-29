@@ -1,12 +1,10 @@
 package com.xatkit.bot.customQuery;
 
 import bodi.generator.dataSource.ResultSet;
+import com.xatkit.bot.Bot;
 import com.xatkit.bot.library.ContextKeys;
-import com.xatkit.bot.library.Entities;
-import com.xatkit.bot.library.Intents;
 import com.xatkit.bot.library.Utils;
 import com.xatkit.execution.State;
-import com.xatkit.plugins.react.platform.ReactPlatform;
 import lombok.Getter;
 import lombok.val;
 
@@ -14,10 +12,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.xatkit.bot.Bot.coreLibraryI18n;
-import static com.xatkit.bot.Bot.getResult;
-import static com.xatkit.bot.Bot.messages;
-import static com.xatkit.bot.Bot.sql;
+import static com.xatkit.bot.App.sql;
 import static com.xatkit.dsl.DSL.intentIs;
 import static com.xatkit.dsl.DSL.state;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -76,10 +71,10 @@ public class CustomFieldOfValue {
     /**
      * Instantiates a new Custom Value Of Field workflow.
      *
-     * @param reactPlatform the react platform of a chatbot
+     * @param bot           the chatbot
      * @param returnState   the state where the chatbot ends up arriving once the workflow is finished
      */
-    public CustomFieldOfValue(ReactPlatform reactPlatform, State returnState) {
+    public CustomFieldOfValue(Bot bot, State returnState) {
         val processCustomFieldOfValueState = state("ProcessCustomValueOfField");
         val processCustomFieldOfValueShowAllState = state("ProcessCustomFieldOfValueShowAll");
         val processCustomFieldOfValueOperatorState = state("ProcessCustomFieldOfValueOperator");
@@ -92,43 +87,43 @@ public class CustomFieldOfValue {
                     operator = (String) context.getIntent().getValue(ContextKeys.OPERATOR);
                     value = (String) context.getIntent().getValue(ContextKeys.VALUE);
                     if (!isEmpty(value)) {
-                        valueField = Entities.fieldValueMap.get(value);
+                        valueField = bot.entities.fieldValueMap.get(value);
                     }
                     if (!isEmpty(field) && !isEmpty(value) && isEmpty(operator)) {
-                        String sqlQuery = sql.queries.fieldOfValue(field, valueField, value, false);
+                        String sqlQuery = bot.sqlQueries.fieldOfValue(field, valueField, value, false);
                         ResultSet resultSet = sql.runSqlQuery(sqlQuery);
                         if (resultSet.getNumRows() == 0) {
-                            reactPlatform.reply(context, MessageFormat.format(messages.getString(
+                            bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString(
                                             "FieldOfValue0"), field, valueField, value));
                             stop = true;
                         } else if (resultSet.getNumRows() == 1) {
                             String result = resultSet.getRow(0).getColumnValue(0);
-                            reactPlatform.reply(context, MessageFormat.format(messages.getString(
+                            bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString(
                                     "FieldOfValue1"), field, valueField, value, result));
                             stop = true;
                         } else if (resultSet.getNumRows() > 1) {
                             List<String> buttons = new ArrayList<>();
-                            buttons.add(Utils.getFirstTrainingSentences(Intents.showAllIntent).get(0));
-                            buttons.add(Utils.getFirstTrainingSentences(Intents.showAllDistinctIntent).get(0));
-                            if (Utils.getEntityValues(Entities.numericFieldEntity).contains(field)) {
-                                buttons.addAll(Utils.getEntityValues(Entities.numericFunctionOperatorEntity));
-                            } else if (Utils.getEntityValues(Entities.dateFieldEntity).contains(field)) {
-                                buttons.addAll(Utils.getEntityValues(Entities.dateFunctionOperatorEntity));
-                            } else if (Utils.getEntityValues(Entities.textualFieldEntity).contains(field)) {
+                            buttons.add(Utils.getFirstTrainingSentences(bot.intents.showAllIntent).get(0));
+                            buttons.add(Utils.getFirstTrainingSentences(bot.intents.showAllDistinctIntent).get(0));
+                            if (Utils.getEntityValues(bot.entities.numericFieldEntity).contains(field)) {
+                                buttons.addAll(Utils.getEntityValues(bot.entities.numericFunctionOperatorEntity));
+                            } else if (Utils.getEntityValues(bot.entities.dateFieldEntity).contains(field)) {
+                                buttons.addAll(Utils.getEntityValues(bot.entities.dateFunctionOperatorEntity));
+                            } else if (Utils.getEntityValues(bot.entities.textualFieldEntity).contains(field)) {
                                 // textual operators here
                             }
-                            sqlQuery = sql.queries.fieldOfValue(field, valueField, value, true);
+                            sqlQuery = bot.sqlQueries.fieldOfValue(field, valueField, value, true);
                             ResultSet resultSetDistinct = sql.runSqlQuery(sqlQuery);
-                            buttons.add(Utils.getFirstTrainingSentences(coreLibraryI18n.Quit).get(0));
-                            reactPlatform.reply(context, MessageFormat.format(messages.getString(
+                            buttons.add(Utils.getFirstTrainingSentences(bot.coreLibraryI18n.Quit).get(0));
+                            bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString(
                                     "AskFieldOfValueOperation"), resultSet.getNumRows(), field,
                                     resultSetDistinct.getNumRows(), valueField, value), buttons);
                         }
                     } else if (!isEmpty(operator)) {
                         // Check that operator type matches field type
-                        if (!(Utils.getEntityValues(Entities.numericFunctionOperatorEntity).contains(operator) && Utils.getEntityValues(Entities.numericFieldEntity).contains(field))
+                        if (!(Utils.getEntityValues(bot.entities.numericFunctionOperatorEntity).contains(operator) && Utils.getEntityValues(bot.entities.numericFieldEntity).contains(field))
                                 &&
-                                !(Utils.getEntityValues(Entities.dateFunctionOperatorEntity).contains(operator) && Utils.getEntityValues(Entities.dateFieldEntity).contains(field))) {
+                                !(Utils.getEntityValues(bot.entities.dateFunctionOperatorEntity).contains(operator) && Utils.getEntityValues(bot.entities.dateFieldEntity).contains(field))) {
                             error = true;
                         }
                     } else {
@@ -136,37 +131,37 @@ public class CustomFieldOfValue {
                     }
                 })
                 .next()
-                .when(context -> error).moveTo(getResult.getGenerateResultSetFromQueryState())
+                .when(context -> error).moveTo(bot.getResult.getGenerateResultSetFromQueryState())
                 .when(context -> stop).moveTo(returnState)
                 .when(context -> !error && !isEmpty(operator)).moveTo(processCustomFieldOfValueOperatorState)
-                .when(intentIs(Intents.showAllIntent)).moveTo(processCustomFieldOfValueShowAllState)
-                .when(intentIs(Intents.showAllDistinctIntent)).moveTo(processCustomFieldOfValueShowAllState)
-                .when(intentIs(Intents.numericFunctionOperatorIntent)).moveTo(processCustomFieldOfValueOperatorState)
-                .when(intentIs(Intents.dateFunctionOperatorIntent)).moveTo(processCustomFieldOfValueOperatorState)
-                .when(intentIs(coreLibraryI18n.Quit)).moveTo(returnState);
+                .when(intentIs(bot.intents.showAllIntent)).moveTo(processCustomFieldOfValueShowAllState)
+                .when(intentIs(bot.intents.showAllDistinctIntent)).moveTo(processCustomFieldOfValueShowAllState)
+                .when(intentIs(bot.intents.numericFunctionOperatorIntent)).moveTo(processCustomFieldOfValueOperatorState)
+                .when(intentIs(bot.intents.dateFunctionOperatorIntent)).moveTo(processCustomFieldOfValueOperatorState)
+                .when(intentIs(bot.coreLibraryI18n.Quit)).moveTo(returnState);
 
         this.processCustomFieldOfValueState = processCustomFieldOfValueState.getState();
 
         processCustomFieldOfValueShowAllState
                 .body(context -> {
-                    boolean isDistinct = (context.getIntent().getDefinition().getName().equals(Intents.showAllDistinctIntent.getName()));
-                    String sqlQuery = sql.queries.fieldOfValue(field, valueField, value, isDistinct);
+                    boolean isDistinct = (context.getIntent().getDefinition().getName().equals(bot.intents.showAllDistinctIntent.getName()));
+                    String sqlQuery = bot.sqlQueries.fieldOfValue(field, valueField, value, isDistinct);
                     ResultSet resultSet = sql.runSqlQuery(sqlQuery);
-                    getResult.setResultSet(resultSet);
+                    bot.getResult.setResultSet(resultSet);
 
                 })
                 .next()
-                .moveTo(getResult.getShowDataState());
+                .moveTo(bot.getResult.getShowDataState());
 
         processCustomFieldOfValueOperatorState
                 .body(context -> {
-                    if (!context.getIntent().getDefinition().getName().equals(Intents.customFieldOfValueOperatorIntent.getName())) {
+                    if (!context.getIntent().getDefinition().getName().equals(bot.intents.customFieldOfValueOperatorIntent.getName())) {
                         operator = (String) context.getIntent().getValue(ContextKeys.VALUE);
                     }
-                    String sqlQuery = sql.queries.fieldOfValueOperator(field, valueField, value, operator);
+                    String sqlQuery = bot.sqlQueries.fieldOfValueOperator(field, valueField, value, operator);
                     ResultSet resultSet = sql.runSqlQuery(sqlQuery);
                     String result = resultSet.getRow(0).getColumnValue(0);
-                    reactPlatform.reply(context, MessageFormat.format(messages.getString(
+                    bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString(
                                     "FieldOfValueWithOperation"), operator, field, valueField, value, result));
                 })
                 .next()

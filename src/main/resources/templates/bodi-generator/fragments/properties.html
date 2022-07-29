@@ -1,22 +1,45 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
+<!--/*@thymesVar id="tab" type="bodi.generator.ui.controller.user.PropertiesTab"*/-->
 <!--/*@thymesVar id="properties" type="bodi.generator.ui.model.Properties"*/-->
+<!--/*@thymesVar id="enabledLanguages" type="java.util.Map<java.lang.String, java.lang.Boolean>"*/-->
+<!--/*@thymesVar id="selectedLanguage" type="java.lang.String"*/-->
+<!--/*@thymesVar id="errors" type="java.util.List<java.lang.String>"*/-->
+
 <div class="app-dashboard-body-content off-canvas-content" data-off-canvas-content th:fragment="content">
     <h2 class="text-left" th:text="'Properties'"></h2>
     <div class="grid-x">
         <ul class="tabs cell auto" data-tabs id="properties-tabs">
-            <li class="tabs-title is-active"><a href="#general" aria-selected="true">General</a></li>
-            <li class="tabs-title"><a href="#intent_provider">Intent provider</a></li>
-            <li class="tabs-title"><a href="#database">Database</a></li>
-            <li class="tabs-title"><a href="#nlp_server">NLP Server</a></li>
-            <li class="tabs-title"><a href="#open_data">Open data</a></li>
+            <li class="tabs-title" th:classappend="${tab.label.equals('general') ? 'is-active': ''}">
+                <a href="#general">General</a>
+            </li>
+            <li class="tabs-title" th:classappend="${tab.label.equals('bot') ? 'is-active': ''}">
+                <a href="#bot">Bot</a>
+            </li>
+            <li class="tabs-title" th:classappend="${tab.label.equals('intent_provider') ? 'is-active': ''}">
+                <a href="#intent_provider">Intent provider</a>
+            </li>
+            <li class="tabs-title" th:classappend="${tab.label.equals('database') ? 'is-active': ''}">
+                <a href="#database">Database</a>
+            </li>
+            <li class="tabs-title" th:classappend="${tab.label.equals('open_data') ? 'is-active': ''}">
+                <a href="#open_data">Open data</a>
+            </li>
+            <li class="tabs-title" th:classappend="${tab.label.equals('nlp_server') ? 'is-active': ''}">
+                <a href="#nlp_server">NLP Server</a>
+            </li>
         </ul>
     </div>
     <br>
     <div class="grid-x">
         <div class="tabs-content cell auto" data-tabs-content="properties-tabs"
             th:if="${properties != null}">
-            <div class="tabs-panel is-active" id="general">
+            <div class="tabs-panel" th:classappend="${tab.label.equals('general') ? 'is-active': ''}" id="general">
+                <ul th:if="${!errors.isEmpty()}">
+                    <li th:each="error : ${errors}"
+                        style="color:darkred; font-weight: bold;"
+                        th:text="${error}"></li>
+                </ul>
                 <form th:object="${properties}"
                       th:action="@{/bodi-generator/properties/store_properties_general}"
                       th:with="BotProperties=${T(com.xatkit.bot.library.BotProperties)},
@@ -24,8 +47,15 @@
                       method="POST">
                     <div class="grid-x">
                         <div class="cell small-6">
+                            <p>Bot Languages</p>
+                            <div th:each="lang : ${enabledLanguages.entrySet()}">
+                                <input type="checkbox"
+                                       th:checked="${lang.value}"
+                                       th:name="'enabledLanguages'"
+                                       th:text="' ' + ${lang.key}"
+                                       th:value="${lang.key}">
+                            </div>
                             <!-- BODI-GENERATOR.PROPERTIES -->
-                            <h4>BODI Generator properties</h4>
                             <label th:for="${BodiGeneratorProperties.BOT_NAME}"
                                    th:text="${BodiGeneratorProperties.BOT_NAME}"></label>
                             <input th:id="${BodiGeneratorProperties.BOT_NAME}" type="text"
@@ -38,23 +68,6 @@
                                 <option th:value="false">No</option>
                             </select>
                             <!-- BOT.PROPERTIES -->
-                            <h4>Bot properties</h4>
-                            <label th:for="${BotProperties.XATKIT_SERVER_PORT}"
-                                   th:text="${BotProperties.XATKIT_SERVER_PORT}"></label>
-                            <input th:id="${BotProperties.XATKIT_SERVER_PORT}" type="number"
-                                   th:field="*{botProperties['__${BotProperties.XATKIT_SERVER_PORT}__']}">
-                            <label th:for="${BotProperties.XATKIT_REACT_PORT}"
-                                   th:text="${BotProperties.XATKIT_REACT_PORT}"></label>
-                            <input th:id="${BotProperties.XATKIT_REACT_PORT}" type="number"
-                                   th:field="*{botProperties['__${BotProperties.XATKIT_REACT_PORT}__']}">
-                            <label th:for="${BotProperties.BOT_LANGUAGE}"
-                                   th:text="${BotProperties.BOT_LANGUAGE}"></label>
-                            <select th:id="${BotProperties.BOT_LANGUAGE}"
-                                    th:field="*{botProperties['__${BotProperties.BOT_LANGUAGE}__']}">
-                                <option th:value="'en'">English</option>
-                                <option th:value="'ca'">Catalan</option>
-                                <option th:value="'es'">Spanish</option>
-                            </select>
                             <label th:for="${BotProperties.BOT_PAGE_LIMIT}"
                                    th:text="${BotProperties.BOT_PAGE_LIMIT}"></label>
                             <input th:id="${BotProperties.BOT_PAGE_LIMIT}" type="number"
@@ -75,16 +88,79 @@
                     <button type="submit" class="button" onclick="return confirm('Are you sure you want to save the changes?')">Save changes</button>
                 </form>
             </div>
-            <div class="tabs-panel" id="intent_provider">
+            <div class="tabs-panel" th:classappend="${tab.label.equals('bot') ? 'is-active': ''}" id="bot">
+                <form th:action="@{/bodi-generator/properties/change_selected_language/BOT}"
+                      method="POST">
+                    <div th:each="lang : ${enabledLanguages.entrySet()}"
+                         style="display: inline-block;">
+                        <button th:if="${lang.value} and ${lang.key == selectedLanguage}"
+                                type="submit"
+                                class="button"
+                                style="background-color: royalblue;"
+                                th:text="${lang.key}"
+                                th:name="language"
+                                th:value="${lang.key}">
+                        </button>
+                        <button th:if="${lang.value} and ${lang.key != selectedLanguage}"
+                                type="submit"
+                                class="button"
+                                th:text="${lang.key}"
+                                th:name="language"
+                                th:value="${lang.key}">
+                        </button>
+                    </div>
+                </form>
+                <form th:object="${properties}"
+                      th:action="@{/bodi-generator/properties/store_properties_bot}"
+                      th:with="BotProperties=${T(com.xatkit.bot.library.BotProperties)}"
+                      method="POST">
+                    <div class="grid-x">
+                        <div class="cell small-6">
+                            <h4>Xatkit ports</h4>
+                            <label th:for="${BotProperties.XATKIT_SERVER_PORT}"
+                                   th:text="${BotProperties.XATKIT_SERVER_PORT}"></label>
+                            <input th:id="${BotProperties.XATKIT_SERVER_PORT}" type="number"
+                                   th:field="*{botPropertiesLang['__${selectedLanguage}__']['__${BotProperties.XATKIT_SERVER_PORT}__']}">
+                            <label th:for="${BotProperties.XATKIT_REACT_PORT}"
+                                   th:text="${BotProperties.XATKIT_REACT_PORT}"></label>
+                            <input th:id="${BotProperties.XATKIT_REACT_PORT}" type="number"
+                                   th:field="*{botPropertiesLang['__${selectedLanguage}__']['__${BotProperties.XATKIT_REACT_PORT}__']}">
+                        </div>
+                    </div>
+                    <button type="submit" class="button" onclick="return confirm('Are you sure you want to save the changes?')">Save changes</button>
+                </form>
+            </div>
+            <div class="tabs-panel" th:classappend="${tab.label.equals('intent_provider') ? 'is-active': ''}" id="intent_provider">
+                <form th:action="@{/bodi-generator/properties/change_selected_language/INTENT_PROVIDER}"
+                      method="POST">
+                    <div th:each="lang : ${enabledLanguages.entrySet()}"
+                         style="display: inline-block;">
+                        <button th:if="${lang.value} and ${lang.key == selectedLanguage}"
+                                type="submit"
+                                class="button"
+                                style="background-color: royalblue;"
+                                th:text="${lang.key}"
+                                th:name="language"
+                                th:value="${lang.key}">
+                        </button>
+                        <button th:if="${lang.value} and ${lang.key != selectedLanguage}"
+                                type="submit"
+                                class="button"
+                                th:text="${lang.key}"
+                                th:name="language"
+                                th:value="${lang.key}">
+                        </button>
+                    </div>
+                </form>
                 <form th:object="${properties}"
                       th:action="@{/bodi-generator/properties/set_intent_provider}"
-                      th:with="BodiGeneratorProperties=${T(bodi.generator.dataSchema.BodiGeneratorProperties)}"
+                      th:with="BotProperties=${T(com.xatkit.bot.library.BotProperties)}"
                       method="POST">
                     <div class="grid-x grid-margin-x">
                         <div class="cell small-4">
                             <h4>Intent provider</h4>
-                            <select th:id="${BodiGeneratorProperties.XATKIT_INTENT_PROVIDER}"
-                                    th:field="*{bodiGeneratorProperties['__${BodiGeneratorProperties.XATKIT_INTENT_PROVIDER}__']}">
+                            <select th:id="${BotProperties.XATKIT_INTENT_PROVIDER}"
+                                    th:field="*{botPropertiesLang['__${selectedLanguage}__']['__${BotProperties.XATKIT_INTENT_PROVIDER}__']}">
                                 <option th:value="''">-</option>
                                 <option th:value="'com.xatkit.core.recognition.dialogflow.DialogFlowIntentRecognitionProvider'">DialogFlow</option>
                                 <option th:value="'com.xatkit.core.recognition.nlpjs.NlpjsIntentRecognitionProvider'">NLP.js</option>
@@ -101,20 +177,20 @@
                       method="POST">
                     <div class="grid-x">
                         <div class="cell small-6"
-                             th:if="${properties.botProperties['__${BotProperties.XATKIT_INTENT_PROVIDER}__']} == 'com.xatkit.core.recognition.dialogflow.DialogFlowIntentRecognitionProvider'">
+                             th:if="${properties.botPropertiesLang['__${selectedLanguage}__']['__${BotProperties.XATKIT_INTENT_PROVIDER}__']} == 'com.xatkit.core.recognition.dialogflow.DialogFlowIntentRecognitionProvider'">
                             <h4>DialogFlow</h4>
                             <label th:for="${BotProperties.XATKIT_DIALOGFLOW_PROJECT_ID}"
                                    th:text="${BotProperties.XATKIT_DIALOGFLOW_PROJECT_ID}"></label>
                             <input th:id="${BotProperties.XATKIT_DIALOGFLOW_PROJECT_ID}" type="text"
-                                   th:field="*{botProperties['__${BotProperties.XATKIT_DIALOGFLOW_PROJECT_ID}__']}">
+                                   th:field="*{botPropertiesLang['__${selectedLanguage}__']['__${BotProperties.XATKIT_DIALOGFLOW_PROJECT_ID}__']}">
                             <label th:for="${BotProperties.XATKIT_DIALOGFLOW_CREDENTIALS_PATH}"
                                    th:text="${BotProperties.XATKIT_DIALOGFLOW_CREDENTIALS_PATH}"></label>
                             <input th:id="${BotProperties.XATKIT_DIALOGFLOW_CREDENTIALS_PATH}" type="text"
-                                   th:field="*{botProperties['__${BotProperties.XATKIT_DIALOGFLOW_CREDENTIALS_PATH}__']}">
+                                   th:field="*{botPropertiesLang['__${selectedLanguage}__']['__${BotProperties.XATKIT_DIALOGFLOW_CREDENTIALS_PATH}__']}">
                             <label th:for="${BotProperties.XATKIT_DIALOGFLOW_LANGUAGE}"
                                    th:text="${BotProperties.XATKIT_DIALOGFLOW_LANGUAGE}"></label>
                             <select th:id="${BotProperties.XATKIT_DIALOGFLOW_LANGUAGE}"
-                                    th:field="*{botProperties['__${BotProperties.XATKIT_DIALOGFLOW_LANGUAGE}__']}">
+                                    th:field="*{botPropertiesLang['__${selectedLanguage}__']['__${BotProperties.XATKIT_DIALOGFLOW_LANGUAGE}__']}">
                                 <option th:value="'en'">English</option>
                                 <option th:value="'ca'">Catalan</option>
                                 <option th:value="'es'">Spanish</option>
@@ -124,7 +200,7 @@
                                 <input class="switch-input"
                                        th:id="${BotProperties.XATKIT_DIALOGFLOW_CLEAN_ON_STARTUP}"
                                        type="checkbox"
-                                       th:field="*{botProperties['__${BotProperties.XATKIT_DIALOGFLOW_CLEAN_ON_STARTUP}__']}">
+                                       th:field="*{botPropertiesLang['__${selectedLanguage}__']['__${BotProperties.XATKIT_DIALOGFLOW_CLEAN_ON_STARTUP}__']}">
                                 <label class="switch-paddle"
                                        th:for="${BotProperties.XATKIT_DIALOGFLOW_CLEAN_ON_STARTUP}">
                                     <span class="switch-active" aria-hidden="true">Yes</span>
@@ -135,22 +211,22 @@
                             <label th:for="${BotProperties.XATKIT_DIALOGFLOW_CLEAN_ON_STARTUP}"
                                    th:text="${BotProperties.XATKIT_DIALOGFLOW_CLEAN_ON_STARTUP}"></label>
                             <select th:id="${BotProperties.XATKIT_DIALOGFLOW_CLEAN_ON_STARTUP}"
-                                    th:field="*{botProperties['__${BotProperties.XATKIT_DIALOGFLOW_CLEAN_ON_STARTUP}__']}">
+                                    th:field="*{botPropertiesLang['__${selectedLanguage}__']['__${BotProperties.XATKIT_DIALOGFLOW_CLEAN_ON_STARTUP}__']}">
                                 <option th:value="true">Yes</option>
                                 <option th:value="false">No</option>
                             </select>
                         </div>
                         <div class="cell small-8"
-                             th:if="${properties.botProperties['__${BotProperties.XATKIT_INTENT_PROVIDER}__']} == 'com.xatkit.core.recognition.nlpjs.NlpjsIntentRecognitionProvider'">
+                             th:if="${properties.botPropertiesLang['__${selectedLanguage}__']['__${BotProperties.XATKIT_INTENT_PROVIDER}__']} == 'com.xatkit.core.recognition.nlpjs.NlpjsIntentRecognitionProvider'">
                             <h2>NLP.js</h2>
                             <label th:for="${BotProperties.XATKIT_NLPJS_AGENTID}"
                                    th:text="${BotProperties.XATKIT_NLPJS_AGENTID}"></label>
                             <input th:id="${BotProperties.XATKIT_NLPJS_AGENTID}" type="text"
-                                   th:field="*{botProperties['__${BotProperties.XATKIT_NLPJS_AGENTID}__']}">
+                                   th:field="*{botPropertiesLang['__${selectedLanguage}__']['__${BotProperties.XATKIT_NLPJS_AGENTID}__']}">
                             <label th:for="${BotProperties.XATKIT_NLPJS_LANGUAGE}"
                                    th:text="${BotProperties.XATKIT_NLPJS_LANGUAGE}"></label>
                             <select th:id="${BotProperties.XATKIT_NLPJS_LANGUAGE}"
-                                    th:field="*{botProperties['__${BotProperties.XATKIT_NLPJS_LANGUAGE}__']}">
+                                    th:field="*{botPropertiesLang['__${selectedLanguage}__']['__${BotProperties.XATKIT_NLPJS_LANGUAGE}__']}">
                                 <option th:value="'en'">English</option>
                                 <option th:value="'ca'">Catalan</option>
                                 <option th:value="'es'">Spanish</option>
@@ -158,22 +234,43 @@
                             <label th:for="${BotProperties.XATKIT_NLPJS_SERVER}"
                                    th:text="${BotProperties.XATKIT_NLPJS_SERVER}"></label>
                             <input th:id="${BotProperties.XATKIT_NLPJS_SERVER}" type="text"
-                                   th:field="*{botProperties['__${BotProperties.XATKIT_NLPJS_SERVER}__']}">
+                                   th:field="*{botPropertiesLang['__${selectedLanguage}__']['__${BotProperties.XATKIT_NLPJS_SERVER}__']}">
                         </div>
                     </div>
                     <button type="submit" class="button" onclick="return confirm('Are you sure you want to save the changes?')">Save changes</button>
                 </form>
             </div>
-            <div class="tabs-panel" id="database">
+            <div class="tabs-panel" th:classappend="${tab.label.equals('database') ? 'is-active': ''}" id="database">
+                <form th:action="@{/bodi-generator/properties/change_selected_language/DATABASE}"
+                      method="POST">
+                    <div th:each="lang : ${enabledLanguages.entrySet()}"
+                         style="display: inline-block;">
+                        <button th:if="${lang.value} and ${lang.key == selectedLanguage}"
+                                type="submit"
+                                class="button"
+                                style="background-color: royalblue;"
+                                th:text="${lang.key}"
+                                th:name="language"
+                                th:value="${lang.key}">
+                        </button>
+                        <button th:if="${lang.value} and ${lang.key != selectedLanguage}"
+                                type="submit"
+                                class="button"
+                                th:text="${lang.key}"
+                                th:name="language"
+                                th:value="${lang.key}">
+                        </button>
+                    </div>
+                </form>
                 <form th:object="${properties}"
                       th:action="@{/bodi-generator/properties/set_database}"
-                      th:with="BodiGeneratorProperties=${T(bodi.generator.dataSchema.BodiGeneratorProperties)}"
+                      th:with="BotProperties=${T(com.xatkit.bot.library.BotProperties)}"
                       method="POST">
                     <div class="grid-x grid-margin-x">
                         <div class="cell small-4">
                             <h4>Database</h4>
-                            <select th:id="${BodiGeneratorProperties.XATKIT_LOGS_DATABASE}"
-                                    th:field="*{bodiGeneratorProperties['__${BodiGeneratorProperties.XATKIT_LOGS_DATABASE}__']}">
+                            <select th:id="${BotProperties.XATKIT_LOGS_DATABASE}"
+                                    th:field="*{botPropertiesLang['__${selectedLanguage}__']['__${BotProperties.XATKIT_LOGS_DATABASE}__']}">
                                 <option th:value="''">-</option>
                                 <option th:value="'com.xatkit.core.recognition.RecognitionMonitorPostgreSQL'">PostgreSQL</option>
                             </select>
@@ -189,37 +286,79 @@
                       method="POST">
                     <div class="grid-x">
                         <div class="cell small-6"
-                             th:if="${properties.botProperties['__${BotProperties.XATKIT_LOGS_DATABASE}__']} == 'com.xatkit.core.recognition.RecognitionMonitorPostgreSQL'">
+                             th:if="${properties.botPropertiesLang['__${selectedLanguage}__']['__${BotProperties.XATKIT_LOGS_DATABASE}__']} == 'com.xatkit.core.recognition.RecognitionMonitorPostgreSQL'">
                             <h4>PostgreSQL</h4>
                             <label th:for="${BotProperties.XATKIT_RECOGNITION_ENABLE_MONITORING}"
                                    th:text="${BotProperties.XATKIT_RECOGNITION_ENABLE_MONITORING}"></label>
                             <select th:id="${BotProperties.XATKIT_RECOGNITION_ENABLE_MONITORING}"
-                                    th:field="*{botProperties['__${BotProperties.XATKIT_RECOGNITION_ENABLE_MONITORING}__']}">
+                                    th:field="*{botPropertiesLang['__${selectedLanguage}__']['__${BotProperties.XATKIT_RECOGNITION_ENABLE_MONITORING}__']}">
                                 <option th:value="true">Yes</option>
                                 <option th:value="false">No</option>
                             </select>
                             <label th:for="${BotProperties.XATKIT_POSTGRESQL_URL}"
                                    th:text="${BotProperties.XATKIT_POSTGRESQL_URL}"></label>
                             <input th:id="${BotProperties.XATKIT_POSTGRESQL_URL}" type="text"
-                                   th:field="*{botProperties['__${BotProperties.XATKIT_POSTGRESQL_URL}__']}">
+                                   th:field="*{botPropertiesLang['__${selectedLanguage}__']['__${BotProperties.XATKIT_POSTGRESQL_URL}__']}">
                             <label th:for="${BotProperties.XATKIT_POSTGRESQL_USER}"
                                    th:text="${BotProperties.XATKIT_POSTGRESQL_USER}"></label>
                             <input th:id="${BotProperties.XATKIT_POSTGRESQL_USER}" type="text"
-                                   th:field="*{botProperties['__${BotProperties.XATKIT_POSTGRESQL_USER}__']}">
+                                   th:field="*{botPropertiesLang['__${selectedLanguage}__']['__${BotProperties.XATKIT_POSTGRESQL_USER}__']}">
                             <label th:for="${BotProperties.XATKIT_POSTGRESQL_PASSWORD}"
                                    th:text="${BotProperties.XATKIT_POSTGRESQL_PASSWORD}"></label>
                             <input th:id="${BotProperties.XATKIT_POSTGRESQL_PASSWORD}" type="text"
-                                   th:field="*{botProperties['__${BotProperties.XATKIT_POSTGRESQL_PASSWORD}__']}">
+                                   th:field="*{botPropertiesLang['__${selectedLanguage}__']['__${BotProperties.XATKIT_POSTGRESQL_PASSWORD}__']}">
                             <label th:for="${BotProperties.XATKIT_POSTGRESQL_BOT_ID}"
                                    th:text="${BotProperties.XATKIT_POSTGRESQL_BOT_ID}"></label>
                             <input th:id="${BotProperties.XATKIT_POSTGRESQL_BOT_ID}" type="number"
-                                   th:field="*{botProperties['__${BotProperties.XATKIT_POSTGRESQL_BOT_ID}__']}">
+                                   th:field="*{botPropertiesLang['__${selectedLanguage}__']['__${BotProperties.XATKIT_POSTGRESQL_BOT_ID}__']}">
                         </div>
                     </div>
                     <button type="submit" class="button" onclick="return confirm('Are you sure you want to save the changes?')">Save changes</button>
                 </form>
             </div>
-            <div class="tabs-panel" id="nlp_server">
+            <div class="tabs-panel" th:classappend="${tab.label.equals('open_data') ? 'is-active': ''}" id="open_data">
+                <form th:action="@{/bodi-generator/properties/change_selected_language/OPEN_DATA}"
+                      method="POST">
+                    <div th:each="lang : ${enabledLanguages.entrySet()}"
+                         style="display: inline-block;">
+                        <button th:if="${lang.value} and ${lang.key == selectedLanguage}"
+                                type="submit"
+                                class="button"
+                                style="background-color: royalblue;"
+                                th:text="${lang.key}"
+                                th:name="language"
+                                th:value="${lang.key}">
+                        </button>
+                        <button th:if="${lang.value} and ${lang.key != selectedLanguage}"
+                                type="submit"
+                                class="button"
+                                th:text="${lang.key}"
+                                th:name="language"
+                                th:value="${lang.key}">
+                        </button>
+                    </div>
+                </form>
+                <form th:object="${properties}"
+                      th:action="@{/bodi-generator/properties/store_properties_open_data}"
+                      th:with="BotProperties=${T(com.xatkit.bot.library.BotProperties)}"
+                      method="POST">
+                    <div class="grid-x">
+                        <div class="cell small-6">
+                            <h4>Open data</h4>
+                            <label th:for="${BotProperties.BOT_ODATA_TITLE}"
+                                   th:text="${BotProperties.BOT_ODATA_TITLE}"></label>
+                            <input th:id="${BotProperties.BOT_ODATA_TITLE}" type="text"
+                                   th:field="*{botPropertiesLang['__${selectedLanguage}__']['__${BotProperties.BOT_ODATA_TITLE}__']}">
+                            <label th:for="${BotProperties.BOT_ODATA_URL}"
+                                   th:text="${BotProperties.BOT_ODATA_URL}"></label>
+                            <input th:id="${BotProperties.BOT_ODATA_URL}" type="text"
+                                   th:field="*{botPropertiesLang['__${selectedLanguage}__']['__${BotProperties.BOT_ODATA_URL}__']}">
+                        </div>
+                    </div>
+                    <button type="submit" class="button" onclick="return confirm('Are you sure you want to save the changes?')">Save changes</button>
+                </form>
+            </div>
+            <div class="tabs-panel" th:classappend="${tab.label.equals('nlp_server') ? 'is-active': ''}" id="nlp_server">
                 <form th:object="${properties}"
                       th:action="@{/bodi-generator/properties/store_properties_nlp_server}"
                       th:with="BotProperties=${T(com.xatkit.bot.library.BotProperties)}"
@@ -235,43 +374,6 @@
                                    th:text="${BotProperties.TEXT_TO_TABLE_ENDPOINT}"></label>
                             <input th:id="${BotProperties.TEXT_TO_TABLE_ENDPOINT}" type="text"
                                    th:field="*{botProperties['__${BotProperties.TEXT_TO_TABLE_ENDPOINT}__']}">
-                        </div>
-                    </div>
-                    <button type="submit" class="button" onclick="return confirm('Are you sure you want to save the changes?')">Save changes</button>
-                </form>
-            </div>
-            <div class="tabs-panel" id="open_data">
-                <form th:object="${properties}"
-                      th:action="@{/bodi-generator/properties/store_properties_open_data}"
-                      th:with="BotProperties=${T(com.xatkit.bot.library.BotProperties)}"
-                      method="POST">
-                    <div class="grid-x">
-                        <div class="cell small-6">
-                            <h4>Open data</h4>
-                            <label th:for="${BotProperties.BOT_ODATA_TITLE_EN}"
-                                   th:text="${BotProperties.BOT_ODATA_TITLE_EN}"></label>
-                            <input th:id="${BotProperties.BOT_ODATA_TITLE_EN}" type="text"
-                                   th:field="*{botProperties['__${BotProperties.BOT_ODATA_TITLE_EN}__']}">
-                            <label th:for="${BotProperties.BOT_ODATA_TITLE_CA}"
-                                   th:text="${BotProperties.BOT_ODATA_TITLE_CA}"></label>
-                            <input th:id="${BotProperties.BOT_ODATA_TITLE_CA}" type="text"
-                                   th:field="*{botProperties['__${BotProperties.BOT_ODATA_TITLE_CA}__']}">
-                            <label th:for="${BotProperties.BOT_ODATA_TITLE_ES}"
-                                   th:text="${BotProperties.BOT_ODATA_TITLE_ES}"></label>
-                            <input th:id="${BotProperties.BOT_ODATA_TITLE_ES}" type="text"
-                                   th:field="*{botProperties['__${BotProperties.BOT_ODATA_TITLE_ES}__']}">
-                            <label th:for="${BotProperties.BOT_ODATA_URL_EN}"
-                                   th:text="${BotProperties.BOT_ODATA_URL_EN}"></label>
-                            <input th:id="${BotProperties.BOT_ODATA_URL_EN}" type="text"
-                                   th:field="*{botProperties['__${BotProperties.BOT_ODATA_URL_EN}__']}">
-                            <label th:for="${BotProperties.BOT_ODATA_URL_CA}"
-                                   th:text="${BotProperties.BOT_ODATA_URL_CA}"></label>
-                            <input th:id="${BotProperties.BOT_ODATA_URL_CA}" type="text"
-                                   th:field="*{botProperties['__${BotProperties.BOT_ODATA_URL_CA}__']}">
-                            <label th:for="${BotProperties.BOT_ODATA_URL_ES}"
-                                   th:text="${BotProperties.BOT_ODATA_URL_ES}"></label>
-                            <input th:id="${BotProperties.BOT_ODATA_URL_ES}" type="text"
-                                   th:field="*{botProperties['__${BotProperties.BOT_ODATA_URL_ES}__']}">
                         </div>
                     </div>
                     <button type="submit" class="button" onclick="return confirm('Are you sure you want to save the changes?')">Save changes</button>

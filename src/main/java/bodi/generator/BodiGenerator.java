@@ -352,8 +352,12 @@ public final class BodiGenerator {
                 FileUtils.copyDirectory(testBotSource, testBotDest);
             }
 
-            System.out.println("Creating resource bot.properties");
+            System.out.println("Creating resource config.properties");
             createBotPropertiesFile(conf);
+            String[] languages = conf.getString(BotProperties.BOT_LANGUAGES).split(",");
+            for (String language : languages) {
+                createBotLanguagePropertiesFile(language, conf);
+            }
 
             List<String> botFiles = new ArrayList<>();
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/Bot.java");
@@ -378,46 +382,70 @@ public final class BodiGenerator {
     }
 
     /**
-     * Creates the default {@code bot.properties} configuration file of the generated bot.
+     * Creates the default {@code config.properties} configuration file of the generated bot.
      *
      * @param conf the bodi-generator configuration properties
      */
     private static void createBotPropertiesFile(Configuration conf) {
-        String outputFolder = conf.getString("xls.generator.output");
+        String outputFolder = conf.getString(BodiGeneratorProperties.OUTPUT_DIRECTORY);
         try {
-            FileWriter fw = new FileWriter(outputFolder + "/src/main/resources/bot.properties");
+            FileWriter fw = new FileWriter(outputFolder + "/src/main/resources/config.properties");
 
             fw.write("# Bot\n\n");
             fw.write(BotProperties.DATA_NAME + " = " + conf.getString(BodiGeneratorProperties.DATA_NAME) + "\n");
             fw.write(BotProperties.CSV_DELIMITER + " = " + conf.getString(BodiGeneratorProperties.CSV_DELIMITER) + "\n");
-            fw.write(BotProperties.XATKIT_SERVER_PORT + " = " + "5000" + "\n");
-            fw.write(BotProperties.XATKIT_REACT_PORT + " = " + "5001" + "\n");
-            fw.write(BotProperties.BOT_LANGUAGE + " = " + "en" + "\n");
             fw.write(BotProperties.BOT_PAGE_LIMIT + " = " + "10" + "\n");
             fw.write(BotProperties.BOT_MAX_ENTRIES_TO_DISPLAY + " = " + "5" + "\n");
             fw.write(BotProperties.BOT_ENABLE_CHECK_CORRECT_ANSWER + " = " + "true" + "\n");
+            fw.write(BotProperties.BOT_LANGUAGES + " = " + conf.getString(BotProperties.BOT_LANGUAGES) + "\n");
+
+            fw.write("\n# NLP Server properties\n\n");
+            fw.write(BotProperties.SERVER_URL + " = " + "127.0.0.1:5002" + "\n");
+            fw.write(BotProperties.TEXT_TO_TABLE_ENDPOINT + " = " + "text-to-table" + "\n");
+
+            fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Creates the default {@code config_{language}.properties} configuration file of the generated bot.
+     *
+     * @param language the language that the properties belong to
+     * @param conf     the bodi-generator configuration properties
+     */
+    private static void createBotLanguagePropertiesFile(String language, Configuration conf) {
+        String outputFolder = conf.getString(BodiGeneratorProperties.OUTPUT_DIRECTORY);
+        try {
+            FileWriter fw = new FileWriter(outputFolder + "/src/main/resources/config_" + language + ".properties");
+
+            fw.write("# Bot\n\n");
+            fw.write(BotProperties.XATKIT_SERVER_PORT + " = " + "5000" + "\n");
+            fw.write(BotProperties.XATKIT_REACT_PORT + " = " + "5001" + "\n");
+            fw.write(BotProperties.BOT_LANGUAGE + " = " + "en" + "\n");
 
             fw.write("\n# Intent provider\n\n");
-            if (conf.getString(BodiGeneratorProperties.XATKIT_INTENT_PROVIDER)
+            if (conf.getString(BotProperties.XATKIT_INTENT_PROVIDER)
                     .equals("com.xatkit.core.recognition.dialogflow.DialogFlowIntentRecognitionProvider")) {
-                fw.write(BotProperties.XATKIT_INTENT_PROVIDER + " = " + conf.getString(BodiGeneratorProperties.XATKIT_INTENT_PROVIDER) + "\n");
+                fw.write(BotProperties.XATKIT_INTENT_PROVIDER + " = " + conf.getString(BotProperties.XATKIT_INTENT_PROVIDER) + "\n");
                 fw.write(BotProperties.XATKIT_DIALOGFLOW_PROJECT_ID + " = " + "your-project-id" + "\n");
                 fw.write(BotProperties.XATKIT_DIALOGFLOW_CREDENTIALS_PATH + " = " + "path-to-your-credentials-file" + "\n");
                 fw.write(BotProperties.XATKIT_DIALOGFLOW_LANGUAGE + " = " + "en" + "\n");
                 fw.write(BotProperties.XATKIT_DIALOGFLOW_CLEAN_ON_STARTUP + " = " + "true" + "\n");
-            } else if (conf.getString(BodiGeneratorProperties.XATKIT_INTENT_PROVIDER)
+            } else if (conf.getString(BotProperties.XATKIT_INTENT_PROVIDER)
                     .equals("com.xatkit.core.recognition.nlpjs.NlpjsIntentRecognitionProvider")) {
-                fw.write(BotProperties.XATKIT_INTENT_PROVIDER + " = " + conf.getString(BodiGeneratorProperties.XATKIT_INTENT_PROVIDER) + "\n");
+                fw.write(BotProperties.XATKIT_INTENT_PROVIDER + " = " + conf.getString(BotProperties.XATKIT_INTENT_PROVIDER) + "\n");
                 fw.write(BotProperties.XATKIT_NLPJS_AGENTID + " = " + "default" + "\n");
                 fw.write(BotProperties.XATKIT_NLPJS_LANGUAGE + " = " + "en" + "\n");
                 fw.write(BotProperties.XATKIT_NLPJS_SERVER + " = " + "http://localhost:8080" + "\n");
 
             }
 
-            if (conf.getString(BodiGeneratorProperties.XATKIT_LOGS_DATABASE)
+            if (conf.getString(BotProperties.XATKIT_LOGS_DATABASE)
                     .equals("com.xatkit.core.recognition.RecognitionMonitorPostgreSQL")) {
                 fw.write("\n# PostgreSQL\n\n");
-                fw.write(BotProperties.XATKIT_LOGS_DATABASE + " = " + conf.getString(BodiGeneratorProperties.XATKIT_LOGS_DATABASE) + "\n");
+                fw.write(BotProperties.XATKIT_LOGS_DATABASE + " = " + conf.getString(BotProperties.XATKIT_LOGS_DATABASE) + "\n");
                 fw.write(BotProperties.XATKIT_DATABASE_MODEL + " = " + "postgresql" + "\n");
                 fw.write(BotProperties.XATKIT_RECOGNITION_ENABLE_MONITORING + " = " + "true" + "\n");
                 fw.write(BotProperties.XATKIT_POSTGRESQL_URL + " = " + "your-url" + "\n");
@@ -426,17 +454,9 @@ public final class BodiGenerator {
                 fw.write(BotProperties.XATKIT_POSTGRESQL_BOT_ID + " = " + "your-bot-id" + "\n");
             }
 
-            fw.write("\n# NLP Server properties\n\n");
-            fw.write(BotProperties.SERVER_URL + " = " + "127.0.0.1:5002" + "\n");
-            fw.write(BotProperties.TEXT_TO_TABLE_ENDPOINT + " = " + "text-to-table" + "\n");
-
             fw.write("\n# Open data resource information\n\n");
-            fw.write(BotProperties.BOT_ODATA_TITLE_EN + " = " + "title-in-english" + "\n");
-            fw.write(BotProperties.BOT_ODATA_TITLE_CA + " = " + "title-in-catalan" + "\n");
-            fw.write(BotProperties.BOT_ODATA_TITLE_ES + " = " + "title-in-spanish" + "\n");
-            fw.write(BotProperties.BOT_ODATA_URL_EN + " = " + "url-english-source" + "\n");
-            fw.write(BotProperties.BOT_ODATA_URL_CA + " = " + "url-catalan-source" + "\n");
-            fw.write(BotProperties.BOT_ODATA_URL_ES + " = " + "url-spanish-source" + "\n");
+            fw.write(BotProperties.BOT_ODATA_TITLE + " = " + "title" + "\n");
+            fw.write(BotProperties.BOT_ODATA_URL + " = " + "url" + "\n");
             fw.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -549,8 +569,13 @@ public final class BodiGenerator {
                 FileUtils.copyDirectory(testBotSource, testBotDest);
             }
 
-            System.out.println("Creating resource bot.properties");
+            System.out.println("Creating resource config.properties");
             createBotPropertiesFile(properties);
+
+            Set<String> languages = (Set<String>) properties.getBotProperties().get(BotProperties.BOT_LANGUAGES);
+            for (String language : languages) {
+                createBotLanguagePropertiesFile(language, properties);
+            }
 
             List<String> botFiles = new ArrayList<>();
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/Bot.java");
@@ -584,61 +609,79 @@ public final class BodiGenerator {
     }
 
     /**
-     * Creates the {@code bot.properties} configuration file of the generated bot.
+     * Creates the {@code config.properties} configuration file of the generated bot.
      *
      * @param properties the bodi-generator and bot properties
      */
     private static void createBotPropertiesFile(Properties properties) {
         String outputFolder = (String) properties.getBodiGeneratorProperties().get(BodiGeneratorProperties.OUTPUT_DIRECTORY);
         try {
-            FileWriter fw = new FileWriter(outputFolder + "/src/main/resources/bot.properties");
+            FileWriter fw = new FileWriter(outputFolder + "/src/main/resources/config.properties");
 
             fw.write("# Bot\n\n");
-            fw.write(BotProperties.DATA_NAME + " = " + properties.getBotProperties().get(BotProperties.DATA_NAME) + "\n");
-            fw.write(BotProperties.CSV_DELIMITER + " = " + properties.getBotProperties().get(BotProperties.CSV_DELIMITER) + "\n");
-            fw.write(BotProperties.XATKIT_SERVER_PORT + " = " + properties.getBotProperties().get(BotProperties.XATKIT_SERVER_PORT) + "\n");
-            fw.write(BotProperties.XATKIT_REACT_PORT + " = " + properties.getBotProperties().get(BotProperties.XATKIT_REACT_PORT) + "\n");
-            fw.write(BotProperties.BOT_LANGUAGE + " = " + properties.getBotProperties().get(BotProperties.BOT_LANGUAGE) + "\n");
+            fw.write(BotProperties.DATA_NAME + " = " + properties.getBotProperties().get(BodiGeneratorProperties.DATA_NAME) + "\n");
+            fw.write(BotProperties.CSV_DELIMITER + " = " + properties.getBotProperties().get(BodiGeneratorProperties.CSV_DELIMITER) + "\n");
             fw.write(BotProperties.BOT_PAGE_LIMIT + " = " + properties.getBotProperties().get(BotProperties.BOT_PAGE_LIMIT) + "\n");
             fw.write(BotProperties.BOT_MAX_ENTRIES_TO_DISPLAY + " = " + properties.getBotProperties().get(BotProperties.BOT_MAX_ENTRIES_TO_DISPLAY) + "\n");
             fw.write(BotProperties.BOT_ENABLE_CHECK_CORRECT_ANSWER + " = " + properties.getBotProperties().get(BotProperties.BOT_ENABLE_CHECK_CORRECT_ANSWER) + "\n");
-
-            fw.write("\n# Intent provider\n\n");
-            if (properties.getBotProperties().get(BotProperties.XATKIT_INTENT_PROVIDER).equals("com.xatkit.core.recognition.dialogflow.DialogFlowIntentRecognitionProvider")) {
-                fw.write(BotProperties.XATKIT_INTENT_PROVIDER + " = " + properties.getBotProperties().get(BotProperties.XATKIT_INTENT_PROVIDER) + "\n");
-                fw.write(BotProperties.XATKIT_DIALOGFLOW_PROJECT_ID + " = " + properties.getBotProperties().get(BotProperties.XATKIT_DIALOGFLOW_PROJECT_ID) + "\n");
-                fw.write(BotProperties.XATKIT_DIALOGFLOW_CREDENTIALS_PATH + " = " + properties.getBotProperties().get(BotProperties.XATKIT_DIALOGFLOW_CREDENTIALS_PATH) + "\n");
-                fw.write(BotProperties.XATKIT_DIALOGFLOW_LANGUAGE + " = " + properties.getBotProperties().get(BotProperties.XATKIT_DIALOGFLOW_LANGUAGE) + "\n");
-                fw.write(BotProperties.XATKIT_DIALOGFLOW_CLEAN_ON_STARTUP + " = " + properties.getBotProperties().get(BotProperties.XATKIT_DIALOGFLOW_CLEAN_ON_STARTUP) + "\n");
-            } else if (properties.getBotProperties().get(BotProperties.XATKIT_INTENT_PROVIDER).equals("com.xatkit.core.recognition.nlpjs.NlpjsIntentRecognitionProvider")) {
-                fw.write(BotProperties.XATKIT_INTENT_PROVIDER + " = " + properties.getBotProperties().get(BotProperties.XATKIT_INTENT_PROVIDER) + "\n");
-                fw.write(BotProperties.XATKIT_NLPJS_AGENTID + " = " + properties.getBotProperties().get(BotProperties.XATKIT_NLPJS_AGENTID) + "\n");
-                fw.write(BotProperties.XATKIT_NLPJS_LANGUAGE + " = " + properties.getBotProperties().get(BotProperties.XATKIT_NLPJS_LANGUAGE) + "\n");
-                fw.write(BotProperties.XATKIT_NLPJS_SERVER + " = " + properties.getBotProperties().get(BotProperties.XATKIT_NLPJS_SERVER) + "\n");
-            }
-
-            if (properties.getBotProperties().get(BotProperties.XATKIT_LOGS_DATABASE).equals("com.xatkit.core.recognition.RecognitionMonitorPostgreSQL")) {
-                fw.write("\n# PostgreSQL\n\n");
-                fw.write(BotProperties.XATKIT_LOGS_DATABASE + " = " + properties.getBotProperties().get(BotProperties.XATKIT_LOGS_DATABASE) + "\n");
-                fw.write(BotProperties.XATKIT_DATABASE_MODEL + " = " + properties.getBotProperties().get(BotProperties.XATKIT_DATABASE_MODEL) + "\n");
-                fw.write(BotProperties.XATKIT_RECOGNITION_ENABLE_MONITORING + " = " + properties.getBotProperties().get(BotProperties.XATKIT_RECOGNITION_ENABLE_MONITORING) + "\n");
-                fw.write(BotProperties.XATKIT_POSTGRESQL_URL + " = " + properties.getBotProperties().get(BotProperties.XATKIT_POSTGRESQL_URL) + "\n");
-                fw.write(BotProperties.XATKIT_POSTGRESQL_USER + " = " + properties.getBotProperties().get(BotProperties.XATKIT_POSTGRESQL_USER) + "\n");
-                fw.write(BotProperties.XATKIT_POSTGRESQL_PASSWORD + " = " + properties.getBotProperties().get(BotProperties.XATKIT_POSTGRESQL_PASSWORD) + "\n");
-                fw.write(BotProperties.XATKIT_POSTGRESQL_BOT_ID + " = " + properties.getBotProperties().get(BotProperties.XATKIT_POSTGRESQL_BOT_ID) + "\n");
-            }
+            String languagesString = String.join(",", (Set<String>) properties.getBotProperties().get(BotProperties.BOT_LANGUAGES));
+            fw.write(BotProperties.BOT_LANGUAGES + " = " + languagesString + "\n");
 
             fw.write("\n# NLP Server properties\n\n");
             fw.write(BotProperties.SERVER_URL + " = " + properties.getBotProperties().get(BotProperties.SERVER_URL) + "\n");
             fw.write(BotProperties.TEXT_TO_TABLE_ENDPOINT + " = " + properties.getBotProperties().get(BotProperties.TEXT_TO_TABLE_ENDPOINT) + "\n");
 
+            fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Creates the default {@code config_{language}.properties} configuration file of the generated bot.
+     *
+     * @param language   the language that the properties belong to
+     * @param properties the bodi-generator and bot properties
+     */
+    private static void createBotLanguagePropertiesFile(String language, Properties properties) {
+        String outputFolder = (String) properties.getBodiGeneratorProperties().get(BodiGeneratorProperties.OUTPUT_DIRECTORY);
+        Map<String, Object> botPropertiesLang = properties.getBotPropertiesLang().get(language);
+        try {
+            FileWriter fw = new FileWriter(outputFolder + "/src/main/resources/config_" + language + ".properties");
+
+            fw.write("# Bot\n\n");
+            fw.write(BotProperties.XATKIT_SERVER_PORT + " = " + botPropertiesLang.get(BotProperties.XATKIT_SERVER_PORT) + "\n");
+            fw.write(BotProperties.XATKIT_REACT_PORT + " = " + botPropertiesLang.get(BotProperties.XATKIT_REACT_PORT) + "\n");
+            fw.write(BotProperties.BOT_LANGUAGE + " = " + botPropertiesLang.get(BotProperties.BOT_LANGUAGE) + "\n");
+
+            fw.write("\n# Intent provider\n\n");
+            if (botPropertiesLang.get(BotProperties.XATKIT_INTENT_PROVIDER).equals("com.xatkit.core.recognition.dialogflow.DialogFlowIntentRecognitionProvider")) {
+                fw.write(BotProperties.XATKIT_INTENT_PROVIDER + " = " + botPropertiesLang.get(BotProperties.XATKIT_INTENT_PROVIDER) + "\n");
+                fw.write(BotProperties.XATKIT_DIALOGFLOW_PROJECT_ID + " = " + botPropertiesLang.get(BotProperties.XATKIT_DIALOGFLOW_PROJECT_ID) + "\n");
+                fw.write(BotProperties.XATKIT_DIALOGFLOW_CREDENTIALS_PATH + " = " + botPropertiesLang.get(BotProperties.XATKIT_DIALOGFLOW_CREDENTIALS_PATH) + "\n");
+                fw.write(BotProperties.XATKIT_DIALOGFLOW_LANGUAGE + " = " + botPropertiesLang.get(BotProperties.XATKIT_DIALOGFLOW_LANGUAGE) + "\n");
+                fw.write(BotProperties.XATKIT_DIALOGFLOW_CLEAN_ON_STARTUP + " = " + botPropertiesLang.get(BotProperties.XATKIT_DIALOGFLOW_CLEAN_ON_STARTUP) + "\n");
+            } else if (botPropertiesLang.get(BotProperties.XATKIT_INTENT_PROVIDER).equals("com.xatkit.core.recognition.nlpjs.NlpjsIntentRecognitionProvider")) {
+                fw.write(BotProperties.XATKIT_INTENT_PROVIDER + " = " + botPropertiesLang.get(BotProperties.XATKIT_INTENT_PROVIDER) + "\n");
+                fw.write(BotProperties.XATKIT_NLPJS_AGENTID + " = " + botPropertiesLang.get(BotProperties.XATKIT_NLPJS_AGENTID) + "\n");
+                fw.write(BotProperties.XATKIT_NLPJS_LANGUAGE + " = " + botPropertiesLang.get(BotProperties.XATKIT_NLPJS_LANGUAGE) + "\n");
+                fw.write(BotProperties.XATKIT_NLPJS_SERVER + " = " + botPropertiesLang.get(BotProperties.XATKIT_NLPJS_SERVER) + "\n");
+            }
+
+            if (botPropertiesLang.get(BotProperties.XATKIT_LOGS_DATABASE).equals("com.xatkit.core.recognition.RecognitionMonitorPostgreSQL")) {
+                fw.write("\n# PostgreSQL\n\n");
+                fw.write(BotProperties.XATKIT_LOGS_DATABASE + " = " + botPropertiesLang.get(BotProperties.XATKIT_LOGS_DATABASE) + "\n");
+                fw.write(BotProperties.XATKIT_DATABASE_MODEL + " = " + botPropertiesLang.get(BotProperties.XATKIT_DATABASE_MODEL) + "\n");
+                fw.write(BotProperties.XATKIT_RECOGNITION_ENABLE_MONITORING + " = " + botPropertiesLang.get(BotProperties.XATKIT_RECOGNITION_ENABLE_MONITORING) + "\n");
+                fw.write(BotProperties.XATKIT_POSTGRESQL_URL + " = " + botPropertiesLang.get(BotProperties.XATKIT_POSTGRESQL_URL) + "\n");
+                fw.write(BotProperties.XATKIT_POSTGRESQL_USER + " = " + botPropertiesLang.get(BotProperties.XATKIT_POSTGRESQL_USER) + "\n");
+                fw.write(BotProperties.XATKIT_POSTGRESQL_PASSWORD + " = " + botPropertiesLang.get(BotProperties.XATKIT_POSTGRESQL_PASSWORD) + "\n");
+                fw.write(BotProperties.XATKIT_POSTGRESQL_BOT_ID + " = " + botPropertiesLang.get(BotProperties.XATKIT_POSTGRESQL_BOT_ID) + "\n");
+            }
+
             fw.write("\n# Open data resource information\n\n");
-            fw.write(BotProperties.BOT_ODATA_TITLE_EN + " = " + properties.getBotProperties().get(BotProperties.BOT_ODATA_TITLE_EN) + "\n");
-            fw.write(BotProperties.BOT_ODATA_TITLE_CA + " = " + properties.getBotProperties().get(BotProperties.BOT_ODATA_TITLE_CA) + "\n");
-            fw.write(BotProperties.BOT_ODATA_TITLE_ES + " = " + properties.getBotProperties().get(BotProperties.BOT_ODATA_TITLE_ES) + "\n");
-            fw.write(BotProperties.BOT_ODATA_URL_EN + " = " + properties.getBotProperties().get(BotProperties.BOT_ODATA_URL_EN) + "\n");
-            fw.write(BotProperties.BOT_ODATA_URL_CA + " = " + properties.getBotProperties().get(BotProperties.BOT_ODATA_URL_CA) + "\n");
-            fw.write(BotProperties.BOT_ODATA_URL_ES + " = " + properties.getBotProperties().get(BotProperties.BOT_ODATA_URL_ES) + "\n");
+            fw.write(BotProperties.BOT_ODATA_TITLE + " = " + botPropertiesLang.get(BotProperties.BOT_ODATA_TITLE) + "\n");
+            fw.write(BotProperties.BOT_ODATA_URL + " = " + botPropertiesLang.get(BotProperties.BOT_ODATA_URL) + "\n");
 
             fw.close();
         } catch (IOException e) {

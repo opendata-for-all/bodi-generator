@@ -1,15 +1,11 @@
 package com.xatkit.bot.customQuery;
 
+import com.xatkit.bot.Bot;
 import com.xatkit.bot.getResult.GetResult;
-import com.xatkit.bot.library.Intents;
 import com.xatkit.execution.State;
-import com.xatkit.plugins.react.platform.ReactPlatform;
 import lombok.Getter;
 import lombok.val;
 
-import static com.xatkit.bot.Bot.coreLibraryI18n;
-import static com.xatkit.bot.Bot.getResult;
-import static com.xatkit.bot.Bot.messages;
 import static com.xatkit.dsl.DSL.intentIs;
 import static com.xatkit.dsl.DSL.state;
 
@@ -93,47 +89,47 @@ public class CustomQuery {
     /**
      * Instantiates a new Custom Query workflow.
      *
-     * @param reactPlatform the react platform of a chatbot
-     * @param returnState   the state where the chatbot ends up arriving once the workflow is finished
+     * @param bot         the chatbot that uses this workflow
+     * @param returnState the state where the chatbot ends up arriving once the workflow is finished
      */
-    public CustomQuery(ReactPlatform reactPlatform, State returnState) {
-        customFilter = new CustomFilter(reactPlatform, returnState);
-        customShowFieldDistinct = new CustomShowFieldDistinct(reactPlatform, returnState);
-        customFrequentValueInField = new CustomFrequentValueInField(reactPlatform, returnState);
-        customValueFrequency = new CustomValueFrequency(reactPlatform, returnState);
-        customValue1vsValue2 = new CustomValue1vsValue2(reactPlatform, returnState);
-        customNumericFieldFunction = new CustomNumericFieldFunction(reactPlatform, returnState);
-        customRowOfNumericFieldFunction = new CustomRowOfNumericFieldFunction(reactPlatform, returnState);
-        customRowCount = new CustomRowCount(reactPlatform, returnState);
-        customFieldOfValue = new CustomFieldOfValue(reactPlatform, returnState);
-        customRowOfValues = new CustomRowOfValues(reactPlatform, returnState);
+    public CustomQuery(Bot bot, State returnState) {
+        customFilter = new CustomFilter(bot, returnState);
+        customShowFieldDistinct = new CustomShowFieldDistinct(bot, returnState);
+        customFrequentValueInField = new CustomFrequentValueInField(bot, returnState);
+        customValueFrequency = new CustomValueFrequency(bot, returnState);
+        customValue1vsValue2 = new CustomValue1vsValue2(bot, returnState);
+        customNumericFieldFunction = new CustomNumericFieldFunction(bot, returnState);
+        customRowOfNumericFieldFunction = new CustomRowOfNumericFieldFunction(bot, returnState);
+        customRowCount = new CustomRowCount(bot, returnState);
+        customFieldOfValue = new CustomFieldOfValue(bot, returnState);
+        customRowOfValues = new CustomRowOfValues(bot, returnState);
 
         val awaitingCustomQueryState = state("AwaitingCustomQuery");
 
         awaitingCustomQueryState
                 .body(context -> {
-                    reactPlatform.reply(context, messages.getString("WriteYourQuery"));
+                    bot.reactPlatform.reply(context, bot.messages.getString("WriteYourQuery"));
                 })
                 .next()
-                .when(intentIs(Intents.customShowFieldDistinctIntent)).moveTo(customShowFieldDistinct.getProcessCustomShowFieldDistinctState())
-                .when(intentIs(Intents.customMostFrequentValueInFieldIntent)).moveTo(customFrequentValueInField.getProcessCustomFrequentValueInFieldState())
-                .when(intentIs(Intents.customLeastFrequentValueInFieldIntent)).moveTo(customFrequentValueInField.getProcessCustomFrequentValueInFieldState())
-                .when(intentIs(Intents.customValueFrequencyIntent)).moveTo(customValueFrequency.getProcessCustomValueFrequencyState())
-                .when(intentIs(Intents.customValue1MoreThanValue2Intent)).moveTo(customValue1vsValue2.getProcessCustomValue1vsValue2State())
-                .when(intentIs(Intents.customValue1LessThanValue2Intent)).moveTo(customValue1vsValue2.getProcessCustomValue1vsValue2State())
-                .when(intentIs(Intents.customNumericFieldFunctionIntent)).moveTo(customNumericFieldFunction.getProcessCustomNumericFieldFunctionState())
-                .when(intentIs(Intents.customRowOfNumericFieldFunctionIntent)).moveTo(customRowOfNumericFieldFunction.getProcessCustomRowOfNumericFieldFunctionState())
-                .when(intentIs(Intents.customRowCountIntent)).moveTo(customRowCount.getProcessCustomRowCountState())
-                .when(intentIs(Intents.customFieldOfValueIntent)).moveTo(customFieldOfValue.getProcessCustomFieldOfValueState())
-                .when(intentIs(Intents.customFieldOfValueOperatorIntent)).moveTo(customFieldOfValue.getProcessCustomFieldOfValueState())
-                .when(intentIs(Intents.customRowOfValuesIntent)).moveTo(customRowOfValues.getProcessCustomRowOfValuesState())
+                .when(intentIs(bot.intents.customShowFieldDistinctIntent)).moveTo(customShowFieldDistinct.getProcessCustomShowFieldDistinctState())
+                .when(intentIs(bot.intents.customMostFrequentValueInFieldIntent)).moveTo(customFrequentValueInField.getProcessCustomFrequentValueInFieldState())
+                .when(intentIs(bot.intents.customLeastFrequentValueInFieldIntent)).moveTo(customFrequentValueInField.getProcessCustomFrequentValueInFieldState())
+                .when(intentIs(bot.intents.customValueFrequencyIntent)).moveTo(customValueFrequency.getProcessCustomValueFrequencyState())
+                .when(intentIs(bot.intents.customValue1MoreThanValue2Intent)).moveTo(customValue1vsValue2.getProcessCustomValue1vsValue2State())
+                .when(intentIs(bot.intents.customValue1LessThanValue2Intent)).moveTo(customValue1vsValue2.getProcessCustomValue1vsValue2State())
+                .when(intentIs(bot.intents.customNumericFieldFunctionIntent)).moveTo(customNumericFieldFunction.getProcessCustomNumericFieldFunctionState())
+                .when(intentIs(bot.intents.customRowOfNumericFieldFunctionIntent)).moveTo(customRowOfNumericFieldFunction.getProcessCustomRowOfNumericFieldFunctionState())
+                .when(intentIs(bot.intents.customRowCountIntent)).moveTo(customRowCount.getProcessCustomRowCountState())
+                .when(intentIs(bot.intents.customFieldOfValueIntent)).moveTo(customFieldOfValue.getProcessCustomFieldOfValueState())
+                .when(intentIs(bot.intents.customFieldOfValueOperatorIntent)).moveTo(customFieldOfValue.getProcessCustomFieldOfValueState())
+                .when(intentIs(bot.intents.customRowOfValuesIntent)).moveTo(customRowOfValues.getProcessCustomRowOfValuesState())
 
-                .when(intentIs(Intents.customNumericFilterIntent)).moveTo(customFilter.getSaveCustomFilterState())
-                .when(intentIs(Intents.customDateFilterIntent)).moveTo(customFilter.getSaveCustomFilterState())
-                .when(intentIs(Intents.customTextualFilterIntent)).moveTo(customFilter.getSaveCustomFilterState())
-                .when(intentIs(Intents.showDataIntent)).moveTo(getResult.getGenerateResultSetState())
-                .when(intentIs(coreLibraryI18n.Quit)).moveTo(returnState)
-                .when(intentIs(coreLibraryI18n.AnyValue)).moveTo(getResult.getGenerateResultSetFromQueryState());
+                .when(intentIs(bot.intents.customNumericFilterIntent)).moveTo(customFilter.getSaveCustomFilterState())
+                .when(intentIs(bot.intents.customDateFilterIntent)).moveTo(customFilter.getSaveCustomFilterState())
+                .when(intentIs(bot.intents.customTextualFilterIntent)).moveTo(customFilter.getSaveCustomFilterState())
+                .when(intentIs(bot.intents.showDataIntent)).moveTo(bot.getResult.getGenerateResultSetState())
+                .when(intentIs(bot.coreLibraryI18n.Quit)).moveTo(returnState)
+                .when(intentIs(bot.coreLibraryI18n.AnyValue)).moveTo(bot.getResult.getGenerateResultSetFromQueryState());
 
         this.awaitingCustomQueryState = awaitingCustomQueryState.getState();
     }

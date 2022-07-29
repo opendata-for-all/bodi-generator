@@ -1,18 +1,16 @@
 package com.xatkit.bot.customQuery;
 
 import bodi.generator.dataSource.ResultSet;
+import com.xatkit.bot.Bot;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Entities;
 import com.xatkit.execution.State;
-import com.xatkit.plugins.react.platform.ReactPlatform;
 import lombok.Getter;
 import lombok.val;
 
 import java.text.MessageFormat;
 
-import static com.xatkit.bot.Bot.getResult;
-import static com.xatkit.bot.Bot.messages;
-import static com.xatkit.bot.Bot.sql;
+import static com.xatkit.bot.App.sql;
 import static com.xatkit.dsl.DSL.state;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -45,10 +43,10 @@ public class CustomValueFrequency {
     /**
      * Instantiates a new Custom Value Frequency workflow.
      *
-     * @param reactPlatform the react platform of a chatbot
-     * @param returnState   the state where the chatbot ends up arriving once the workflow is finished
+     * @param bot         the chatbot that uses this workflow
+     * @param returnState the state where the chatbot ends up arriving once the workflow is finished
      */
-    public CustomValueFrequency(ReactPlatform reactPlatform, State returnState) {
+    public CustomValueFrequency(Bot bot, State returnState) {
         val processCustomValueFrequencyState = state("ProcessCustomValueFrequency");
 
         processCustomValueFrequencyState
@@ -57,17 +55,17 @@ public class CustomValueFrequency {
                     String value = (String) context.getIntent().getValue(ContextKeys.VALUE);
                     if (!isEmpty(value)) {
                         String field = Entities.fieldValueMap.get(value);
-                        String sqlQuery = sql.queries.valueFrequency(field, value);
+                        String sqlQuery = bot.sqlQueries.valueFrequency(field, value);
                         ResultSet resultSet = sql.runSqlQuery(sqlQuery);
                         int valueFrequency = Integer.parseInt(resultSet.getRow(0).getColumnValue(0));
-                        reactPlatform.reply(context, MessageFormat.format(messages.getString("ShowValueFrequency"),
+                        bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("ShowValueFrequency"),
                                 valueFrequency, field, value));
                     } else {
                         error = true;
                     }
                 })
                 .next()
-                .when(context -> error).moveTo(getResult.getGenerateResultSetFromQueryState())
+                .when(context -> error).moveTo(bot.getResult.getGenerateResultSetFromQueryState())
                 .when(context -> !error).moveTo(returnState);
 
         this.processCustomValueFrequencyState = processCustomValueFrequencyState.getState();

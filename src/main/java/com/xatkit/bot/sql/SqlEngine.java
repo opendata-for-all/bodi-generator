@@ -32,21 +32,16 @@ public class SqlEngine {
     private Statement statement;
 
     /**
-     * The system that generates the SQL queries.
-     */
-    public SqlQueries queries;
-
-    /**
      * Instantiates a new {@link SqlEngine}
      * <p>
      * It connects to a local database made up of the {@code .csv} file(s) stored in the resources folder.
      */
-    public SqlEngine(String tableName, char delimiter) {
-        queries = new SqlQueries(tableName, delimiter);
+    public SqlEngine() {
         try {
+            Class.forName("org.apache.drill.jdbc.Driver");
             Connection conn = DriverManager.getConnection(url);
             statement = conn.createStatement();
-        } catch (SQLException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             Log.error(e, "An error occurred while connecting to {0}, see the attached exception", url);
         }
     }

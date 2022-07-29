@@ -4,11 +4,7 @@ import bodi.generator.dataSource.ResultSet;
 import bodi.generator.dataSource.Row;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
-import com.xatkit.bot.Bot;
 import fr.inria.atlanmod.commons.log.Log;
-import org.apache.commons.configuration2.Configuration;
-import org.apache.commons.configuration2.builder.fluent.Configurations;
-import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -18,7 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.xatkit.bot.Bot.checkCorrectAnswer;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
@@ -51,33 +46,28 @@ public class NLPServerClient {
     /**
      * Instantiates a new {@link NLPServerClient}.
      * <p>
-     * The attributes of the instance are loaded from a resources file {@code bot.properties}
+     * The attributes of the instance are loaded from a resources file {@code config.properties}
+     *
+     * @param serverUrl the server url
+     * @param textToTableEndpoint the endpoint to get a tabular answer from a textual question
      */
-    public NLPServerClient() {
-        Configuration configuration;
-        Configurations configurations = new Configurations();
-        try {
-            configuration = configurations.properties(Thread.currentThread().getContextClassLoader()
-                    .getResource(Bot.botPropertiesFile));
-            this.serverUrl = "http://" + configuration.getString("SERVER_URL") + "/";
-            this.textToTableEndpoint = configuration.getString("TEXT_TO_TABLE_ENDPOINT");
-        } catch (ConfigurationException e) {
-            e.printStackTrace();
-            System.out.println("Configuration file not found");
-        }
+    public NLPServerClient(String serverUrl, String textToTableEndpoint) {
+        this.serverUrl = serverUrl;
+        this.textToTableEndpoint = textToTableEndpoint;
     }
 
     /**
      * Gets the response from the server endpoint.
      *
-     * @param input the input of the server
+     * @param input    the input of the server
+     * @param language the input language
      * @return the server response
      * @throws UnirestException the unirest exception
      */
-    private JSONObject getResponse(String input) throws UnirestException {
+    private JSONObject getResponse(String input, String language) throws UnirestException {
         JSONObject request = new JSONObject();
         request.put("input", input);
-        request.put("language", Bot.language);
+        request.put("language", language);
         request.put("fields", (Collection<?>) null);
         request.put("filters", (Collection<?>) null);
         request.put("ignoreCase", true);
@@ -89,13 +79,14 @@ public class NLPServerClient {
     /**
      * Makes a query to the server and obtains the translations of the server input.
      *
-     * @param input the input of the server
-     * @return if successful, a map containing the language-translation entries, otherwise null
+     * @param input    the input of the server
+     * @param language the input language
+     * @return if successful, a map containing the language-translation entries, otherwise an empty map
      */
-    public Map<String, String> getTranslations(String input) {
+    public Map<String, String> getTranslations(String input, String language) {
         Map<String, String> translations = new HashMap<>();
         try {
-            JSONObject response = getResponse(input);
+            JSONObject response = getResponse(input, language);
             String sqlQuery = response.getString("sql");
             String inputInEnglish = response.getString("input_en");
             translations.put("sql", sqlQuery);
@@ -109,15 +100,16 @@ public class NLPServerClient {
     }
 
     /**
-     * Makes a query to the server and obtains a {@link bodi.generator.dataSource.ResultSet} containing the response.
+     * Makes a query to the server and obtains a {@link ResultSet} containing the response.
      *
-     * @param input the input of the server
-     * @return if successful, the {@link bodi.generator.dataSource.ResultSet} containing the result of the server,
-     * otherwise an empty {@link bodi.generator.dataSource.ResultSet}.
+     * @param input    the input of the server
+     * @param language the input language
+     * @return if successful, the {@link ResultSet} containing the result of the server, otherwise an empty
+     * {@link ResultSet}.
      */
-    public ResultSet runQuery(String input) {
+    public ResultSet runQuery(String input, String language) {
         try {
-            JSONObject response = getResponse(input);
+            JSONObject response = getResponse(input, language);
             String sqlQuery = response.getString("sql");
             JSONArray headerJson = response.getJSONArray("header");
             JSONArray tableJson = response.getJSONArray("table");
@@ -143,7 +135,7 @@ public class NLPServerClient {
                 }
                 table.add(new Row(values));
             }
-            checkCorrectAnswer.setLastSqlQuery(sqlQuery);
+            //checkCorrectAnswer.setLastSqlQuery(sqlQuery);
             return new ResultSet(header, table);
         } catch (Exception e) {
             Log.error(e, "An error occurred while getting the SQL result, see the attached exception");

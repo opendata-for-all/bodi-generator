@@ -15,6 +15,7 @@ public final class BotProperties {
     public static final String XATKIT_SERVER_PORT = "xatkit.server.port";
     public static final String XATKIT_REACT_PORT = "xatkit.react.port";
     public static final String BOT_LANGUAGE = "bot.language";
+    public static final String BOT_LANGUAGES = "bot.languages";
     public static final String BOT_PAGE_LIMIT = "bot.pageLimit";
     public static final String BOT_MAX_ENTRIES_TO_DISPLAY = "bot.maxEntriesToDisplay";
     public static final String BOT_ENABLE_CHECK_CORRECT_ANSWER = "bot.enableCheckCorrectAnswer";
@@ -56,11 +57,7 @@ public final class BotProperties {
 
     // Open data resource information
 
-    public static final String BOT_ODATA_TITLE_EN = "bot.odata.title.en";
-    public static final String BOT_ODATA_TITLE_CA = "bot.odata.title.ca";
-    public static final String BOT_ODATA_TITLE_ES = "bot.odata.title.es";
-    public static final String BOT_ODATA_URL_EN = "bot.odata.url.en";
-    public static final String BOT_ODATA_URL_CA = "bot.odata.url.ca";
-    public static final String BOT_ODATA_URL_ES = "bot.odata.url.es";
+    public static final String BOT_ODATA_TITLE = "bot.odata.title";
+    public static final String BOT_ODATA_URL = "bot.odata.url";
 
 }

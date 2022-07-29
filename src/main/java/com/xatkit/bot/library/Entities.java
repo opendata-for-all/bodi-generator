@@ -1,6 +1,5 @@
 package com.xatkit.bot.library;
 
-import com.xatkit.bot.Bot;
 import com.xatkit.dsl.entity.EntityDefinitionReferenceProvider;
 import com.xatkit.dsl.entity.MappingEntryStep;
 import com.xatkit.dsl.entity.MappingSynonymStep;
@@ -20,10 +19,15 @@ import java.util.Map;
 
 import static com.xatkit.dsl.DSL.mapping;
 
-public final class Entities {
+/**
+ * A set of entities the chatbot can recognize.
+ */
+public class Entities {
 
-    private Entities() {
-    }
+    /**
+     * The language of the entities.
+     */
+    private final String language;
 
     /**
      * The name of the file containing the chatbot field entities.
@@ -41,10 +45,13 @@ public final class Entities {
     private static String rowNamesJsonFile = "rowNames.json";
 
     /**
-     * Contains the chatbot entities in a JSON format and in the bot language ({@link Bot#language}).
+     * Contains the chatbot entities in a JSON format.
      */
     private static final JSONObject entitiesJson;
 
+    /**
+     * Contains the chatbot associated row names in a JSON format.
+     */
     private static final JSONObject rowNamesJson;
 
     /**
@@ -92,54 +99,80 @@ public final class Entities {
     /**
      * The entity numericFieldEntity.
      */
-    public static final EntityDefinitionReferenceProvider numericFieldEntity = generateEntity("numericFieldEntity");
+    public final EntityDefinitionReferenceProvider numericFieldEntity;
     /**
      * The entity textualFieldEntity.
      */
-    public static final EntityDefinitionReferenceProvider textualFieldEntity = generateEntity("textualFieldEntity");
+    public final EntityDefinitionReferenceProvider textualFieldEntity;
     /**
      * The entity dateFieldEntity.
      */
-    public static final EntityDefinitionReferenceProvider dateFieldEntity = generateEntity("dateFieldEntity");
+    public final EntityDefinitionReferenceProvider dateFieldEntity;
     /**
      * The entity fieldEntity (combines {@link #numericFieldEntity}, {@link #textualFieldEntity} and
      * {@link #dateFieldEntity}).
      */
-    public static final EntityDefinitionReferenceProvider fieldEntity = mergeEntities("fieldEntity", numericFieldEntity, textualFieldEntity, dateFieldEntity);
+    public final EntityDefinitionReferenceProvider fieldEntity;
 
     /**
      * The entity numericOperatorEntity.
      */
-    public static final EntityDefinitionReferenceProvider numericOperatorEntity = generateEntity("numericOperatorEntity");
+    public final EntityDefinitionReferenceProvider numericOperatorEntity;
     /**
      * The entity textualOperatorEntity.
      */
-    public static final EntityDefinitionReferenceProvider textualOperatorEntity = generateEntity("textualOperatorEntity");
+    public final EntityDefinitionReferenceProvider textualOperatorEntity;
     /**
      * The entity dateOperatorEntity.
      */
-    public static final EntityDefinitionReferenceProvider dateOperatorEntity = generateEntity("dateOperatorEntity");
+    public final EntityDefinitionReferenceProvider dateOperatorEntity;
 
     /**
      * The entity numericFunctionOperatorEntity.
      */
-    public static final EntityDefinitionReferenceProvider numericFunctionOperatorEntity = generateEntity("numericFunctionOperatorEntity");
+    public final EntityDefinitionReferenceProvider numericFunctionOperatorEntity;
     /**
      * The entity dateFunctionOperatorEntity.
      */
-    public static final EntityDefinitionReferenceProvider dateFunctionOperatorEntity = generateEntity("dateFunctionOperatorEntity");
+    public final EntityDefinitionReferenceProvider dateFunctionOperatorEntity;
     /**
      * The entity functionOperatorEntity (combines {@link #numericFunctionOperatorEntity} and
      * {@link #dateFunctionOperatorEntity}).
      */
-    public static final EntityDefinitionReferenceProvider functionOperatorEntity = mergeEntities("functionOperator", numericFunctionOperatorEntity, dateFunctionOperatorEntity);
+    public final EntityDefinitionReferenceProvider functionOperatorEntity;
 
     /**
      * The entity fieldValueEntity.
      */
-    public static final EntityDefinitionReferenceProvider fieldValueEntity = generateFieldValueEntity();
+    public final EntityDefinitionReferenceProvider fieldValueEntity;
 
-    public static final EntityDefinitionReferenceProvider rowNameEntity = generateRowNameEntity();
+    public final EntityDefinitionReferenceProvider rowNameEntity;
+
+    /**
+     * Instantiates a new {@link Entities} object.
+     *
+     * @param language the language of the entities
+     */
+    public Entities(String language) {
+        this.language = language;
+
+        numericFieldEntity = generateEntity("numericFieldEntity");
+        textualFieldEntity = generateEntity("textualFieldEntity");
+        dateFieldEntity = generateEntity("dateFieldEntity");
+        fieldEntity = mergeEntities("fieldEntity", numericFieldEntity, textualFieldEntity, dateFieldEntity);
+
+        numericOperatorEntity = generateEntity("numericOperatorEntity");
+        textualOperatorEntity = generateEntity("textualOperatorEntity");
+        dateOperatorEntity = generateEntity("dateOperatorEntity");
+
+        numericFunctionOperatorEntity = generateEntity("numericFunctionOperatorEntity");
+        dateFunctionOperatorEntity = generateEntity("dateFunctionOperatorEntity");
+        functionOperatorEntity = mergeEntities("functionOperator", numericFunctionOperatorEntity, dateFunctionOperatorEntity);
+
+        fieldValueEntity = generateFieldValueEntity();
+
+        rowNameEntity = generateRowNameEntity();
+    }
 
     /**
      * Generates a chatbot entity.
@@ -149,12 +182,12 @@ public final class Entities {
      * @param entityName the name of the entity
      * @return the entity object
      */
-    private static EntityDefinitionReferenceProvider generateEntity(String entityName) {
+    private EntityDefinitionReferenceProvider generateEntity(String entityName) {
         JSONObject entityJson = entitiesJson.getJSONObject(entityName);
         MappingEntryStep entity = mapping(entityName);
         for (String entry : entityJson.keySet()) {
             MappingSynonymStep synonymStep = entity.entry().value(entry);
-            for (Object synonym : entityJson.getJSONObject(entry).getJSONObject(Bot.language).getJSONArray("synonyms")) {
+            for (Object synonym : entityJson.getJSONObject(entry).getJSONObject(language).getJSONArray("synonyms")) {
                 synonymStep.synonym((String) synonym);
             }
             try {
@@ -201,7 +234,7 @@ public final class Entities {
      *
      * @return the fieldValueEntity
      */
-    private static EntityDefinitionReferenceProvider generateFieldValueEntity() {
+    private EntityDefinitionReferenceProvider generateFieldValueEntity() {
         fieldValueMap = new HashMap<>();
         MappingEntryStep entity = mapping("fieldValueEntity");
         for (String typeFieldEntityName : entitiesJson.keySet()) {
@@ -212,7 +245,7 @@ public final class Entities {
                     for (String entryName : fieldValues.keySet()) {
                         JSONObject valueObject = fieldValues.getJSONObject(entryName);
                         MappingSynonymStep synonymStep = entity.entry().value(entryName);
-                        for (Object synonym : valueObject.getJSONArray(Bot.language)) {
+                        for (Object synonym : valueObject.getJSONArray(language)) {
                             synonymStep.synonym((String) synonym);
                         }
                         fieldValueMap.put(entryName, fieldName);
@@ -223,12 +256,11 @@ public final class Entities {
         return (EntityDefinitionReferenceProvider) entity;
     }
 
-
-    private static EntityDefinitionReferenceProvider generateRowNameEntity() {
+    private EntityDefinitionReferenceProvider generateRowNameEntity() {
         String entityName = "rowNameEntity";
         JSONObject entityJson = rowNamesJson.getJSONObject(entityName);
         MappingEntryStep entity = mapping(entityName);
-        for (Object entry : entityJson.getJSONArray(Bot.language)) {
+        for (Object entry : entityJson.getJSONArray(language)) {
             entity.entry().value((String) entry);
         }
         return (EntityDefinitionReferenceProvider) entity;

@@ -1,11 +1,10 @@
 package com.xatkit.bot.customQuery;
 
 import bodi.generator.dataSource.ResultSet;
+import com.xatkit.bot.Bot;
 import com.xatkit.bot.library.ContextKeys;
-import com.xatkit.bot.library.Entities;
 import com.xatkit.bot.library.Utils;
 import com.xatkit.execution.State;
-import com.xatkit.plugins.react.platform.ReactPlatform;
 import lombok.Getter;
 import lombok.val;
 
@@ -13,9 +12,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.xatkit.bot.Bot.getResult;
-import static com.xatkit.bot.Bot.messages;
-import static com.xatkit.bot.Bot.sql;
+import static com.xatkit.bot.App.sql;
 import static com.xatkit.dsl.DSL.state;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -47,10 +44,10 @@ public class CustomRowOfNumericFieldFunction {
     /**
      * Instantiates a new Custom Row Of Numeric Field Function workflow.
      *
-     * @param reactPlatform the react platform of a chatbot
-     * @param returnState   the state where the chatbot ends up arriving once the workflow is finished
+     * @param bot         the chatbot that uses this workflow
+     * @param returnState the state where the chatbot ends up arriving once the workflow is finished
      */
-    public CustomRowOfNumericFieldFunction(ReactPlatform reactPlatform, State returnState) {
+    public CustomRowOfNumericFieldFunction(Bot bot, State returnState) {
         val processCustomRowOfNumericFieldFunctionState = state("ProcessCustomRowOfNumericFieldFunction");
 
         processCustomRowOfNumericFieldFunctionState
@@ -58,24 +55,24 @@ public class CustomRowOfNumericFieldFunction {
                     error = false;
                     String rowName = (String) context.getIntent().getValue(ContextKeys.ROW_NAME);
                     if (isEmpty(rowName)) {
-                        rowName = Utils.getEntityValues(Entities.rowNameEntity).get(0);
+                        rowName = Utils.getEntityValues(bot.entities.rowNameEntity).get(0);
                     }
                     String field = (String) context.getIntent().getValue(ContextKeys.FIELD);
                     String operator = (String) context.getIntent().getValue(ContextKeys.OPERATOR);
                     if (!isEmpty(field) && !isEmpty(operator) && (operator.equals("max") || operator.equals("min"))) {
-                        List<String> keyFields = new ArrayList<>(Entities.keyFields);
-                        String sqlQuery = sql.queries.rowOfNumericFieldFunction(keyFields, field, operator);
+                        List<String> keyFields = new ArrayList<>(bot.entities.keyFields);
+                        String sqlQuery = bot.sqlQueries.rowOfNumericFieldFunction(keyFields, field, operator);
                         ResultSet resultSet = sql.runSqlQuery(sqlQuery);
-                        getResult.setResultSet(resultSet);
-                        reactPlatform.reply(context, MessageFormat.format(messages.getString("CustomRowOfNumericFieldFunction"),
+                        bot.getResult.setResultSet(resultSet);
+                        bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("CustomRowOfNumericFieldFunction"),
                                 rowName, operator, field));
                     } else {
                         error = true;
                     }
                 })
                 .next()
-                .when(context -> error).moveTo(getResult.getGenerateResultSetFromQueryState())
-                .when(context -> !error).moveTo(getResult.getShowDataState());
+                .when(context -> error).moveTo(bot.getResult.getGenerateResultSetFromQueryState())
+                .when(context -> !error).moveTo(bot.getResult.getShowDataState());
 
         this.processCustomRowOfNumericFieldFunctionState = processCustomRowOfNumericFieldFunctionState.getState();
     }

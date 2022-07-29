@@ -1,21 +1,16 @@
 package com.xatkit.bot.customQuery;
 
 import bodi.generator.dataSource.ResultSet;
+import com.xatkit.bot.Bot;
 import com.xatkit.bot.library.ContextKeys;
-import com.xatkit.bot.library.Intents;
 import com.xatkit.bot.library.Utils;
 import com.xatkit.execution.State;
-import com.xatkit.plugins.react.platform.ReactPlatform;
 import lombok.Getter;
 import lombok.val;
 
 import java.text.MessageFormat;
 
-import static com.xatkit.bot.Bot.coreLibraryI18n;
-import static com.xatkit.bot.Bot.getResult;
-import static com.xatkit.bot.Bot.maxEntriesToDisplay;
-import static com.xatkit.bot.Bot.messages;
-import static com.xatkit.bot.Bot.sql;
+import static com.xatkit.bot.App.sql;
 import static com.xatkit.dsl.DSL.intentIs;
 import static com.xatkit.dsl.DSL.state;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -44,10 +39,10 @@ public class CustomFilter {
     /**
      * Instantiates a new Custom Filter workflow.
      *
-     * @param reactPlatform the react platform of a chatbot
-     * @param returnState   the state where the chatbot ends up arriving once the workflow is finished
+     * @param bot         the chatbot that uses this workflow
+     * @param returnState the state where the chatbot ends up arriving once the workflow is finished
      */
-    public CustomFilter(ReactPlatform reactPlatform, State returnState) {
+    public CustomFilter(Bot bot, State returnState) {
         val saveCustomFilterState = state("SaveCustomFilter");
         val selectNextActionState = state("SelectNextAction");
 
@@ -57,33 +52,33 @@ public class CustomFilter {
                     String operator = (String) context.getIntent().getValue(ContextKeys.OPERATOR);
                     String value = (String) context.getIntent().getValue(ContextKeys.VALUE);
                     if (!isEmpty(field) && !isEmpty(operator) && !isEmpty(value)) {
-                        sql.queries.addFilter(field, operator, value);
-                        String sqlQuery =  sql.queries.selectAll();
+                        bot.sqlQueries.addFilter(field, operator, value);
+                        String sqlQuery =  bot.sqlQueries.selectAll();
                         ResultSet resultSet = sql.runSqlQuery(sqlQuery);
-                        getResult.setResultSet(resultSet);
+                        bot.getResult.setResultSet(resultSet);
                         resultSetNumRows = resultSet.getNumRows();
-                        reactPlatform.reply(context, MessageFormat.format(messages.getString("FilterAdded"),
+                        bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("FilterAdded"),
                                 field, operator, value, resultSet.getNumRows()));
                     } else {
-                        reactPlatform.reply(context, messages.getString("SomethingWentWrong"));
+                        bot.reactPlatform.reply(context, bot.messages.getString("SomethingWentWrong"));
                     }
                 })
                 .next()
-                .when(context -> resultSetNumRows <= maxEntriesToDisplay).moveTo(getResult.getShowDataState())
-                .when(context -> resultSetNumRows > maxEntriesToDisplay).moveTo(selectNextActionState);
+                .when(context -> resultSetNumRows <= bot.maxEntriesToDisplay).moveTo(bot.getResult.getShowDataState())
+                .when(context -> resultSetNumRows > bot.maxEntriesToDisplay).moveTo(selectNextActionState);
 
         selectNextActionState
                 .body(context -> {
-                    reactPlatform.reply(context, messages.getString("SelectNextAction"),
+                    bot.reactPlatform.reply(context, bot.messages.getString("SelectNextAction"),
                             Utils.getFirstTrainingSentences(
-                                    Intents.anotherQueryIntent,
-                                    Intents.showDataIntent,
-                                    coreLibraryI18n.Quit));
+                                    bot.intents.anotherQueryIntent,
+                                    bot.intents.showDataIntent,
+                                    bot.coreLibraryI18n.Quit));
                 })
                 .next()
-                .when(intentIs(Intents.anotherQueryIntent)).moveTo(returnState)
-                .when(intentIs(Intents.showDataIntent)).moveTo(getResult.getShowDataState())
-                .when(intentIs(coreLibraryI18n.Quit)).moveTo(returnState);
+                .when(intentIs(bot.intents.anotherQueryIntent)).moveTo(returnState)
+                .when(intentIs(bot.intents.showDataIntent)).moveTo(bot.getResult.getShowDataState())
+                .when(intentIs(bot.coreLibraryI18n.Quit)).moveTo(returnState);
 
         this.saveCustomFilterState = saveCustomFilterState.getState();
     }

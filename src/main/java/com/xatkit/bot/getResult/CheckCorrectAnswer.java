@@ -1,15 +1,12 @@
 package com.xatkit.bot.getResult;
 
-import com.xatkit.bot.library.Intents;
+import com.xatkit.bot.Bot;
 import com.xatkit.bot.library.Utils;
 import com.xatkit.execution.State;
-import com.xatkit.plugins.react.platform.ReactPlatform;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.val;
 
-import static com.xatkit.bot.Bot.coreLibraryI18n;
-import static com.xatkit.bot.Bot.messages;
 import static com.xatkit.dsl.DSL.intentIs;
 import static com.xatkit.dsl.DSL.state;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -37,27 +34,27 @@ public class CheckCorrectAnswer {
     /**
      * Instantiates a new Check Correct Answer Function workflow.
      *
-     * @param reactPlatform the react platform of a chatbot
-     * @param returnState   the state where the chatbot ends up arriving once the workflow is finished
+     * @param bot         the chatbot that uses this workflow
+     * @param returnState the state where the chatbot ends up arriving once the workflow is finished
      */
-    public CheckCorrectAnswer(ReactPlatform reactPlatform, State returnState) {
+    public CheckCorrectAnswer(Bot bot, State returnState) {
         val processCheckCorrectAnswerState = state("ProcessCheckCorrectAnswer");
 
         processCheckCorrectAnswerState
                 .body(context -> {
                     if (!isEmpty(lastSqlQuery)) {
-                        reactPlatform.reply(context, messages.getString("ShowSQL"));
-                        reactPlatform.reply(context, lastSqlQuery);
+                        bot.reactPlatform.reply(context, bot.messages.getString("ShowSQL"));
+                        bot.reactPlatform.reply(context, lastSqlQuery);
                     }
-                    reactPlatform.reply(context, messages.getString("AskCorrectAnswer"),
+                    bot.reactPlatform.reply(context, bot.messages.getString("AskCorrectAnswer"),
                             Utils.getFirstTrainingSentences(
-                                    coreLibraryI18n.Yes, coreLibraryI18n.No, Intents.iDontKnowIntent));
+                                    bot.coreLibraryI18n.Yes, bot.coreLibraryI18n.No, bot.intents.iDontKnowIntent));
                     lastSqlQuery = null;
                 })
                 .next()
-                .when(intentIs(coreLibraryI18n.Yes)).moveTo(returnState)
-                .when(intentIs(coreLibraryI18n.No)).moveTo(returnState)
-                .when(intentIs(Intents.iDontKnowIntent)).moveTo(returnState);
+                .when(intentIs(bot.coreLibraryI18n.Yes)).moveTo(returnState)
+                .when(intentIs(bot.coreLibraryI18n.No)).moveTo(returnState)
+                .when(intentIs(bot.intents.iDontKnowIntent)).moveTo(returnState);
 
         this.processCheckCorrectAnswerState = processCheckCorrectAnswerState.getState();
     }

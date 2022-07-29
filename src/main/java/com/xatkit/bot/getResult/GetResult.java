@@ -1,22 +1,19 @@
 package com.xatkit.bot.getResult;
 
 import bodi.generator.dataSource.ResultSet;
+import com.xatkit.bot.App;
+import com.xatkit.bot.Bot;
 import com.xatkit.bot.library.ContextKeys;
-import com.xatkit.bot.library.Intents;
 import com.xatkit.bot.library.Utils;
 import com.xatkit.execution.State;
-import com.xatkit.plugins.react.platform.ReactPlatform;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.val;
 
 import java.text.MessageFormat;
 
-import static com.xatkit.bot.Bot.coreLibraryI18n;
-import static com.xatkit.bot.Bot.messages;
-import static com.xatkit.bot.Bot.nlpServerClient;
-import static com.xatkit.bot.Bot.pageLimit;
-import static com.xatkit.bot.Bot.sql;
+import static com.xatkit.bot.App.nlpServerClient;
+import static com.xatkit.bot.App.sql;
 import static com.xatkit.dsl.DSL.intentIs;
 import static com.xatkit.dsl.DSL.state;
 
@@ -49,10 +46,10 @@ public class GetResult {
      * One of the entry points for the Get Result workflow.
      * <p>
      * When no intent is recognized from a user question, this state is executed to try to obtain a tabular answer to
-     * that question, using {@link com.xatkit.bot.Bot#nlpServerClient}.
+     * that question, using {@link App#nlpServerClient}.
      * <p>
-     * The filters previously applied by the user are also added to
-     * the query (see {@link com.xatkit.bot.nlp.NLPServerClient#runQuery(String)}
+     * <del>The filters previously applied by the user are also added to the query (see
+     * {@link com.xatkit.bot.nlp.NLPServerClient#runQuery(String, String)}</del>
      */
     @Getter
     private final State generateResultSetFromQueryState;
@@ -74,17 +71,17 @@ public class GetResult {
     /**
      * Instantiates a new Get Result workflow.
      *
-     * @param reactPlatform the react platform of a chatbot
-     * @param returnState   the state where the chatbot ends up arriving once the workflow is finished
+     * @param bot         the chatbot that uses this workflow
+     * @param returnState the state where the chatbot ends up arriving once the workflow is finished
      */
-    public GetResult(ReactPlatform reactPlatform, State returnState) {
+    public GetResult(Bot bot, State returnState) {
         val generateResultSetState = state("GenerateResultSet");
         val generateResultSetFromQueryState = state("GenerateResultSetFromQuery");
         val showDataState = state("ShowData");
 
         generateResultSetState
                 .body(context -> {
-                    String sqlQuery = sql.queries.selectAll();
+                    String sqlQuery = bot.sqlQueries.selectAll();
                     resultSet = sql.runSqlQuery(sqlQuery);
                 })
                 .next()
@@ -95,7 +92,7 @@ public class GetResult {
         generateResultSetFromQueryState
                 .body(context -> {
                     String query = context.getIntent().getMatchedInput();
-                    resultSet = nlpServerClient.runQuery(query);
+                    resultSet = nlpServerClient.runQuery(query, bot.language);
                 })
                 .next()
                 .moveTo(showDataState);
@@ -106,15 +103,15 @@ public class GetResult {
                 .body(context -> {
                     int pageCount = 1;
                     if (context.getIntent().getMatchedInput()
-                            .equals(Intents.showNextPageIntent.getTrainingSentences().get(0))) {
+                            .equals(bot.intents.showNextPageIntent.getTrainingSentences().get(0))) {
                         pageCount = (int) context.getSession().get(ContextKeys.PAGE_COUNT) + 1;
                     } else if (context.getIntent().getMatchedInput()
-                            .equals(Intents.showPreviousPageIntent.getTrainingSentences().get(0))) {
+                            .equals(bot.intents.showPreviousPageIntent.getTrainingSentences().get(0))) {
                         pageCount = (int) context.getSession().get(ContextKeys.PAGE_COUNT) - 1;
                     }
                     int totalEntries = resultSet.getNumRows();
-                    int totalPages = totalEntries / pageLimit;
-                    if (totalEntries % pageLimit != 0) {
+                    int totalPages = totalEntries / bot.pageLimit;
+                    if (totalEntries % bot.pageLimit != 0) {
                         totalPages += 1;
                     }
                     if (pageCount > totalPages) {
@@ -124,34 +121,34 @@ public class GetResult {
                         // Page overflow
                         pageCount = totalPages;
                     }
-                    int offset = (pageCount - 1) * pageLimit;
+                    int offset = (pageCount - 1) * bot.pageLimit;
                     context.getSession().put(ContextKeys.PAGE_COUNT, pageCount);
 
                     if (totalEntries > 0) {
                         // Print table
-                        String resultSetString = resultSet.printTable(offset, pageLimit);
-                        int selectedEntries = (offset + pageLimit > totalEntries ? totalEntries - offset : pageLimit);
-                        reactPlatform.reply(context, MessageFormat.format(
-                                messages.getString("ShowingRecords"), selectedEntries, totalEntries));
+                        String resultSetString = resultSet.printTable(offset, bot.pageLimit);
+                        int selectedEntries = (offset + bot.pageLimit > totalEntries ? totalEntries - offset : bot.pageLimit);
+                        bot.reactPlatform.reply(context, MessageFormat.format(
+                                bot.messages.getString("ShowingRecords"), selectedEntries, totalEntries));
                         if (totalPages > 1) {
-                            reactPlatform.reply(context, MessageFormat.format(
-                                    messages.getString("PageCount"), pageCount, totalPages));
-                            reactPlatform.reply(context, resultSetString, Utils.getFirstTrainingSentences(
-                                    Intents.showPreviousPageIntent,
-                                    Intents.showNextPageIntent,
-                                    coreLibraryI18n.Quit));
+                            bot.reactPlatform.reply(context, MessageFormat.format(
+                                    bot.messages.getString("PageCount"), pageCount, totalPages));
+                            bot.reactPlatform.reply(context, resultSetString, Utils.getFirstTrainingSentences(
+                                    bot.intents.showPreviousPageIntent,
+                                    bot.intents.showNextPageIntent,
+                                    bot.coreLibraryI18n.Quit));
                         } else {
-                            reactPlatform.reply(context, resultSetString);
+                            bot.reactPlatform.reply(context, resultSetString);
                         }
                     } else {
-                        reactPlatform.reply(context, messages.getString("NothingFound"));
+                        bot.reactPlatform.reply(context, bot.messages.getString("NothingFound"));
                     }
                 })
                 .next()
-                .when(context -> (resultSet.getNumRows() <= pageLimit)).moveTo(returnState)
-                .when(intentIs(Intents.showPreviousPageIntent)).moveTo(showDataState)
-                .when(intentIs(Intents.showNextPageIntent)).moveTo(showDataState)
-                .when(intentIs(coreLibraryI18n.Quit)).moveTo(returnState);
+                .when(context -> (resultSet.getNumRows() <= bot.pageLimit)).moveTo(returnState)
+                .when(intentIs(bot.intents.showPreviousPageIntent)).moveTo(showDataState)
+                .when(intentIs(bot.intents.showNextPageIntent)).moveTo(showDataState)
+                .when(intentIs(bot.coreLibraryI18n.Quit)).moveTo(returnState);
 
         this.showDataState = showDataState.getState();
     }

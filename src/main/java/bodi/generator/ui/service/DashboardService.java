@@ -2,6 +2,7 @@ package bodi.generator.ui.service;
 
 import bodi.generator.ui.controller.user.CustomizationTab;
 import bodi.generator.ui.controller.user.DashboardView;
+import bodi.generator.ui.controller.user.PropertiesTab;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
@@ -37,6 +38,20 @@ public class DashboardService {
     public String viewCustomization(CustomizationTab tab, Model model) {
         model.addAttribute("dashboardUrl", "/bodi-generator");
         model.addAttribute("page", DashboardView.CUSTOMIZATION);
+        model.addAttribute("tab", tab);
+        return "bodi-generator/dashboard";
+    }
+
+    /**
+     * Sets the dashboard view {@code properties} and sets the {@code properties} tab.
+     *
+     * @param tab   the tab to set
+     * @param model the model
+     * @return the name of the dashboard page
+     */
+    public String viewProperties(PropertiesTab tab, Model model) {
+        model.addAttribute("dashboardUrl", "/bodi-generator");
+        model.addAttribute("page", DashboardView.PROPERTIES);
         model.addAttribute("tab", tab);
         return "bodi-generator/dashboard";
     }

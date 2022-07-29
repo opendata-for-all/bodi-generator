@@ -5,9 +5,10 @@ import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.CSVWriter;
 import com.opencsv.exceptions.CsvException;
+import com.xatkit.bot.App;
 import com.xatkit.bot.Bot;
 import com.xatkit.bot.nlp.NLPServerClient;
-import com.xatkit.core.XatkitBot;
+import org.apache.commons.configuration2.BaseConfiguration;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -17,9 +18,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import static com.xatkit.bot.Bot.createBot;
-import static com.xatkit.bot.Bot.customQuery;
 import static com.xatkit.testing.IntentMatchingTesting.testIntentMatching;
+
 
 /**
  * Test class used to evaluate the {@link CustomQuery} workflow.
@@ -29,7 +29,7 @@ public class TestCustomQuery {
     /**
      * The chatbot used for testing.
      */
-    private static XatkitBot xatkitBot;
+        private static Bot bot;
 
     /**
      * The name of the file containing the utterances to test in Custom Query.
@@ -44,8 +44,8 @@ public class TestCustomQuery {
 
     @BeforeAll
     static void setUpBeforeAll() {
-        xatkitBot = createBot();
-        fileName = "customQueryUtterances_" + Bot.language + ".csv";
+        bot = new Bot(new BaseConfiguration());
+        fileName = "customQueryUtterances_" + bot.language + ".csv";
     }
 
     /**
@@ -56,10 +56,10 @@ public class TestCustomQuery {
     @Test
     void testCustomQuery()  {
         String outputFilePath = testIntentMatching(
-                xatkitBot,
+                bot.xatkitBot,
                 fileName,
-                customQuery.getAwaitingCustomQueryState());
-        generateTranslations(Bot.nlpServerClient, outputFilePath);
+                bot.customQuery.getAwaitingCustomQueryState());
+        generateTranslations(App.nlpServerClient, outputFilePath);
     }
 
     /**
@@ -85,11 +85,11 @@ public class TestCustomQuery {
                 String detectedIntent = row[2];
                 if (detectedIntent.equals("AnyValue")) {
                     String utterance = row[0];
-                    Map<String, String> translations = nlpServerClient.getTranslations(utterance);
+                    Map<String, String> translations = nlpServerClient.getTranslations(utterance, bot.language);
                     String englishTranslation = translations.get("english");
                     String sqlTranslation = translations.get("sql");
 
-                    if (!Bot.language.equals("en")) {
+                    if (!bot.language.equals("en")) {
                         row[5] = englishTranslation;
                     }
                     row[6] = sqlTranslation;
