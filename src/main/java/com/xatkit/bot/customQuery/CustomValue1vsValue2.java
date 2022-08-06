@@ -3,6 +3,7 @@ package com.xatkit.bot.customQuery;
 import bodi.generator.dataSource.ResultSet;
 import com.xatkit.bot.Bot;
 import com.xatkit.bot.library.ContextKeys;
+import com.xatkit.bot.library.Entities;
 import com.xatkit.execution.State;
 import lombok.Getter;
 import lombok.val;
@@ -50,14 +51,14 @@ public class CustomValue1vsValue2 {
                     String value1 = (String) context.getIntent().getValue(ContextKeys.VALUE + "1");
                     String value2 = (String) context.getIntent().getValue(ContextKeys.VALUE + "2");
                     if (!isEmpty(value1) && !isEmpty(value2)) {
-                        String field1 = bot.entities.fieldValueMap.get(value1);
-                        String field2 = bot.entities.fieldValueMap.get(value2);
+                        String field1 = Entities.fieldValueMap.get(value1);
+                        String field2 = Entities.fieldValueMap.get(value2);
 
                         String sqlQuery = bot.sqlQueries.valueFrequency(field1, value1);
                         ResultSet resultSet = sql.runSqlQuery(sqlQuery);
                         int value1Freq = Integer.parseInt(resultSet.getRow(0).getColumnValue(0));
 
-                        sqlQuery = bot.sqlQueries.valueFrequency(field1, value1);
+                        sqlQuery = bot.sqlQueries.valueFrequency(field2, value2);
                         resultSet = sql.runSqlQuery(sqlQuery);
                         int value2Freq = Integer.parseInt(resultSet.getRow(0).getColumnValue(0));
 
