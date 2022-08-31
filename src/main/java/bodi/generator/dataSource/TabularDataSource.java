@@ -266,8 +266,12 @@ public class TabularDataSource {
             if (row.getValues().size() > 0) {
                 firstLastQuotes = "\"";
             }
-            System.out.println(firstLastQuotes + String.join("\"" + delimiter + "\"", row.getValues()) + firstLastQuotes);
-            out.println(firstLastQuotes + String.join("\"" + delimiter + "\"", row.getValues()) + firstLastQuotes);
+            List<String> values = new ArrayList<>();
+            row.getValues().forEach(value -> {
+                String newValue = value.replaceAll("\"\"", "\"");
+                values.add(newValue.replaceAll("\"", "\"\""));
+            });
+            out.println(firstLastQuotes + String.join("\"" + delimiter + "\"", values) + firstLastQuotes);
         }
         out.close();
     }
