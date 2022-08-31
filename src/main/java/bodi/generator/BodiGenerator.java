@@ -361,16 +361,23 @@ public final class BodiGenerator {
 
             List<String> botFiles = new ArrayList<>();
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/Bot.java");
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/getResult/CheckCorrectAnswer.java");
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/getResult/GetResult.java");
-            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomQuery.java");
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomFieldOfValue.java");
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomFilter.java");
-            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomShowFieldDistinct.java");
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomFrequentValueInField.java");
-            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomValueFrequency.java");
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomNumericFieldFunction.java");
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomQuery.java");
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomRowCount.java");
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomRowOfNumericFieldFunction.java");
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomRowOfValues.java");
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomShowFieldDistinct.java");
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomValue1vsValue2.java");
-            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/structuredQuery/StructuredQuery.java");
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomValueFrequency.java");
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/structuredQuery/ResetBot.java");
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/structuredQuery/SelectViewField.java");
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/structuredQuery/StructuredFilter.java");
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/structuredQuery/StructuredQuery.java");
 
             System.out.println("Creating transitionGraph.dot test file");
             Path dotFile = Paths.get(outputFolder + "/src/test/resources/transitionGraph.dot");
@@ -395,12 +402,12 @@ public final class BodiGenerator {
             fw.write(BotProperties.DATA_NAME + " = " + conf.getString(BodiGeneratorProperties.DATA_NAME) + "\n");
             fw.write(BotProperties.CSV_DELIMITER + " = " + conf.getString(BodiGeneratorProperties.CSV_DELIMITER) + "\n");
             fw.write(BotProperties.BOT_PAGE_LIMIT + " = " + "10" + "\n");
-            fw.write(BotProperties.BOT_MAX_ENTRIES_TO_DISPLAY + " = " + "5" + "\n");
+            fw.write(BotProperties.BOT_MAX_ENTRIES_TO_DISPLAY + " = " + "7" + "\n");
             fw.write(BotProperties.BOT_ENABLE_CHECK_CORRECT_ANSWER + " = " + "true" + "\n");
             fw.write(BotProperties.BOT_LANGUAGES + " = " + conf.getString(BotProperties.BOT_LANGUAGES) + "\n");
 
             fw.write("\n# NLP Server properties\n\n");
-            fw.write(BotProperties.SERVER_URL + " = " + "127.0.0.1:5002" + "\n");
+            fw.write(BotProperties.SERVER_URL + " = " + "127.0.0.1:5050" + "\n");
             fw.write(BotProperties.TEXT_TO_TABLE_ENDPOINT + " = " + "text-to-table" + "\n");
 
             fw.close();
@@ -423,7 +430,7 @@ public final class BodiGenerator {
             fw.write("# Bot\n\n");
             fw.write(BotProperties.XATKIT_SERVER_PORT + " = " + "5000" + "\n");
             fw.write(BotProperties.XATKIT_REACT_PORT + " = " + "5001" + "\n");
-            fw.write(BotProperties.BOT_LANGUAGE + " = " + "en" + "\n");
+            fw.write(BotProperties.BOT_LANGUAGE + " = " + language + "\n");
 
             fw.write("\n# Intent provider\n\n");
             if (conf.getString(BotProperties.XATKIT_INTENT_PROVIDER)
@@ -431,13 +438,13 @@ public final class BodiGenerator {
                 fw.write(BotProperties.XATKIT_INTENT_PROVIDER + " = " + conf.getString(BotProperties.XATKIT_INTENT_PROVIDER) + "\n");
                 fw.write(BotProperties.XATKIT_DIALOGFLOW_PROJECT_ID + " = " + "your-project-id" + "\n");
                 fw.write(BotProperties.XATKIT_DIALOGFLOW_CREDENTIALS_PATH + " = " + "path-to-your-credentials-file" + "\n");
-                fw.write(BotProperties.XATKIT_DIALOGFLOW_LANGUAGE + " = " + "en" + "\n");
+                fw.write(BotProperties.XATKIT_DIALOGFLOW_LANGUAGE + " = " + language + "\n");
                 fw.write(BotProperties.XATKIT_DIALOGFLOW_CLEAN_ON_STARTUP + " = " + "true" + "\n");
             } else if (conf.getString(BotProperties.XATKIT_INTENT_PROVIDER)
                     .equals("com.xatkit.core.recognition.nlpjs.NlpjsIntentRecognitionProvider")) {
                 fw.write(BotProperties.XATKIT_INTENT_PROVIDER + " = " + conf.getString(BotProperties.XATKIT_INTENT_PROVIDER) + "\n");
                 fw.write(BotProperties.XATKIT_NLPJS_AGENTID + " = " + "default" + "\n");
-                fw.write(BotProperties.XATKIT_NLPJS_LANGUAGE + " = " + "en" + "\n");
+                fw.write(BotProperties.XATKIT_NLPJS_LANGUAGE + " = " + language + "\n");
                 fw.write(BotProperties.XATKIT_NLPJS_SERVER + " = " + "http://localhost:8080" + "\n");
 
             }
@@ -579,16 +586,23 @@ public final class BodiGenerator {
 
             List<String> botFiles = new ArrayList<>();
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/Bot.java");
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/getResult/CheckCorrectAnswer.java");
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/getResult/GetResult.java");
-            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomQuery.java");
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomFieldOfValue.java");
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomFilter.java");
-            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomShowFieldDistinct.java");
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomFrequentValueInField.java");
-            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomValueFrequency.java");
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomNumericFieldFunction.java");
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomQuery.java");
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomRowCount.java");
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomRowOfNumericFieldFunction.java");
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomRowOfValues.java");
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomShowFieldDistinct.java");
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomValue1vsValue2.java");
-            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/structuredQuery/StructuredQuery.java");
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomValueFrequency.java");
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/structuredQuery/ResetBot.java");
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/structuredQuery/SelectViewField.java");
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/structuredQuery/StructuredFilter.java");
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/structuredQuery/StructuredQuery.java");
 
             System.out.println("Creating transitionGraph.dot test file");
             Path dotFile = Paths.get(outputFolder + "/src/test/resources/transitionGraph.dot");
