@@ -260,9 +260,15 @@ public class TabularDataSource {
      */
     public void writeCsv(String path) throws FileNotFoundException {
         PrintWriter out = new PrintWriter(path);
-        out.println(String.join(String.valueOf(delimiter), header));
+        String firstLastQuotes = "\"";
+        List<String> quotedHeader = new ArrayList<>();
+        header.forEach(value -> {
+            String newValue = value.replaceAll("\"\"", "\"");
+            quotedHeader.add(newValue.replaceAll("\"", "\"\""));
+        });
+        out.println(firstLastQuotes + String.join("\"" + delimiter + "\"", quotedHeader) + firstLastQuotes);
         for (Row row : table) {
-            String firstLastQuotes = "";
+            firstLastQuotes = "";
             if (row.getValues().size() > 0) {
                 firstLastQuotes = "\"";
             }
