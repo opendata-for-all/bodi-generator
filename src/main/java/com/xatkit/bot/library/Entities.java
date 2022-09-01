@@ -68,7 +68,7 @@ public class Entities {
      * <p>
      * It is used to display these fields in some bot answers, instead of an entire row.
      */
-    public static List<String> keyFields = new ArrayList<>();
+    public List<String> keyFields;
 
     // Merge the json files containing bot entities
     static {
@@ -155,6 +155,7 @@ public class Entities {
      */
     public Entities(String language) {
         this.language = language;
+        this.keyFields = new ArrayList<>();
 
         numericFieldEntity = generateEntity("numericFieldEntity");
         textualFieldEntity = generateEntity("textualFieldEntity");
@@ -193,7 +194,7 @@ public class Entities {
             try {
                 boolean key = entityJson.getJSONObject(entry).getBoolean("key");
                 if (key) {
-                    keyFields.add(entry);
+                    this.keyFields.add(entry);
                 }
             } catch (Exception ignored) { }
         }
