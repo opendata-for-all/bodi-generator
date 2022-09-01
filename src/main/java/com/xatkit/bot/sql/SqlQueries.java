@@ -261,8 +261,8 @@ public class SqlQueries {
             fields.add(field);
         }
         String fieldsString = String.join(", ", fields);
-        String sqlQuery = "SELECT DISTINCT " + fieldsString + " FROM " + table + " WHERE " + toDecimal(field) + " = ("
-            + numericFieldFunction(field, operator) + ")";
+        String sqlQuery = "SELECT DISTINCT " + fieldsString + " FROM " + table + " WHERE " + field + " <> '' AND "
+                + toDecimal(field) + " = (" + numericFieldFunction(field, operator) + ")";
         if (!filters.isEmpty()) {
             sqlQuery += " AND " + String.join(" AND ", getFiltersAsSqlConditions());
         }
@@ -312,7 +312,7 @@ public class SqlQueries {
      */
     public String fieldOfValueOperator(String targetField, String field1, String value1, String operator) {
         String sqlQuery = "SELECT " + operator + "(" + toDecimal(targetField) + ") as " + operator + "_" + targetField
-                + " FROM " + table + " WHERE " + field1 + " = '" + value1 + "'";
+                + " FROM " + table + " WHERE " + targetField + " <> '' AND " + field1 + " = '" + value1 + "'";
         if (!filters.isEmpty()) {
             sqlQuery += " AND " + String.join(" AND ", getFiltersAsSqlConditions());
         }
