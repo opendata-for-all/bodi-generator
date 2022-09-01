@@ -92,7 +92,8 @@ public class CustomFieldOfValue {
                     if (!isEmpty(field) && !isEmpty(value) && isEmpty(operator)) {
                         String sqlQuery = bot.sqlQueries.fieldOfValue(field, valueField, value, false);
                         ResultSet resultSet = sql.runSqlQuery(sqlQuery);
-                        if (resultSet.getNumRows() == 0) {
+                        if (resultSet.getNumRows() == 0
+                                || (resultSet.getNumRows() == 1 && isEmpty(resultSet.getRow(0).getColumnValue(0)))) {
                             bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString(
                                             "FieldOfValue0"), field, valueField, value));
                             stop = true;
