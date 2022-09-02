@@ -55,11 +55,11 @@ public class CustomValue1vsValue2 {
                         String field2 = Entities.fieldValueMap.get(value2);
 
                         String sqlQuery = bot.sqlQueries.valueFrequency(field1, value1);
-                        ResultSet resultSet = sql.runSqlQuery(sqlQuery);
+                        ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
                         int value1Freq = Integer.parseInt(resultSet.getRow(0).getColumnValue(0));
 
                         sqlQuery = bot.sqlQueries.valueFrequency(field2, value2);
-                        resultSet = sql.runSqlQuery(sqlQuery);
+                        resultSet = sql.runSqlQuery(bot, sqlQuery);
                         int value2Freq = Integer.parseInt(resultSet.getRow(0).getColumnValue(0));
 
                         if (context.getIntent().getDefinition().getName().equals(bot.intents.customValue1MoreThanValue2Intent.getName())) {

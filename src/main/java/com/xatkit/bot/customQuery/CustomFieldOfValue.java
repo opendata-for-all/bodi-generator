@@ -91,7 +91,7 @@ public class CustomFieldOfValue {
                     }
                     if (!isEmpty(field) && !isEmpty(value) && isEmpty(operator)) {
                         String sqlQuery = bot.sqlQueries.fieldOfValue(field, valueField, value, false);
-                        ResultSet resultSet = sql.runSqlQuery(sqlQuery);
+                        ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
                         if (resultSet.getNumRows() == 0
                                 || (resultSet.getNumRows() == 1 && isEmpty(resultSet.getRow(0).getColumnValue(0)))) {
                             bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString(
@@ -114,7 +114,7 @@ public class CustomFieldOfValue {
                                 // textual operators here
                             }
                             sqlQuery = bot.sqlQueries.fieldOfValue(field, valueField, value, true);
-                            ResultSet resultSetDistinct = sql.runSqlQuery(sqlQuery);
+                            ResultSet resultSetDistinct = sql.runSqlQuery(bot, sqlQuery);
                             buttons.add(Utils.getFirstTrainingSentences(bot.coreLibraryI18n.Quit).get(0));
                             bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString(
                                     "AskFieldOfValueOperation"), resultSet.getNumRows(), field,
@@ -147,7 +147,7 @@ public class CustomFieldOfValue {
                 .body(context -> {
                     boolean isDistinct = (context.getIntent().getDefinition().getName().equals(bot.intents.showAllDistinctIntent.getName()));
                     String sqlQuery = bot.sqlQueries.fieldOfValue(field, valueField, value, isDistinct);
-                    ResultSet resultSet = sql.runSqlQuery(sqlQuery);
+                    ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
                     bot.getResult.setResultSet(resultSet);
 
                 })
@@ -160,7 +160,7 @@ public class CustomFieldOfValue {
                         operator = (String) context.getIntent().getValue(ContextKeys.VALUE);
                     }
                     String sqlQuery = bot.sqlQueries.fieldOfValueOperator(field, valueField, value, operator);
-                    ResultSet resultSet = sql.runSqlQuery(sqlQuery);
+                    ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
                     String result = resultSet.getRow(0).getColumnValue(0);
                     bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString(
                                     "FieldOfValueWithOperation"), operator, field, valueField, value, result));

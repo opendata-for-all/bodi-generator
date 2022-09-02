@@ -52,7 +52,7 @@ public class CustomRowCount {
                     String rowName = (String) context.getIntent().getValue(ContextKeys.ROW_NAME);
                     if (!isEmpty(rowName)) {
                         String sqlQuery = bot.sqlQueries.rowCount();
-                        ResultSet resultSet = sql.runSqlQuery(sqlQuery);
+                        ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
                         int rowCount = Integer.parseInt(resultSet.getRow(0).getColumnValue(0));
                         bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("ShowRowCount"),
                                 rowCount, rowName));

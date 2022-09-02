@@ -61,7 +61,7 @@ public class CustomRowOfValues {
                     if (!isEmpty(value1)) {
                         String field1 = bot.entities.fieldValueMap.get(value1);
                         String sqlQuery = bot.sqlQueries.rowOfValues1(keyFields, field1, value1);
-                        ResultSet resultSet = sql.runSqlQuery(sqlQuery);
+                        ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
                         bot.getResult.setResultSet(resultSet);
                         bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("RowOfValue1"),
                                 rowName, field1, value1));
@@ -69,7 +69,7 @@ public class CustomRowOfValues {
                         String field2 = bot.entities.fieldValueMap.get(value2);
                         String field3 = bot.entities.fieldValueMap.get(value3);
                         String sqlQuery = bot.sqlQueries.rowOfValues2(keyFields, field2, value2, field3, value3);
-                        ResultSet resultSet = sql.runSqlQuery(sqlQuery);
+                        ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
                         bot.getResult.setResultSet(resultSet);
                         bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("RowOfValue2AndValue3"),
                                 rowName, field2, value2, field3, value3));

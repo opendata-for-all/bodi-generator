@@ -176,7 +176,7 @@ public class StructuredFilter {
                     if (!isEmpty(field) && !isEmpty(operator) && !isEmpty(value)) {
                         bot.sqlQueries.addFilter(field, operator, value);
                         String sqlQuery =  bot.sqlQueries.selectAll();
-                        ResultSet resultSet = sql.runSqlQuery(sqlQuery);
+                        ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
                         bot.getResult.setResultSet(resultSet);
                         resultSetNumRows = resultSet.getNumRows();
                         bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("FilterAdded"),
@@ -221,7 +221,7 @@ public class StructuredFilter {
                     if (!isEmpty(field) && !isEmpty(operator) && !isEmpty(value)) {
                         bot.sqlQueries.removeFilter(field, operator, value);
                         String sqlQuery =  bot.sqlQueries.selectAll();
-                        ResultSet resultSet = sql.runSqlQuery(sqlQuery);
+                        ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
                         bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("FilterRemoved"),
                                 field, operator, value, resultSet.getNumRows()));
                     } else {

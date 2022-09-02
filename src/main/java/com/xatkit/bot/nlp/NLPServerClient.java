@@ -4,6 +4,7 @@ import bodi.generator.dataSource.ResultSet;
 import bodi.generator.dataSource.Row;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import com.xatkit.bot.Bot;
 import fr.inria.atlanmod.commons.log.Log;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -103,13 +104,13 @@ public class NLPServerClient {
      * Makes a query to the server and obtains a {@link ResultSet} containing the response.
      *
      * @param input    the input of the server
-     * @param language the input language
+     * @param bot      the chatbot
      * @return if successful, the {@link ResultSet} containing the result of the server, otherwise an empty
      * {@link ResultSet}.
      */
-    public ResultSet runQuery(String input, String language) {
+    public ResultSet runQuery(Bot bot, String input) {
         try {
-            JSONObject response = getResponse(input, language);
+            JSONObject response = getResponse(input, bot.language);
             String sqlQuery = response.getString("sql");
             JSONArray headerJson = response.getJSONArray("header");
             JSONArray tableJson = response.getJSONArray("table");
@@ -120,7 +121,13 @@ public class NLPServerClient {
             Log.info("Query text translated to SQL statement: {0}", sqlQuery);
             List<String> header = new ArrayList<>();
             for (int i = 0; i < headerJson.length(); i++) {
-                header.add(headerJson.getString(i));
+                String originalName = headerJson.getString(i);
+                String readableName = bot.entities.readableNames.get(originalName);
+                if (!isEmpty(readableName)) {
+                    header.add(readableName);
+                } else {
+                    header.add(originalName);
+                }
             }
             List<Row> table = new ArrayList<>();
             for (int i = 0; i < tableJson.length(); i++) {

@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.xatkit.dsl.DSL.mapping;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * A set of entities the chatbot can recognize.
@@ -62,6 +63,15 @@ public class Entities {
      * we need this to know which field they belong to.
      */
     public static Map<String, String> fieldValueMap;
+
+    /**
+     * The readable names associated to each field entity entry.
+     * <p>
+     * The field entities entries contain the original names of the fields (i.e. the names extracted from a csv
+     * header). Additionally, a field entity entry can have a readable name which, as its name suggests, it is a more
+     * friendly name of the field name that can be used to display it to the user.
+     */
+    public Map<String, String> readableNames;
 
     /**
      * The list of {@link #fieldEntity} considered as key fields.
@@ -156,6 +166,7 @@ public class Entities {
     public Entities(String language) {
         this.language = language;
         this.keyFields = new ArrayList<>();
+        this.readableNames = new HashMap<>();
 
         numericFieldEntity = generateEntity("numericFieldEntity");
         textualFieldEntity = generateEntity("textualFieldEntity");
@@ -188,6 +199,14 @@ public class Entities {
         MappingEntryStep entity = mapping(entityName);
         for (String entry : entityJson.keySet()) {
             MappingSynonymStep synonymStep = entity.entry().value(entry);
+            try {
+                String readableName = entityJson.getJSONObject(entry).getJSONObject(language).getString("readableName");
+                if (!isEmpty(readableName)) {
+                    // Add the readable name as an entity synonym
+                    synonymStep.synonym(readableName);
+                    this.readableNames.put(entry, readableName);
+                }
+            } catch (Exception ignored) { }
             for (Object synonym : entityJson.getJSONObject(entry).getJSONObject(language).getJSONArray("synonyms")) {
                 synonymStep.synonym((String) synonym);
             }

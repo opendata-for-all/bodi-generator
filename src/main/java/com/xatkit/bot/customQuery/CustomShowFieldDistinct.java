@@ -48,7 +48,7 @@ public class CustomShowFieldDistinct {
                     String field = (String) context.getIntent().getValue(ContextKeys.FIELD);
                     if (!isEmpty(field)) {
                         String sqlQuery = bot.sqlQueries.showFieldDistinct(field);
-                        ResultSet resultSet = sql.runSqlQuery(sqlQuery);
+                        ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
                         bot.getResult.setResultSet(resultSet);
                     } else {
                         error = true;

@@ -62,7 +62,7 @@ public class CustomRowOfNumericFieldFunction {
                     if (!isEmpty(field) && !isEmpty(operator) && (operator.equals("max") || operator.equals("min"))) {
                         List<String> keyFields = new ArrayList<>(bot.entities.keyFields);
                         String sqlQuery = bot.sqlQueries.rowOfNumericFieldFunction(keyFields, field, operator);
-                        ResultSet resultSet = sql.runSqlQuery(sqlQuery);
+                        ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
                         bot.getResult.setResultSet(resultSet);
                         bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("CustomRowOfNumericFieldFunction"),
                                 rowName, operator, field));
