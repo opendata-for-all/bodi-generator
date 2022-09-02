@@ -3,6 +3,7 @@ package bodi.generator.dataSchema;
 import bodi.generator.dataSource.TabularDataSource;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,7 +16,7 @@ import java.util.Set;
  *
  * @see SchemaField
  */
-public class SchemaField {
+public class SchemaField implements Serializable {
 
     /**
      * The name of the field as it was in the {@link TabularDataSource} from which it was inferred.

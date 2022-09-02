@@ -1,5 +1,6 @@
 package bodi.generator.dataSource;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -14,7 +15,7 @@ import java.util.List;
  * @see TabularDataSource
  * @see ResultSet
  */
-public class Row {
+public class Row implements Serializable {
 
     /**
      * The content of the row. Each element of this collection represents a cell.

@@ -46,7 +46,12 @@ public enum DashboardView {
     /**
      * The {@code deploy_bot} page of the dashboard.
      */
-    DEPLOY_BOT("deploy_bot");
+    DEPLOY_BOT("deploy_bot"),
+
+    /**
+     * The {@code session} page of the dashboard.
+     */
+    SESSION("session");
 
     /**
      * The label of the enumeration value.

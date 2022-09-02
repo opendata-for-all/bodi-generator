@@ -3,13 +3,14 @@ package bodi.generator.ui.model;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
  * This class stores configuration properties of the Bodi Generator and the generated bot. It is filled from the Bodi
  * Generator user interface.
  */
-public class Properties {
+public class Properties implements Serializable {
 
     /**
      * The Bodi Generator properties.

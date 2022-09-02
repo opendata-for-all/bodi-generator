@@ -3,6 +3,7 @@ package bodi.generator.dataSchema;
 import bodi.generator.dataSource.TabularDataSource;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -18,7 +19,7 @@ import java.util.Set;
  * @see SchemaField
  * @see TabularDataSource
  */
-public class SchemaType {
+public class SchemaType implements Serializable {
 
     /**
      * The name of the {@link SchemaType}.

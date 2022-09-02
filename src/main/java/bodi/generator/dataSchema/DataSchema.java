@@ -4,6 +4,7 @@ import bodi.generator.dataSource.TabularDataSource;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,7 +24,7 @@ import static java.util.Objects.isNull;
  * <p>
  * This is not a data container. It is only an outline of a data container (i.e. a {@link TabularDataSource})
  */
-public class DataSchema {
+public class DataSchema implements Serializable {
 
     /**
      * A set containing all the available languages of the {@link DataSchema} content.
