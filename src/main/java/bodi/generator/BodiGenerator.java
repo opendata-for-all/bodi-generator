@@ -527,7 +527,7 @@ public final class BodiGenerator {
             File fieldOperatorsDest = new File(outputFolder + "/src/main/resources/fieldOperators.json");
             FileUtils.copyFile(fieldOperatorsSource, fieldOperatorsDest);
 
-            String defaultRowNamesFile = "rowNames.json";
+            String defaultRowNamesFile = "defaultRowNames.json";
             InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(defaultRowNamesFile);
             JSONObject defaultRowNamesJson = null;
             if (is == null) {
