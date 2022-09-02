@@ -18,8 +18,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import static org.springframework.util.CollectionUtils.isEmpty;
@@ -79,6 +81,16 @@ public class PropertiesController {
             Set<String> enabledLanguagesSet = (Set<String>) objects.getProperties().getBotProperties().get(BotProperties.BOT_LANGUAGES);
             for (String lang : DataSchema.languages) {
                 enabledLanguages.put(lang, enabledLanguagesSet.contains(lang));
+            }
+            if (!enabledLanguages.get(selectedLanguage)) {
+                Iterator<Entry<String, Boolean>> it = enabledLanguages.entrySet().iterator();
+                while (it.hasNext()) {
+                    Entry<String, Boolean> e = it.next();
+                    if (e.getValue()) {
+                        selectedLanguage = e.getKey();
+                        break;
+                    }
+                }
             }
             model.addAttribute("enabledLanguages", enabledLanguages);
             model.addAttribute("selectedLanguage", selectedLanguage);
