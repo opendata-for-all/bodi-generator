@@ -82,7 +82,7 @@ public class GetResult {
         generateResultSetState
                 .body(context -> {
                     String sqlQuery = bot.sqlQueries.selectAll();
-                    resultSet = sql.runSqlQuery(bot, sqlQuery);
+                    resultSet = sql.runSqlQuery(sqlQuery);
                 })
                 .next()
                 .moveTo(showDataState);
@@ -92,7 +92,7 @@ public class GetResult {
         generateResultSetFromQueryState
                 .body(context -> {
                     String query = context.getIntent().getMatchedInput();
-                    resultSet = nlpServerClient.runQuery(bot, query);
+                    resultSet = nlpServerClient.runQuery(query, bot.language);
                 })
                 .next()
                 .moveTo(showDataState);

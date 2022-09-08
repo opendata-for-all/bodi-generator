@@ -40,6 +40,17 @@
             </a>
         </div>
         <div class="cell small-4 card-container">
+            <a th:href="${dashboardUrl} + '/session'" class="card">
+                <div class="card-section card-header">
+                    <h2><i class="large fa fa-user"></i>&nbsp;<span>Session</span></h2>
+                </div>
+                <div class="card-section card-content">
+                    <p class="card-content-description">Load an old session or download the current one for future
+                        improvements to your chatbot .</p>
+                </div>
+            </a>
+        </div>
+        <div class="cell small-4 card-container">
             <a th:href="${dashboardUrl} + '/deploy_bot'" class="card">
                 <div class="card-section card-header">
                     <h2><i class="large fa fa-cloud-arrow-up"></i>&nbsp;<span>Deploy bot</span></h2>
