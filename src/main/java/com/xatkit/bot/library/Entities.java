@@ -14,8 +14,10 @@ import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.xatkit.dsl.DSL.mapping;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -202,9 +204,11 @@ public class Entities {
             try {
                 String readableName = entityJson.getJSONObject(entry).getJSONObject(language).getString("readableName");
                 if (!isEmpty(readableName)) {
-                    // Add the readable name as an entity synonym
-                    synonymStep.synonym(readableName);
                     this.readableNames.put(entry, readableName);
+                    if (!entry.equals(readableName)) {
+                        // Add the readable name as an entity synonym
+                        synonymStep.synonym(readableName);
+                    }
                 }
             } catch (Exception ignored) { }
             for (Object synonym : entityJson.getJSONObject(entry).getJSONObject(language).getJSONArray("synonyms")) {
@@ -216,6 +220,12 @@ public class Entities {
                     this.keyFields.add(entry);
                 }
             } catch (Exception ignored) { }
+        }
+        // Check there are no duplicated readable names
+        Set<String> readableNamesSet = new HashSet<>(this.readableNames.values());
+        List<String> readableNamesList = new ArrayList<>(this.readableNames.values());
+        if (readableNamesSet.size() < readableNamesList.size()) {
+            throw new IllegalArgumentException("duplicated readable names were found in field entities");
         }
         return (EntityDefinitionReferenceProvider) entity;
     }
