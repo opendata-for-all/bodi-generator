@@ -53,6 +53,8 @@ public class CustomValue1vsValue2 {
                     if (!isEmpty(value1) && !isEmpty(value2)) {
                         String field1 = Entities.fieldValueMap.get(value1);
                         String field2 = Entities.fieldValueMap.get(value2);
+                        String field1RN = bot.entities.readableNames.get(field1);
+                        String field2RN = bot.entities.readableNames.get(field2);
 
                         String sqlQuery = bot.sqlQueries.valueFrequency(field1, value1);
                         ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
@@ -65,24 +67,24 @@ public class CustomValue1vsValue2 {
                         if (context.getIntent().getDefinition().getName().equals(bot.intents.customValue1MoreThanValue2Intent.getName())) {
                             if (value1Freq > value2Freq) {
                                 bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("CustomValue1MoreThanValue2"),
-                                        value1, value1Freq, field1, value2, value2Freq, field2));
+                                        value1, value1Freq, field1RN, value2, value2Freq, field2RN));
                             } else if (value2Freq > value1Freq) {
                                 bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("CustomValue1MoreThanValue2"),
-                                        value2, value2Freq, field2, value1, value1Freq, field1));
+                                        value2, value2Freq, field2RN, value1, value1Freq, field1RN));
                             } else {
                                 bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("CustomValue1EqualToValue2"),
-                                        value1, field1, value2, field2, value1Freq));
+                                        value1, field1RN, value2, field2RN, value1Freq));
                             }
                         } else {
                             if (value1Freq < value2Freq) {
                                 bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("CustomValue1LessThanValue2"),
-                                        value1, value1Freq, field1, value2, value2Freq, field2));
+                                        value1, value1Freq, field1RN, value2, value2Freq, field2RN));
                             } else if (value2Freq < value1Freq) {
                                 bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("CustomValue1LessThanValue2"),
-                                        value2, value2Freq, field2, value1, value1Freq, field1));
+                                        value2, value2Freq, field2RN, value1, value1Freq, field1RN));
                             } else {
                                 bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("CustomValue1EqualToValue2"),
-                                        value1, field1, value2, field2, value1Freq));
+                                        value1, field1RN, value2, field2RN, value1Freq));
                             }
                         }
                     } else {

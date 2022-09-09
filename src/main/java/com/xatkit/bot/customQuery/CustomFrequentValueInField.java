@@ -61,8 +61,9 @@ public class CustomFrequentValueInField {
                         sqlQuery = bot.sqlQueries.frequentValueInFieldMatch(field, frequency);
                         resultSet = sql.runSqlQuery(bot, sqlQuery);
                         bot.getResult.setResultSet(resultSet);
+                        String fieldRN = bot.entities.readableNames.get(field);
                         bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString(messageName),
-                                field, frequency));
+                                fieldRN, frequency));
                     } else {
                         error = true;
                     }

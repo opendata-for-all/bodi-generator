@@ -55,8 +55,9 @@ public class CustomNumericFieldFunction {
                         String sqlQuery = bot.sqlQueries.numericFieldFunction(field, operator);
                         ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
                         float result = Float.parseFloat(resultSet.getRow(0).getColumnValue(0));
+                        String fieldRN = bot.entities.readableNames.get(field);
                         bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("CustomNumericFieldFunction"),
-                                operator, field, result));
+                                operator, fieldRN, result));
                     } else {
                         error = true;
                     }

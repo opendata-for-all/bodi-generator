@@ -64,8 +64,9 @@ public class CustomRowOfNumericFieldFunction {
                         String sqlQuery = bot.sqlQueries.rowOfNumericFieldFunction(keyFields, field, operator);
                         ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
                         bot.getResult.setResultSet(resultSet);
+                        String fieldRN = bot.entities.readableNames.get(field);
                         bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("CustomRowOfNumericFieldFunction"),
-                                rowName, operator, field));
+                                rowName, operator, fieldRN));
                     } else {
                         error = true;
                     }

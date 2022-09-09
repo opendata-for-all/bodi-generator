@@ -49,7 +49,7 @@ public class GetResult {
      * that question, using {@link App#nlpServerClient}.
      * <p>
      * <del>The filters previously applied by the user are also added to the query (see
-     * {@link com.xatkit.bot.nlp.NLPServerClient#runQuery(String, String)}</del>
+     * {@link com.xatkit.bot.nlp.NLPServerClient#runQuery(Bot, String)}</del>
      */
     @Getter
     private final State generateResultSetFromQueryState;

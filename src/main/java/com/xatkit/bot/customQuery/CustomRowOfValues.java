@@ -63,16 +63,19 @@ public class CustomRowOfValues {
                         String sqlQuery = bot.sqlQueries.rowOfValues1(keyFields, field1, value1);
                         ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
                         bot.getResult.setResultSet(resultSet);
+                        String field1RN = bot.entities.readableNames.get(field1);
                         bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("RowOfValue1"),
-                                rowName, field1, value1));
+                                rowName, field1RN, value1));
                     } else if (!isEmpty(value2) && !isEmpty(value3)) {
                         String field2 = bot.entities.fieldValueMap.get(value2);
                         String field3 = bot.entities.fieldValueMap.get(value3);
                         String sqlQuery = bot.sqlQueries.rowOfValues2(keyFields, field2, value2, field3, value3);
                         ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
                         bot.getResult.setResultSet(resultSet);
+                        String field2RN = bot.entities.readableNames.get(field2);
+                        String field3RN = bot.entities.readableNames.get(field3);
                         bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("RowOfValue2AndValue3"),
-                                rowName, field2, value2, field3, value3));
+                                rowName, field2RN, value2, field3RN, value3));
                     } else {
                         error = true;
                     }

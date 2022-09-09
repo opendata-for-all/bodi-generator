@@ -209,6 +209,8 @@ public class Entities {
                         // Add the readable name as an entity synonym
                         synonymStep.synonym(readableName);
                     }
+                } else {
+                    this.readableNames.put(entry, entry);
                 }
             } catch (Exception ignored) { }
             for (Object synonym : entityJson.getJSONObject(entry).getJSONObject(language).getJSONArray("synonyms")) {
