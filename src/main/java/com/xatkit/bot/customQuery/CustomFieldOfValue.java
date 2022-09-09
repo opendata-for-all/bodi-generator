@@ -90,17 +90,19 @@ public class CustomFieldOfValue {
                         valueField = bot.entities.fieldValueMap.get(value);
                     }
                     if (!isEmpty(field) && !isEmpty(value) && isEmpty(operator)) {
+                        String fieldRN = bot.entities.readableNames.get(field);
+                        String valueFieldRN = bot.entities.readableNames.get(valueField);
                         String sqlQuery = bot.sqlQueries.fieldOfValue(field, valueField, value, false);
-                        ResultSet resultSet = sql.runSqlQuery(sqlQuery);
+                        ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
                         if (resultSet.getNumRows() == 0
                                 || (resultSet.getNumRows() == 1 && isEmpty(resultSet.getRow(0).getColumnValue(0)))) {
                             bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString(
-                                            "FieldOfValue0"), field, valueField, value));
+                                            "FieldOfValue0"), fieldRN, valueFieldRN, value));
                             stop = true;
                         } else if (resultSet.getNumRows() == 1) {
                             String result = resultSet.getRow(0).getColumnValue(0);
                             bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString(
-                                    "FieldOfValue1"), field, valueField, value, result));
+                                    "FieldOfValue1"), fieldRN, valueFieldRN, value, result));
                             stop = true;
                         } else if (resultSet.getNumRows() > 1) {
                             List<String> buttons = new ArrayList<>();
@@ -114,11 +116,11 @@ public class CustomFieldOfValue {
                                 // textual operators here
                             }
                             sqlQuery = bot.sqlQueries.fieldOfValue(field, valueField, value, true);
-                            ResultSet resultSetDistinct = sql.runSqlQuery(sqlQuery);
+                            ResultSet resultSetDistinct = sql.runSqlQuery(bot, sqlQuery);
                             buttons.add(Utils.getFirstTrainingSentences(bot.coreLibraryI18n.Quit).get(0));
                             bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString(
-                                    "AskFieldOfValueOperation"), resultSet.getNumRows(), field,
-                                    resultSetDistinct.getNumRows(), valueField, value), buttons);
+                                    "AskFieldOfValueOperation"), resultSet.getNumRows(), fieldRN,
+                                    resultSetDistinct.getNumRows(), valueFieldRN, value), buttons);
                         }
                     } else if (!isEmpty(operator)) {
                         // Check that operator type matches field type
@@ -147,7 +149,7 @@ public class CustomFieldOfValue {
                 .body(context -> {
                     boolean isDistinct = (context.getIntent().getDefinition().getName().equals(bot.intents.showAllDistinctIntent.getName()));
                     String sqlQuery = bot.sqlQueries.fieldOfValue(field, valueField, value, isDistinct);
-                    ResultSet resultSet = sql.runSqlQuery(sqlQuery);
+                    ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
                     bot.getResult.setResultSet(resultSet);
 
                 })
@@ -160,10 +162,12 @@ public class CustomFieldOfValue {
                         operator = (String) context.getIntent().getValue(ContextKeys.VALUE);
                     }
                     String sqlQuery = bot.sqlQueries.fieldOfValueOperator(field, valueField, value, operator);
-                    ResultSet resultSet = sql.runSqlQuery(sqlQuery);
+                    ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
                     String result = resultSet.getRow(0).getColumnValue(0);
+                    String fieldRN = bot.entities.readableNames.get(field);
+                    String valueFieldRN = bot.entities.readableNames.get(valueField);
                     bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString(
-                                    "FieldOfValueWithOperation"), operator, field, valueField, value, result));
+                                    "FieldOfValueWithOperation"), operator, fieldRN, valueFieldRN, value, result));
                 })
                 .next()
                 .moveTo(returnState);

@@ -56,13 +56,14 @@ public class CustomFrequentValueInField {
                             messageName = "CustomMostFrequentValueInField";
                         }
                         String sqlQuery = bot.sqlQueries.frequentValueInField(field, mostFrequent);
-                        ResultSet resultSet = sql.runSqlQuery(sqlQuery);
+                        ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
                         int frequency = Integer.parseInt(resultSet.getRow(0).getColumnValue(1));
                         sqlQuery = bot.sqlQueries.frequentValueInFieldMatch(field, frequency);
-                        resultSet = sql.runSqlQuery(sqlQuery);
+                        resultSet = sql.runSqlQuery(bot, sqlQuery);
                         bot.getResult.setResultSet(resultSet);
+                        String fieldRN = bot.entities.readableNames.get(field);
                         bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString(messageName),
-                                field, frequency));
+                                fieldRN, frequency));
                     } else {
                         error = true;
                     }

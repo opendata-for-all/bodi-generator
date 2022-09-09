@@ -49,7 +49,7 @@ public class GetResult {
      * that question, using {@link App#nlpServerClient}.
      * <p>
      * <del>The filters previously applied by the user are also added to the query (see
-     * {@link com.xatkit.bot.nlp.NLPServerClient#runQuery(String, String)}</del>
+     * {@link com.xatkit.bot.nlp.NLPServerClient#runQuery(Bot, String)}</del>
      */
     @Getter
     private final State generateResultSetFromQueryState;
@@ -82,7 +82,7 @@ public class GetResult {
         generateResultSetState
                 .body(context -> {
                     String sqlQuery = bot.sqlQueries.selectAll();
-                    resultSet = sql.runSqlQuery(sqlQuery);
+                    resultSet = sql.runSqlQuery(bot, sqlQuery);
                 })
                 .next()
                 .moveTo(showDataState);
@@ -92,7 +92,7 @@ public class GetResult {
         generateResultSetFromQueryState
                 .body(context -> {
                     String query = context.getIntent().getMatchedInput();
-                    resultSet = nlpServerClient.runQuery(query, bot.language);
+                    resultSet = nlpServerClient.runQuery(bot, query);
                 })
                 .next()
                 .moveTo(showDataState);

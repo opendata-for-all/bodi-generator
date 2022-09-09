@@ -54,11 +54,12 @@ public class CustomFilter {
                     if (!isEmpty(field) && !isEmpty(operator) && !isEmpty(value)) {
                         bot.sqlQueries.addFilter(field, operator, value);
                         String sqlQuery =  bot.sqlQueries.selectAll();
-                        ResultSet resultSet = sql.runSqlQuery(sqlQuery);
+                        ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
                         bot.getResult.setResultSet(resultSet);
                         resultSetNumRows = resultSet.getNumRows();
+                        String fieldRN = bot.entities.readableNames.get(field);
                         bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("FilterAdded"),
-                                field, operator, value, resultSet.getNumRows()));
+                                fieldRN, operator, value, resultSet.getNumRows()));
                     } else {
                         bot.reactPlatform.reply(context, bot.messages.getString("SomethingWentWrong"));
                     }

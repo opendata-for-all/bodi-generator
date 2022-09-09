@@ -1,6 +1,7 @@
 package com.xatkit.bot.sql;
 
 import bodi.generator.dataSource.Row;
+import com.xatkit.bot.Bot;
 import fr.inria.atlanmod.commons.log.Log;
 
 import java.sql.Connection;
@@ -50,10 +51,11 @@ public class SqlEngine {
      * Executes an SQL query.
      *
      * @param sqlQuery the sql query
+     * @param bot      the chatbot
      * @return if successful, the {@link bodi.generator.dataSource.ResultSet} containing the result of the SQL query,
      * otherwise {@code null}.
      */
-    public bodi.generator.dataSource.ResultSet runSqlQuery(String sqlQuery) {
+    public bodi.generator.dataSource.ResultSet runSqlQuery(Bot bot, String sqlQuery) {
         if (isEmpty(sqlQuery)) {
             return new bodi.generator.dataSource.ResultSet();
         }
@@ -65,7 +67,13 @@ public class SqlEngine {
             List<String> header = new ArrayList<>();
             List<Row> table = new ArrayList<>();
             for (int i = 1; i <= numColumns; i++) {
-                header.add(resultSetMetaData.getColumnLabel(i));
+                String originalName = resultSetMetaData.getColumnLabel(i);
+                String readableName = bot.entities.readableNames.get(originalName);
+                if (!isEmpty(readableName)) {
+                    header.add(readableName);
+                } else {
+                    header.add(originalName);
+                }
             }
             while (resultSet.next()) {
                 List<String> values = new ArrayList<>();

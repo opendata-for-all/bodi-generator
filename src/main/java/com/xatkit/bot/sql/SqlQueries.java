@@ -5,6 +5,7 @@ import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The SQL queries generator.
@@ -50,7 +51,7 @@ public class SqlQueries {
      * @return the cast statement
      */
     private static String toDecimal(String field) {
-        return "CAST(" + field + " as DECIMAL(38," + SCALE + "))";
+        return "CAST(" + field + " AS DECIMAL(38," + SCALE + "))";
     }
 
     /**
@@ -93,6 +94,22 @@ public class SqlQueries {
         List<String> stringFilters = new ArrayList<>();
         for (ImmutableTriple<String, String, String> f : filters) {
             stringFilters.add(f.left + " " + f.middle + " " + f.right);
+        }
+        return stringFilters;
+    }
+
+    /**
+     * Gets the collection of filters as Strings.
+     * <p>
+     * The field names are replaced by readable names stored in a {@link Map}.
+     *
+     * @return the fields as strings
+     * @see com.xatkit.bot.library.Entities#readableNames
+     */
+    public List<String> getFiltersAsStrings(Map<String, String> readableNames) {
+        List<String> stringFilters = new ArrayList<>();
+        for (ImmutableTriple<String, String, String> f : filters) {
+            stringFilters.add(readableNames.get(f.left) + " " + f.middle + " " + f.right);
         }
         return stringFilters;
     }
@@ -218,6 +235,8 @@ public class SqlQueries {
 
     /**
      * Generates a SQL query for the {@link com.xatkit.bot.customQuery.CustomValueFrequency} workflow.
+     * <p>
+     * It is also used in {@link com.xatkit.bot.customQuery.CustomValue1vsValue2}
      *
      * @param field the field of the 'where' condition
      * @param value the value of the 'where' condition
@@ -239,7 +258,7 @@ public class SqlQueries {
      * @return the sql query
      */
     public String numericFieldFunction(String field, String operator) {
-        String sqlQuery = "SELECT " + operator + "(" + toDecimal(field) + ") as " + operator + "_" + field + " FROM "
+        String sqlQuery = "SELECT " + operator + "(" + toDecimal(field) + ") AS " + field + " FROM "
                 + table + " WHERE " + field + " <> ''";
         if (!filters.isEmpty()) {
             sqlQuery += " AND " + String.join(" AND ", getFiltersAsSqlConditions());
@@ -311,7 +330,7 @@ public class SqlQueries {
      * @return the sql query
      */
     public String fieldOfValueOperator(String targetField, String field1, String value1, String operator) {
-        String sqlQuery = "SELECT " + operator + "(" + toDecimal(targetField) + ") as " + operator + "_" + targetField
+        String sqlQuery = "SELECT " + operator + "(" + toDecimal(targetField) + ") AS " + targetField
                 + " FROM " + table + " WHERE " + targetField + " <> '' AND " + field1 + " = '" + value1 + "'";
         if (!filters.isEmpty()) {
             sqlQuery += " AND " + String.join(" AND ", getFiltersAsSqlConditions());

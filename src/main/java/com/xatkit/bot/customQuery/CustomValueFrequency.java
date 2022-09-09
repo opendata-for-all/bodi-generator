@@ -56,10 +56,11 @@ public class CustomValueFrequency {
                     if (!isEmpty(value)) {
                         String field = Entities.fieldValueMap.get(value);
                         String sqlQuery = bot.sqlQueries.valueFrequency(field, value);
-                        ResultSet resultSet = sql.runSqlQuery(sqlQuery);
+                        ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
                         int valueFrequency = Integer.parseInt(resultSet.getRow(0).getColumnValue(0));
+                        String fieldRN = bot.entities.readableNames.get(field);
                         bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("ShowValueFrequency"),
-                                valueFrequency, field, value));
+                                valueFrequency, fieldRN, value));
                     } else {
                         error = true;
                     }

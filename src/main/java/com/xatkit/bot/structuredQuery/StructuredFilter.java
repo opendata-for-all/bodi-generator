@@ -11,6 +11,7 @@ import lombok.val;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.xatkit.bot.App.sql;
 import static com.xatkit.dsl.DSL.intentIs;
@@ -96,8 +97,9 @@ public class StructuredFilter {
 
         selectFieldState
                 .body(context -> {
-                    bot.reactPlatform.reply(context, bot.messages.getString("SelectField"),
-                            (List<String>) context.getSession().get(ContextKeys.FILTER_FIELD_OPTIONS));
+                    List<String> fields = (List<String>) context.getSession().get(ContextKeys.FILTER_FIELD_OPTIONS);
+                    List<String> fieldsRN = fields.stream().map(field -> bot.entities.readableNames.get(field)).collect(Collectors.toList());
+                    bot.reactPlatform.reply(context, bot.messages.getString("SelectField"), fieldsRN);
                 })
                 .next()
                 .when(intentIs(bot.intents.numericFieldIntent)).moveTo(saveFieldState)
@@ -176,11 +178,12 @@ public class StructuredFilter {
                     if (!isEmpty(field) && !isEmpty(operator) && !isEmpty(value)) {
                         bot.sqlQueries.addFilter(field, operator, value);
                         String sqlQuery =  bot.sqlQueries.selectAll();
-                        ResultSet resultSet = sql.runSqlQuery(sqlQuery);
+                        ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
                         bot.getResult.setResultSet(resultSet);
                         resultSetNumRows = resultSet.getNumRows();
+                        String fieldRN = bot.entities.readableNames.get(field);
                         bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("FilterAdded"),
-                                field, operator, value, resultSetNumRows));
+                                fieldRN, operator, value, resultSetNumRows));
                     } else {
                         bot.reactPlatform.reply(context, bot.messages.getString("SomethingWentWrong"));
                     }
@@ -198,7 +201,7 @@ public class StructuredFilter {
 
         selectFilterToRemoveState
                 .body(context -> {
-                    List<String> currentFilters = bot.sqlQueries.getFiltersAsStrings();
+                    List<String> currentFilters = bot.sqlQueries.getFiltersAsStrings(bot.entities.readableNames);
                     if (currentFilters.isEmpty()) {
                         bot.reactPlatform.reply(context, bot.messages.getString("NoFilters"),
                                 Utils.getFirstTrainingSentences(bot.coreLibraryI18n.Quit));
@@ -221,9 +224,10 @@ public class StructuredFilter {
                     if (!isEmpty(field) && !isEmpty(operator) && !isEmpty(value)) {
                         bot.sqlQueries.removeFilter(field, operator, value);
                         String sqlQuery =  bot.sqlQueries.selectAll();
-                        ResultSet resultSet = sql.runSqlQuery(sqlQuery);
+                        ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
+                        String fieldRN = bot.entities.readableNames.get(field);
                         bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("FilterRemoved"),
-                                field, operator, value, resultSet.getNumRows()));
+                                fieldRN, operator, value, resultSet.getNumRows()));
                     } else {
                         bot.reactPlatform.reply(context, bot.messages.getString("SomethingWentWrong"));
                     }
