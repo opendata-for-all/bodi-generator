@@ -18,14 +18,19 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 /**
  * The SQL Engine of a chatbot.
  * <p>
- * It is the responsible for generating and executing SQL queries in a database made up of csv files.
+ * It is the responsible for executing SQL queries in a database.
  */
 public class SqlEngine {
 
     /**
-     * The url of the local database.
+     * The url of the database.
      */
-    private final String url = "jdbc:drill:zk=local";
+    private final String url = "jdbc:drill:drillbit=localhost";
+
+    /**
+     * The driver connection.
+     */
+    private Connection conn;
 
     /**
      * The Statement used to execute SQL queries in a given database.
@@ -40,7 +45,7 @@ public class SqlEngine {
     public SqlEngine() {
         try {
             Class.forName("org.apache.drill.jdbc.Driver");
-            Connection conn = DriverManager.getConnection(url);
+            conn = DriverManager.getConnection(url);
             statement = conn.createStatement();
         } catch (SQLException | ClassNotFoundException e) {
             Log.error(e, "An error occurred while connecting to {0}, see the attached exception", url);
@@ -61,28 +66,37 @@ public class SqlEngine {
         }
         Log.info("Trying to run the SQL query: {0}", sqlQuery);
         try {
-            ResultSet resultSet = statement.executeQuery(sqlQuery);
-            ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
-            int numColumns = resultSetMetaData.getColumnCount();
-            List<String> header = new ArrayList<>();
-            List<Row> table = new ArrayList<>();
-            for (int i = 1; i <= numColumns; i++) {
-                String originalName = resultSetMetaData.getColumnLabel(i);
-                String readableName = bot.entities.readableNames.get(originalName);
-                if (!isEmpty(readableName)) {
-                    header.add(readableName);
-                } else {
-                    header.add(originalName);
-                }
+            if (conn.isClosed()) {
+                Log.warn("The drillbit connection was lost. Trying to establish connection again.");
+                conn = DriverManager.getConnection(url);
+                statement = conn.createStatement();
             }
-            while (resultSet.next()) {
-                List<String> values = new ArrayList<>();
+            if (!conn.isClosed()) {
+                ResultSet resultSet = statement.executeQuery(sqlQuery);
+                ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
+                int numColumns = resultSetMetaData.getColumnCount();
+                List<String> header = new ArrayList<>();
+                List<Row> table = new ArrayList<>();
                 for (int i = 1; i <= numColumns; i++) {
-                    values.add(resultSet.getString(i));
+                    String originalName = resultSetMetaData.getColumnLabel(i);
+                    String readableName = bot.entities.readableNames.get(originalName);
+                    if (!isEmpty(readableName)) {
+                        header.add(readableName);
+                    } else {
+                        header.add(originalName);
+                    }
                 }
-                table.add(new Row(values));
+                while (resultSet.next()) {
+                    List<String> values = new ArrayList<>();
+                    for (int i = 1; i <= numColumns; i++) {
+                        values.add(resultSet.getString(i));
+                    }
+                    table.add(new Row(values));
+                }
+                return new bodi.generator.dataSource.ResultSet(header, table);
+            } else {
+                Log.error("An error occurred while reconnecting to {0}, see the attached exception", url);
             }
-            return new bodi.generator.dataSource.ResultSet(header, table);
         } catch (SQLException e) {
             Log.error(e, "An error occurred while running the SQL query {0}, see the attached exception", sqlQuery);
         }
