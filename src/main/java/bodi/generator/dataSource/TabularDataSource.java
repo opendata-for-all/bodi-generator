@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -82,7 +83,7 @@ public class TabularDataSource implements Serializable {
             this.delimiter = delimiter;
             List<String[]> csv = reader.readAll();
             List<String> originalHeader = new ArrayList<>(Arrays.asList(csv.get(0)));
-            header = new ArrayList<>(originalHeader.stream().map(e -> e.replaceAll(" ", "_")).toList());
+            header = new ArrayList<>(originalHeader.stream().map(e -> e.replaceAll(" ", "_")).collect(Collectors.toList()));
             csv.remove(0);
             table = new ArrayList<>();
             csv.forEach(row -> table.add(new Row(new ArrayList<>(Arrays.asList(row)))));
@@ -116,7 +117,7 @@ public class TabularDataSource implements Serializable {
             this.delimiter = delimiter;
             List<String[]> csv = reader.readAll();
             List<String> originalHeader = new ArrayList<>(Arrays.asList(csv.get(0)));
-            header = new ArrayList<>(originalHeader.stream().map(e -> e.replaceAll(" ", "_")).toList());
+            header = new ArrayList<>(originalHeader.stream().map(e -> e.replaceAll(" ", "_")).collect(Collectors.toList()));
             csv.remove(0);
             table = new ArrayList<>();
             csv.forEach(row -> table.add(new Row(new ArrayList<>(Arrays.asList(row)))));
