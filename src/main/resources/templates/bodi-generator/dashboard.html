@@ -71,6 +71,11 @@
                         <i class="large fa fa-sliders-h"></i><span
                             class="app-dashboard-sidebar-text">Properties</span>
                     </a></li>
+                    <li><a th:href="${dashboardUrl} + '/session'"
+                           th:classappend="${page.label.equals('session') ? 'is-active' : ''}">
+                        <i class="large fa fa-user"></i><span
+                            class="app-dashboard-sidebar-text">Session</span>
+                    </a></li>
                     <li><a th:href="${dashboardUrl} + '/deploy_bot'"
                            th:classappend="${page.label.equals('deploy_bot') ? 'is-active' : ''}">
                         <i class="large fa fa-cloud-arrow-up"></i><span

@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -30,7 +32,10 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
  * A {@link TabularDataSource} is <b>immutable</b>. However, columns can be removed to skip a table attribute that is
  * not necessary for some purpose.
  */
-public class TabularDataSource {
+public class TabularDataSource implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
      * The number of rows of the {@link TabularDataSource}. It is always equal to {@link #table} size

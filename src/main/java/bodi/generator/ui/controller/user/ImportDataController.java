@@ -78,10 +78,9 @@ public class ImportDataController {
     public String storeFile(@RequestParam("file") MultipartFile file,
                             @RequestParam("csvDelimiter") char csvDelimiter) throws IOException {
         objects.setCsvDelimiter(csvDelimiter);
-        objects.setCsv(file.getInputStream().readAllBytes());
         // TODO: check csv.getContentType().equals("text/csv")
         objects.setDataName(file.getOriginalFilename());
-        objects.setTds(new TabularDataSource(new ByteArrayInputStream(objects.getCsv()), csvDelimiter)); // TODO: HANDLE DELIMITER ERROR
+        objects.setTds(new TabularDataSource(new ByteArrayInputStream(file.getInputStream().readAllBytes()), csvDelimiter)); // TODO: HANDLE DELIMITER ERROR
         objects.setDs(tabularDataSourceToDataSchema(objects.getTds()));
         objects.setSchemaType(objects.getDs().getSchemaType("mainSchemaType"));
 

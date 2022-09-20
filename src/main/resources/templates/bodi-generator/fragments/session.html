@@ -1,0 +1,29 @@
+<!DOCTYPE HTML>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+<!--/*@thymesVar id="dataImported" type="boolean"*/-->
+<div class="app-dashboard-body-content off-canvas-content" data-off-canvas-content th:fragment="content">
+    <h2 class="text-left" th:text="'Load / Download a session'"></h2>
+    <div class="grid-x callout"
+         th:if="${dataImported}">
+        <div class="cell auto">
+            <form th:action="@{/bodi-generator/session/download}"
+                  method="POST">
+                <div class="cell small-4">
+                    <input type="submit" class="button" value="Download current session">
+                </div>
+            </form>
+        </div>
+    </div>
+    <form th:action="@{/bodi-generator/session/load}"
+          enctype="multipart/form-data"
+          method="POST">
+        <div class="grid-x callout">
+            <div class="cell small-4">
+                <input type="file" name="file">
+            </div>
+            <div class="cell small-4">
+                <input type="submit" class="button" value="Load"/>
+            </div>
+        </div>
+    </form>
+</div>
