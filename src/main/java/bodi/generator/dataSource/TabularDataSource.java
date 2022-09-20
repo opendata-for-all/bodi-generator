@@ -83,7 +83,8 @@ public class TabularDataSource implements Serializable {
                     .withCSVParser(new CSVParserBuilder().withSeparator(delimiter).build()).build();
             this.delimiter = delimiter;
             List<String[]> csv = reader.readAll();
-            header = new ArrayList<>(Arrays.asList(csv.get(0)));
+            List<String> originalHeader = new ArrayList<>(Arrays.asList(csv.get(0)));
+            header = new ArrayList<>(originalHeader.stream().map(e -> e.replaceAll(" ", "_")).toList());
             csv.remove(0);
             table = new ArrayList<>();
             csv.forEach(row -> table.add(new Row(new ArrayList<>(Arrays.asList(row)))));
@@ -116,7 +117,8 @@ public class TabularDataSource implements Serializable {
                     .withCSVParser(new CSVParserBuilder().withSeparator(delimiter).build()).build();
             this.delimiter = delimiter;
             List<String[]> csv = reader.readAll();
-            header = new ArrayList<>(Arrays.asList(csv.get(0)));
+            List<String> originalHeader = new ArrayList<>(Arrays.asList(csv.get(0)));
+            header = new ArrayList<>(originalHeader.stream().map(e -> e.replaceAll(" ", "_")).toList());
             csv.remove(0);
             table = new ArrayList<>();
             csv.forEach(row -> table.add(new Row(new ArrayList<>(Arrays.asList(row)))));
