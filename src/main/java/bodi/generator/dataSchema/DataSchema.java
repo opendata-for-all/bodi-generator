@@ -4,7 +4,6 @@ import bodi.generator.dataSource.TabularDataSource;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,7 +26,6 @@ import static java.util.Objects.isNull;
  */
 public class DataSchema implements Serializable {
 
-    @Serial
     private static final long serialVersionUID = 1L;
 
     /**

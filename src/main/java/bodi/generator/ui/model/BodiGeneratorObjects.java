@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
 
-import java.io.Serial;
 import java.io.Serializable;
 
 
@@ -18,7 +17,6 @@ import java.io.Serializable;
 @Component
 public class BodiGeneratorObjects implements Serializable {
 
-    @Serial
     private static final long serialVersionUID = 1L;
 
     @Getter
