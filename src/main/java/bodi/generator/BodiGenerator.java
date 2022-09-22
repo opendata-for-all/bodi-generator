@@ -363,6 +363,7 @@ public final class BodiGenerator {
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/Bot.java");
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/getResult/CheckCorrectAnswer.java");
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/getResult/GetResult.java");
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomFieldOfNumericFieldFunction.java");
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomFieldOfValue.java");
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomFilter.java");
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomFrequentValueInField.java");
@@ -588,6 +589,7 @@ public final class BodiGenerator {
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/Bot.java");
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/getResult/CheckCorrectAnswer.java");
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/getResult/GetResult.java");
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomFieldOfNumericFieldFunction.java");
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomFieldOfValue.java");
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomFilter.java");
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/CustomFrequentValueInField.java");

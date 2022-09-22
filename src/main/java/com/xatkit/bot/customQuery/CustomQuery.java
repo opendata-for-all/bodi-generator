@@ -87,6 +87,11 @@ public class CustomQuery {
     public CustomRowOfValues customRowOfValues;
 
     /**
+     * The Custom Field Of Numeric Field Function workflow.
+     */
+    public CustomFieldOfNumericFieldFunction customFieldOfNumericFieldFunction;
+
+    /**
      * Instantiates a new Custom Query workflow.
      *
      * @param bot         the chatbot that uses this workflow
@@ -103,6 +108,7 @@ public class CustomQuery {
         customRowCount = new CustomRowCount(bot, returnState);
         customFieldOfValue = new CustomFieldOfValue(bot, returnState);
         customRowOfValues = new CustomRowOfValues(bot, returnState);
+        customFieldOfNumericFieldFunction = new CustomFieldOfNumericFieldFunction(bot, returnState);
 
         val awaitingCustomQueryState = state("AwaitingCustomQuery");
 
@@ -123,6 +129,7 @@ public class CustomQuery {
                 .when(intentIs(bot.intents.customFieldOfValueIntent)).moveTo(customFieldOfValue.getProcessCustomFieldOfValueState())
                 .when(intentIs(bot.intents.customFieldOfValueOperatorIntent)).moveTo(customFieldOfValue.getProcessCustomFieldOfValueState())
                 .when(intentIs(bot.intents.customRowOfValuesIntent)).moveTo(customRowOfValues.getProcessCustomRowOfValuesState())
+                .when(intentIs(bot.intents.customFieldOfNumericFieldFunctionIntent)).moveTo(customFieldOfNumericFieldFunction.getProcessCustomFieldOfNumericFieldFunctionState())
 
                 .when(intentIs(bot.intents.customNumericFilterIntent)).moveTo(customFilter.getSaveCustomFilterState())
                 .when(intentIs(bot.intents.customDateFilterIntent)).moveTo(customFilter.getSaveCustomFilterState())

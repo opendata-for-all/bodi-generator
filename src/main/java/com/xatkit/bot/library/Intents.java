@@ -190,6 +190,11 @@ public class Intents {
     public final IntentDefinition customRowOfValuesIntent;
 
     /**
+     * The intent customFieldOfNumericFieldFunctionIntent.
+     */
+    public final IntentDefinition customFieldOfNumericFieldFunctionIntent;
+
+    /**
      * Instantiates a new {@link Intents} object.
      *
      * @param entities the entities to use in the intents
@@ -372,6 +377,14 @@ public class Intents {
                 .parameter(ContextKeys.VALUE + "1").fromFragment("VALUE1").entity(entities.fieldValueEntity)
                 .parameter(ContextKeys.VALUE + "2").fromFragment("VALUE2").entity(entities.fieldValueEntity)
                 .parameter(ContextKeys.VALUE + "3").fromFragment("VALUE3").entity(entities.fieldValueEntity)
+                .getIntentDefinition();
+
+        customFieldOfNumericFieldFunctionIntent = intent("CustomFieldOfNumericFieldFunction")
+                .trainingSentences(BUNDLE.getStringArray("CustomFieldOfNumericFieldFunction"))
+                .parameter(ContextKeys.NUMBER).fromFragment("NUMBER").entity(number())
+                .parameter(ContextKeys.FIELD + "1").fromFragment("FIELD1").entity(entities.fieldEntity)
+                .parameter(ContextKeys.OPERATOR).fromFragment("OPERATOR").entity(entities.numericFunctionOperatorEntity)
+                .parameter(ContextKeys.FIELD + "2").fromFragment("FIELD2").entity(entities.numericFieldEntity)
                 .getIntentDefinition();
     }
 }

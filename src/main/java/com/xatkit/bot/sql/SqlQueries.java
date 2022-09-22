@@ -385,4 +385,24 @@ public class SqlQueries {
         }
         return sqlQuery;
     }
+
+    /**
+     * Generates a SQL query for the {@link com.xatkit.bot.customQuery.CustomFieldOfNumericFieldFunction} workflow.
+     *
+     * @param field1   the field to be selected
+     * @param field2   the numeric field where the operator is applied
+     * @param operator the operator
+     * @param number   the number of rows to get
+     * @return the sql query
+     */
+    public String fieldOfNumericFieldFunction(String field1, String field2, String operator, String number) {
+        String order = (operator.equals("min") ? "ASC" : "DESC");
+        String sqlQuery = "SELECT " + field1 + ", " + operator + "(" + toDecimal(field2) + ") AS " + field2 + " FROM "
+            + table + " WHERE " + field2 + " <> ''";
+        if (!filters.isEmpty()) {
+            sqlQuery += " AND " + String.join(" AND ", getFiltersAsSqlConditions());
+        }
+        sqlQuery += " GROUP BY " + field1 + " ORDER BY " + field2 + " " + order + " LIMIT " + number;
+        return sqlQuery;
+    }
 }
