@@ -13,6 +13,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
@@ -66,7 +67,7 @@ public class SqlEngine {
         }
         Log.info("Trying to run the SQL query: {0}", sqlQuery);
         try {
-            if (conn.isClosed()) {
+            if (isNull(conn) || conn.isClosed()) {
                 Log.warn("The drillbit connection was lost. Trying to establish connection again.");
                 conn = DriverManager.getConnection(url);
                 statement = conn.createStatement();

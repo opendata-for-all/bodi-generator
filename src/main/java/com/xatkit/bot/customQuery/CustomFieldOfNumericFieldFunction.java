@@ -3,6 +3,7 @@ package com.xatkit.bot.customQuery;
 import bodi.generator.dataSource.ResultSet;
 import com.xatkit.bot.Bot;
 import com.xatkit.bot.library.ContextKeys;
+import com.xatkit.bot.sql.SqlQueries;
 import com.xatkit.execution.State;
 import lombok.Getter;
 import lombok.val;
@@ -34,11 +35,6 @@ public class CustomFieldOfNumericFieldFunction {
     private final State processCustomFieldOfNumericFieldFunctionState;
 
     /**
-     * This variable stores the error condition of the workflow (i.e. if some parameter was not recognized properly)
-     */
-    private boolean error;
-
-    /**
      * Instantiates a new Custom Field Of Numeric Field Function workflow.
      *
      * @param bot         the chatbot that uses this workflow
@@ -49,19 +45,20 @@ public class CustomFieldOfNumericFieldFunction {
 
         processCustomFieldOfNumericFieldFunctionState
                 .body(context -> {
-                    error = false;
-                    String field1 = (String) context.getIntent().getValue(ContextKeys.FIELD + "1");
-                    String field2 = (String) context.getIntent().getValue(ContextKeys.FIELD + "2");
-                    String operator = (String) context.getIntent().getValue(ContextKeys.OPERATOR);
+                    context.getSession().put(ContextKeys.ERROR, false);
+                    String field1 = (String) context.getSession().get(ContextKeys.FIELD + "1");
+                    String field2 = (String) context.getSession().get(ContextKeys.FIELD + "2");
+                    String operator = (String) context.getSession().get(ContextKeys.OPERATOR);
                     String number = (String) context.getIntent().getValue(ContextKeys.NUMBER);
                     if (!isEmpty(field1) && !isEmpty(field2) && !isEmpty(operator) && (operator.equals("max") || operator.equals("min"))) {
                         if (isEmpty(number)) {
                             // if no number is specified, get the top 1
                             number = "1";
                         }
-                        String sqlQuery = bot.sqlQueries.fieldOfNumericFieldFunction(field1, field2, operator, number);
+                        SqlQueries sqlQueries = (SqlQueries) context.getSession().get(ContextKeys.SQL_QUERIES);
+                        String sqlQuery = sqlQueries.fieldOfNumericFieldFunction(field1, field2, operator, number);
                         ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
-                        bot.getResult.setResultSet(resultSet);
+                        context.getSession().put(ContextKeys.RESULTSET, resultSet);
                         String field1RN = bot.entities.readableNames.get(field1);
                         String field2RN = bot.entities.readableNames.get(field2);
                         if (number.equals("1")) {
@@ -73,12 +70,12 @@ public class CustomFieldOfNumericFieldFunction {
                         }
 
                     } else {
-                        error = true;
+                        context.getSession().put(ContextKeys.ERROR, true);
                     }
                 })
                 .next()
-                .when(context -> error).moveTo(bot.getResult.getGenerateResultSetFromQueryState())
-                .when(context -> !error).moveTo(bot.getResult.getShowDataState());
+                .when(context -> (boolean) context.getSession().get(ContextKeys.ERROR)).moveTo(bot.getResult.getGenerateResultSetFromQueryState())
+                .when(context -> !(boolean) context.getSession().get(ContextKeys.ERROR)).moveTo(bot.getResult.getShowDataState());
 
         this.processCustomFieldOfNumericFieldFunctionState = processCustomFieldOfNumericFieldFunctionState.getState();
     }

@@ -2,7 +2,7 @@ package com.xatkit.bot.structuredQuery;
 
 import com.xatkit.bot.Bot;
 import com.xatkit.bot.library.ContextKeys;
-import com.xatkit.bot.library.Utils;
+import com.xatkit.bot.sql.SqlQueries;
 import com.xatkit.execution.State;
 import lombok.Getter;
 import lombok.val;
@@ -36,11 +36,9 @@ public class ResetBot {
 
         resetBotState
                 .body(context -> {
-                    bot.sqlQueries.clearFilters();
-                    List<String> fields = Utils.getEntityValues(bot.entities.fieldEntity);
-                    List<String> filterFieldOptions = new ArrayList<>(fields);
-                    context.getSession().put(ContextKeys.FILTER_FIELD_OPTIONS, filterFieldOptions);
-                    List<String> viewFieldOptions = new ArrayList<>(fields);
+                    SqlQueries sqlQueries = (SqlQueries) context.getSession().get(ContextKeys.SQL_QUERIES);
+                    sqlQueries.clearFilters();
+                    List<String> viewFieldOptions = new ArrayList<>(sqlQueries.getAllFields());
                     context.getSession().put(ContextKeys.VIEW_FIELD_OPTIONS, viewFieldOptions);
                 })
                 .next()

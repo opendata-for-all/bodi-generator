@@ -4,6 +4,7 @@ import bodi.generator.dataSource.ResultSet;
 import com.xatkit.bot.Bot;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Entities;
+import com.xatkit.bot.sql.SqlQueries;
 import com.xatkit.execution.State;
 import lombok.Getter;
 import lombok.val;
@@ -32,11 +33,6 @@ public class CustomValue1vsValue2 {
     private final State processCustomValue1vsValue2State;
 
     /**
-     * This variable stores the error condition of the workflow (i.e. if some parameter was not recognized properly)
-     */
-    private boolean error;
-
-    /**
      * Instantiates a new Custom Value1 vs Value2 workflow.
      *
      * @param bot         the chatbot that uses this workflow
@@ -47,20 +43,21 @@ public class CustomValue1vsValue2 {
 
         processCustomValue1vsValue2State
                 .body(context -> {
-                    error = false;
-                    String value1 = (String) context.getIntent().getValue(ContextKeys.VALUE + "1");
-                    String value2 = (String) context.getIntent().getValue(ContextKeys.VALUE + "2");
+                    context.getSession().put(ContextKeys.ERROR, false);
+                    String value1 = (String) context.getSession().get(ContextKeys.VALUE + "1");
+                    String value2 = (String) context.getSession().get(ContextKeys.VALUE + "2");
                     if (!isEmpty(value1) && !isEmpty(value2)) {
                         String field1 = Entities.fieldValueMap.get(value1);
                         String field2 = Entities.fieldValueMap.get(value2);
                         String field1RN = bot.entities.readableNames.get(field1);
                         String field2RN = bot.entities.readableNames.get(field2);
 
-                        String sqlQuery = bot.sqlQueries.valueFrequency(field1, value1);
+                        SqlQueries sqlQueries = (SqlQueries) context.getSession().get(ContextKeys.SQL_QUERIES);
+                        String sqlQuery = sqlQueries.valueFrequency(field1, value1);
                         ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
                         int value1Freq = Integer.parseInt(resultSet.getRow(0).getColumnValue(0));
 
-                        sqlQuery = bot.sqlQueries.valueFrequency(field2, value2);
+                        sqlQuery = sqlQueries.valueFrequency(field2, value2);
                         resultSet = sql.runSqlQuery(bot, sqlQuery);
                         int value2Freq = Integer.parseInt(resultSet.getRow(0).getColumnValue(0));
 
@@ -88,12 +85,12 @@ public class CustomValue1vsValue2 {
                             }
                         }
                     } else {
-                        error = true;
+                        context.getSession().put(ContextKeys.ERROR, true);
                     }
                 })
                 .next()
-                .when(context -> error).moveTo(bot.getResult.getGenerateResultSetFromQueryState())
-                .when(context -> !error).moveTo(returnState);
+                .when(context -> (boolean) context.getSession().get(ContextKeys.ERROR)).moveTo(bot.getResult.getGenerateResultSetFromQueryState())
+                .when(context -> !(boolean) context.getSession().get(ContextKeys.ERROR)).moveTo(returnState);
 
         this.processCustomValue1vsValue2State = processCustomValue1vsValue2State.getState();
     }

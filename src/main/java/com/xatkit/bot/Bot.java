@@ -106,11 +106,6 @@ public class Bot {
     public final CustomQuery customQuery;
 
     /**
-     * The system that generates the SQL queries.
-     */
-    public final SqlQueries sqlQueries;
-
-    /**
      * The set of intents the chatbot can recognize.
      */
     public final Intents intents;
@@ -130,6 +125,11 @@ public class Bot {
      */
     public final ReactPlatform reactPlatform;
 
+    /**
+     * Instantiates a new {@link Bot}.
+     *
+     * @param botConfiguration the bot configuration
+     */
     public Bot(Configuration botConfiguration) {
 
         /*
@@ -150,10 +150,6 @@ public class Bot {
         boolean enableCheckCorrectAnswer = botConfiguration.getBoolean(BotProperties.BOT_ENABLE_CHECK_CORRECT_ANSWER, false);
         String odataTitle = botConfiguration.getString(BotProperties.BOT_ODATA_TITLE, null);
         String odataUrl = botConfiguration.getString(BotProperties.BOT_ODATA_URL, null);
-
-        sqlQueries = new SqlQueries(inputDoc, delimiter);
-        List<String> fields = new ArrayList<>(Utils.getEntityValues(entities.fieldEntity));
-        sqlQueries.getAllFields().addAll(fields);
 
         /*
          * Instantiate the platform and providers we will use in the bot definition.
@@ -192,8 +188,10 @@ public class Bot {
                 .when(eventIs(ReactEventProvider.ClientReady)).moveTo(awaitingInput);
         awaitingInput
                 .body(context -> {
-                    List<String> filterFieldOptions = new ArrayList<>(fields);
-                    context.getSession().put(ContextKeys.FILTER_FIELD_OPTIONS, filterFieldOptions);
+                    SqlQueries sqlQueries = new SqlQueries(inputDoc, delimiter);
+                    List<String> fields = new ArrayList<>(entities.readableNames.keySet());
+                    sqlQueries.getAllFields().addAll(fields);
+                    context.getSession().put(ContextKeys.SQL_QUERIES, sqlQueries);
                     List<String> viewFieldOptions = new ArrayList<>(fields);
                     context.getSession().put(ContextKeys.VIEW_FIELD_OPTIONS, viewFieldOptions);
                     reactPlatform.reply(context, messages.getString("Greetings"));

@@ -4,6 +4,7 @@ import bodi.generator.dataSource.ResultSet;
 import com.xatkit.bot.Bot;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Entities;
+import com.xatkit.bot.sql.SqlQueries;
 import com.xatkit.execution.State;
 import lombok.Getter;
 import lombok.val;
@@ -33,11 +34,6 @@ public class CustomRowCount {
     private final State processCustomRowCountState;
 
     /**
-     * This variable stores the error condition of the workflow (i.e. if some parameter was not recognized properly)
-     */
-    private boolean error;
-
-    /**
      * Instantiates a new Custom Row Count workflow.
      *
      * @param bot         the chatbot that uses this workflow
@@ -48,21 +44,22 @@ public class CustomRowCount {
 
         processCustomRowCountState
                 .body(context -> {
-                    error = false;
-                    String rowName = (String) context.getIntent().getValue(ContextKeys.ROW_NAME);
+                    context.getSession().put(ContextKeys.ERROR, false);
+                    String rowName = (String) context.getSession().get(ContextKeys.ROW_NAME);
                     if (!isEmpty(rowName)) {
-                        String sqlQuery = bot.sqlQueries.rowCount();
+                        SqlQueries sqlQueries = (SqlQueries) context.getSession().get(ContextKeys.SQL_QUERIES);
+                        String sqlQuery = sqlQueries.rowCount();
                         ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
                         int rowCount = Integer.parseInt(resultSet.getRow(0).getColumnValue(0));
                         bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("ShowRowCount"),
                                 rowCount, rowName));
                     } else {
-                        error = true;
+                        context.getSession().put(ContextKeys.ERROR, true);
                     }
                 })
                 .next()
-                .when(context -> error).moveTo(bot.getResult.getGenerateResultSetFromQueryState())
-                .when(context -> !error).moveTo(returnState);
+                .when(context -> (boolean) context.getSession().get(ContextKeys.ERROR)).moveTo(bot.getResult.getGenerateResultSetFromQueryState())
+                .when(context -> !(boolean) context.getSession().get(ContextKeys.ERROR)).moveTo(returnState);
 
         this.processCustomRowCountState = processCustomRowCountState.getState();
     }

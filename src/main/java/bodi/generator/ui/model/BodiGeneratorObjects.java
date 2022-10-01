@@ -1,7 +1,6 @@
 package bodi.generator.ui.model;
 
 import bodi.generator.dataSchema.DataSchema;
-import bodi.generator.dataSchema.SchemaField;
 import bodi.generator.dataSchema.SchemaType;
 import bodi.generator.dataSource.TabularDataSource;
 import lombok.Getter;
@@ -45,10 +44,6 @@ public class BodiGeneratorObjects implements Serializable {
 
     @Getter
     @Setter
-    private SchemaField schemaField;
-
-    @Getter
-    @Setter
     private Properties properties;
 
     /**
@@ -63,7 +58,6 @@ public class BodiGeneratorObjects implements Serializable {
         this.setTds(newObjects.getTds());
         this.setDs(newObjects.getDs());
         this.setSchemaType(newObjects.getSchemaType());
-        this.setSchemaField(newObjects.getSchemaField());
         this.setProperties(newObjects.getProperties());
     }
 

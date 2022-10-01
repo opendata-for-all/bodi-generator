@@ -35,6 +35,11 @@ public class FieldsController {
     private final DashboardService dashboard = new DashboardService();
 
     /**
+     * The target {@link SchemaField}.
+     */
+    private SchemaField schemaField = null;
+
+    /**
      * Creates a new {@link FieldsController}.
      *
      * @param objects the objects
@@ -57,11 +62,11 @@ public class FieldsController {
             SchemaType schemaType = objects.getSchemaType();
             model.addAttribute("schemaType", schemaType);
             if (!isNull(field)) {
-                objects.setSchemaField(schemaType.getSchemaField(field));
-            } else {
-                objects.setSchemaField(null);
+                this.schemaField = schemaType.getSchemaField(field);
+            } else if (!schemaType.getSchemaFields().contains(this.schemaField)) {
+                this.schemaField = null;
             }
-            model.addAttribute("schemaField", objects.getSchemaField());
+            model.addAttribute("schemaField", this.schemaField);
         }
         return dashboard.viewCustomization(CustomizationTab.FIELDS, model);
     }
@@ -78,10 +83,10 @@ public class FieldsController {
                              @RequestParam(value = "deleteField", required = false, defaultValue = "false") boolean deleteField) {
         TabularDataSource tds = objects.getTds();
         SchemaType schemaType = objects.getSchemaType();
-        SchemaField schemaField = objects.getSchemaField();
         if (deleteField) {
             schemaType.deleteSchemaField(schemaField);
             tds.removeColumn(schemaField.getOriginalName());
+            this.schemaField = null;
         } else {
             schemaField.setReadableName(updatedSchemaField.getReadableName());
             schemaField.setSynonyms(updatedSchemaField.getSynonyms());

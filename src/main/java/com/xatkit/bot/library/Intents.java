@@ -86,6 +86,10 @@ public class Intents {
      * The intent dateFieldIntent.
      */
     public final IntentDefinition dateFieldIntent;
+    /**
+     * The intent fieldIntent.
+     */
+    public final IntentDefinition fieldIntent;
 
 
     /**
@@ -255,6 +259,10 @@ public class Intents {
         dateFieldIntent = intent("DateField")
                 .trainingSentences(BUNDLE.getStringArray("Value"))
                 .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(entities.dateFieldEntity)
+                .getIntentDefinition();
+        fieldIntent = intent("Field")
+                .trainingSentences(BUNDLE.getStringArray("Value"))
+                .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(entities.fieldEntity)
                 .getIntentDefinition();
 
 

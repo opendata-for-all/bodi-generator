@@ -4,6 +4,7 @@ import bodi.generator.dataSource.ResultSet;
 import com.xatkit.bot.Bot;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Utils;
+import com.xatkit.bot.sql.SqlQueries;
 import com.xatkit.execution.State;
 import lombok.Getter;
 import lombok.val;
@@ -33,10 +34,6 @@ public class CustomFilter {
     private final State saveCustomFilterState;
 
     /**
-     * This variable stores the number of rows of the generated result set.
-     */
-    private int resultSetNumRows;
-    /**
      * Instantiates a new Custom Filter workflow.
      *
      * @param bot         the chatbot that uses this workflow
@@ -48,15 +45,16 @@ public class CustomFilter {
 
         saveCustomFilterState
                 .body(context -> {
-                    String field = (String) context.getIntent().getValue(ContextKeys.FIELD);
-                    String operator = (String) context.getIntent().getValue(ContextKeys.OPERATOR);
-                    String value = (String) context.getIntent().getValue(ContextKeys.VALUE);
+                    String field = (String) context.getSession().get(ContextKeys.FIELD);
+                    String operator = (String) context.getSession().get(ContextKeys.OPERATOR);
+                    String value = (String) context.getSession().get(ContextKeys.VALUE);
                     if (!isEmpty(field) && !isEmpty(operator) && !isEmpty(value)) {
-                        bot.sqlQueries.addFilter(field, operator, value);
-                        String sqlQuery =  bot.sqlQueries.selectAll();
+                        SqlQueries sqlQueries = (SqlQueries) context.getSession().get(ContextKeys.SQL_QUERIES);
+                        sqlQueries.addFilter(field, operator, value);
+                        String sqlQuery =  sqlQueries.selectAll();
                         ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
-                        bot.getResult.setResultSet(resultSet);
-                        resultSetNumRows = resultSet.getNumRows();
+                        context.getSession().put(ContextKeys.RESULTSET, resultSet);
+                        context.getSession().put(ContextKeys.RESULTSET_NUM_ROWS, resultSet.getNumRows());
                         String fieldRN = bot.entities.readableNames.get(field);
                         bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("FilterAdded"),
                                 fieldRN, operator, value, resultSet.getNumRows()));
@@ -65,8 +63,8 @@ public class CustomFilter {
                     }
                 })
                 .next()
-                .when(context -> resultSetNumRows <= bot.maxEntriesToDisplay).moveTo(bot.getResult.getShowDataState())
-                .when(context -> resultSetNumRows > bot.maxEntriesToDisplay).moveTo(selectNextActionState);
+                .when(context -> (int) context.getSession().get(ContextKeys.RESULTSET_NUM_ROWS) <= bot.maxEntriesToDisplay).moveTo(bot.getResult.getShowDataState())
+                .when(context -> (int) context.getSession().get(ContextKeys.RESULTSET_NUM_ROWS) > bot.maxEntriesToDisplay).moveTo(selectNextActionState);
 
         selectNextActionState
                 .body(context -> {

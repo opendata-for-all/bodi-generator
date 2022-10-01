@@ -5,9 +5,9 @@ import com.xatkit.bot.App;
 import com.xatkit.bot.Bot;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Utils;
+import com.xatkit.bot.sql.SqlQueries;
 import com.xatkit.execution.State;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.val;
 
 import java.text.MessageFormat;
@@ -16,6 +16,7 @@ import static com.xatkit.bot.App.nlpServerClient;
 import static com.xatkit.bot.App.sql;
 import static com.xatkit.dsl.DSL.intentIs;
 import static com.xatkit.dsl.DSL.state;
+import static java.util.Objects.isNull;
 
 /**
  * The Get Result workflow of a chatbot.
@@ -57,16 +58,11 @@ public class GetResult {
     /**
      * One of the entry points for the Get Result workflow.
      * <p>
-     * This state shows the result set stored in {@link #resultSet} (previously set by another workflow)
+     * This state shows the result set stored in the context session object {@link ContextKeys#RESULTSET} (previously
+     * set by another workflow)
      */
     @Getter
     private final State showDataState;
-
-    /**
-     * This {@link ResultSet} stores the result to be printed.
-     */
-    @Setter
-    private ResultSet resultSet;
 
     /**
      * Instantiates a new Get Result workflow.
@@ -81,8 +77,9 @@ public class GetResult {
 
         generateResultSetState
                 .body(context -> {
-                    String sqlQuery = bot.sqlQueries.selectAll();
-                    resultSet = sql.runSqlQuery(bot, sqlQuery);
+                    SqlQueries sqlQueries = (SqlQueries) context.getSession().get(ContextKeys.SQL_QUERIES);
+                    String sqlQuery = sqlQueries.selectAll();
+                    context.getSession().put(ContextKeys.RESULTSET, sql.runSqlQuery(bot, sqlQuery));
                 })
                 .next()
                 .moveTo(showDataState);
@@ -92,7 +89,7 @@ public class GetResult {
         generateResultSetFromQueryState
                 .body(context -> {
                     String query = context.getIntent().getMatchedInput();
-                    resultSet = nlpServerClient.runQuery(bot, query);
+                    context.getSession().put(ContextKeys.RESULTSET, nlpServerClient.runQuery(bot, query));
                 })
                 .next()
                 .moveTo(showDataState);
@@ -101,6 +98,10 @@ public class GetResult {
 
         showDataState
                 .body(context -> {
+                    ResultSet resultSet = (ResultSet) context.getSession().get(ContextKeys.RESULTSET);
+                    if (isNull(resultSet)) {
+                        resultSet = new ResultSet();
+                    }
                     int pageCount = 1;
                     if (context.getIntent().getMatchedInput()
                             .equals(bot.intents.showNextPageIntent.getTrainingSentences().get(0))) {
@@ -145,7 +146,7 @@ public class GetResult {
                     }
                 })
                 .next()
-                .when(context -> (resultSet.getNumRows() <= bot.pageLimit)).moveTo(returnState)
+                .when(context -> ((ResultSet) context.getSession().get(ContextKeys.RESULTSET)).getNumRows() <= bot.pageLimit).moveTo(returnState)
                 .when(intentIs(bot.intents.showPreviousPageIntent)).moveTo(showDataState)
                 .when(intentIs(bot.intents.showNextPageIntent)).moveTo(showDataState)
                 .when(intentIs(bot.coreLibraryI18n.Quit)).moveTo(returnState);

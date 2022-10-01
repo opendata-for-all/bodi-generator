@@ -29,6 +29,11 @@ public enum DashboardView {
     FIELDS("fields"),
 
     /**
+     * The {@code field_groups} page of the dashboard.
+     */
+    FIELD_GROUPS("field_groups"),
+
+    /**
      * The {@code merge_fields} page of the dashboard.
      */
     MERGE_FIELDS("merge_fields"),

@@ -127,6 +127,11 @@ public final class CodeGenerator {
                                    <artifactId>json</artifactId>
                                    <version>20211205</version>
                                </dependency>
+                               <dependency>
+                                    <groupId>com.google.guava</groupId>
+                                    <artifactId>guava</artifactId>
+                                    <version>31.1-jre</version>
+                                </dependency>
                                <!-- Tests -->
                                <dependency>
                                    <groupId>org.junit.jupiter</groupId>

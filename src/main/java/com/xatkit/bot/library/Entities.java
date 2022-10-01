@@ -7,6 +7,7 @@ import com.xatkit.intent.EntityDefinition;
 import com.xatkit.intent.MappingEntityDefinition;
 import com.xatkit.intent.MappingEntityDefinitionEntry;
 import lombok.NonNull;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -17,7 +18,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.xatkit.dsl.DSL.mapping;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -82,6 +85,15 @@ public class Entities {
      */
     public List<String> keyFields;
 
+    /**
+     * The collection of field groups.
+     * <p>
+     * The keys are the field group names and the values are the collections of fields each field group includes.
+     *
+     * @see com.xatkit.bot.customQuery.SpecifyEntities
+     */
+    public Map<String, Set<String>> fieldGroups;
+
     // Merge the json files containing bot entities
     static {
         InputStream is1 = Thread.currentThread().getContextClassLoader().getResourceAsStream(fieldsJsonFile);
@@ -111,15 +123,15 @@ public class Entities {
     /**
      * The entity numericFieldEntity.
      */
-    public final EntityDefinitionReferenceProvider numericFieldEntity;
+    public EntityDefinitionReferenceProvider numericFieldEntity;
     /**
      * The entity textualFieldEntity.
      */
-    public final EntityDefinitionReferenceProvider textualFieldEntity;
+    public EntityDefinitionReferenceProvider textualFieldEntity;
     /**
      * The entity dateFieldEntity.
      */
-    public final EntityDefinitionReferenceProvider dateFieldEntity;
+    public EntityDefinitionReferenceProvider dateFieldEntity;
     /**
      * The entity fieldEntity (combines {@link #numericFieldEntity}, {@link #textualFieldEntity} and
      * {@link #dateFieldEntity}).
@@ -169,10 +181,12 @@ public class Entities {
         this.language = language;
         this.keyFields = new ArrayList<>();
         this.readableNames = new HashMap<>();
+        this.fieldGroups = new HashMap<>();
 
         numericFieldEntity = generateEntity("numericFieldEntity");
         textualFieldEntity = generateEntity("textualFieldEntity");
         dateFieldEntity = generateEntity("dateFieldEntity");
+        readFieldGroups();
         fieldEntity = mergeEntities("fieldEntity", numericFieldEntity, textualFieldEntity, dateFieldEntity);
 
         numericOperatorEntity = generateEntity("numericOperatorEntity");
@@ -296,5 +310,67 @@ public class Entities {
             entity.entry().value((String) entry);
         }
         return (EntityDefinitionReferenceProvider) entity;
+    }
+
+    /**
+     * Reads the field groups in {@link #entitiesJson} and fills {@link #fieldGroups}. Also adds the field groups in
+     * their corresponding field entity (depending on the field group type), so they can be matched with the entities.
+     */
+    private void readFieldGroups() {
+        String entityName = "fieldGroups";
+        JSONObject fieldGroupsJson = entitiesJson.getJSONObject(entityName);
+        MappingEntryStep numericFieldGroupsEntity = mapping("numericFieldGroupsEntity");
+        MappingEntryStep textualFieldGroupsEntity = mapping("textualFieldGroupsEntity");
+        MappingEntryStep dateFieldGroupsEntity = mapping("dateFieldGroupsEntity");
+        for (String entry : fieldGroupsJson.keySet()) {
+            JSONObject fieldGroupJson = fieldGroupsJson.getJSONObject(entry);
+            String type = fieldGroupJson.getString("type");
+            JSONArray fieldGroupNames = fieldGroupJson.getJSONArray(language);
+            List<String> fieldList = fieldGroupJson.getJSONArray("fields").toList().stream()
+                    .map(object -> Objects.toString(object, null))
+                    .collect(Collectors.toList());
+            // check fields in the list actually exist, if not, remove them
+            List<String> realFields = null;
+            switch (type) {
+                case "NUMBER":
+                    realFields = Utils.getEntityValues(numericFieldEntity);
+                    break;
+                case "TEXT":
+                    realFields = Utils.getEntityValues(textualFieldEntity);
+                    break;
+                case "DATE":
+                    realFields = Utils.getEntityValues(dateFieldEntity);
+                    break;
+                default:
+                    realFields = new ArrayList<>();
+            }
+            for (String field : fieldList) {
+                if (!realFields.contains(field)) {
+                    fieldList.remove(field);
+                }
+            }
+            if (!fieldList.isEmpty()) {
+                for (Object fieldGroupName : fieldGroupNames) {
+                    String fieldGroupNameString = (String) fieldGroupName;
+                    fieldGroups.put(fieldGroupNameString, new HashSet<>(fieldList));
+                    switch (type) {
+                        case "NUMBER":
+                            numericFieldGroupsEntity.entry().value(fieldGroupNameString);
+                            break;
+                        case "TEXT":
+                            textualFieldGroupsEntity.entry().value(fieldGroupNameString);
+                            break;
+                        case "DATE":
+                            dateFieldGroupsEntity.entry().value(fieldGroupNameString);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+        numericFieldEntity = mergeEntities("numericFieldEntity", numericFieldEntity, (EntityDefinitionReferenceProvider) numericFieldGroupsEntity);
+        textualFieldEntity = mergeEntities("textualFieldEntity", textualFieldEntity, (EntityDefinitionReferenceProvider) textualFieldGroupsEntity);
+        dateFieldEntity = mergeEntities("dateFieldEntity", dateFieldEntity, (EntityDefinitionReferenceProvider) dateFieldGroupsEntity);
     }
 }

@@ -34,6 +34,11 @@ public class SchemaType implements Serializable {
     private List<SchemaField> schemaFields;
 
     /**
+     * The collection of field groups of the {@link SchemaType}.
+     */
+    private List<SchemaFieldGroup> schemaFieldGroups;
+
+    /**
      * The collection of fields that have been deleted from the {@link SchemaType}. Used to recover deleted fields.
      */
     private List<SchemaField> deletedSchemaFields;
@@ -46,6 +51,7 @@ public class SchemaType implements Serializable {
     public SchemaType(String name) {
         this.name = name;
         this.schemaFields = new ArrayList<>();
+        this.schemaFieldGroups = new ArrayList<>();
         this.deletedSchemaFields = new ArrayList<>();
     }
 
@@ -68,6 +74,15 @@ public class SchemaType implements Serializable {
     }
 
     /**
+     * Gets the collection of {@link SchemaFieldGroup}.
+     *
+     * @return the schema field groups
+     */
+    public List<SchemaFieldGroup> getSchemaFieldGroups() {
+        return schemaFieldGroups;
+    }
+
+    /**
      * Gets the collection of deleted {@link SchemaField}.
      *
      * @return the deleted schema fields
@@ -86,6 +101,15 @@ public class SchemaType implements Serializable {
         for (SchemaField schemaField : schemaFields) {
             if (schemaField.getOriginalName().equals(originalName)) {
                 return schemaField;
+            }
+        }
+        return null;
+    }
+
+    public SchemaFieldGroup getSchemaFieldGroup(String name) {
+        for (SchemaFieldGroup schemaFieldGroup : schemaFieldGroups) {
+            if (schemaFieldGroup.getName().equals(name)) {
+                return schemaFieldGroup;
             }
         }
         return null;
@@ -113,6 +137,15 @@ public class SchemaType implements Serializable {
      */
     public void addSchemaField(SchemaField schemaField) {
         schemaFields.add(schemaField);
+    }
+
+    /**
+     * Adds a {@link SchemaFieldGroup} to the {@link SchemaType}.
+     *
+     * @param schemaFieldGroup the {@link SchemaFieldGroup}
+     */
+    public void addSchemaFieldGroup(SchemaFieldGroup schemaFieldGroup) {
+        schemaFieldGroups.add(schemaFieldGroup);
     }
 
     /**
@@ -184,6 +217,29 @@ public class SchemaType implements Serializable {
     }
 
     /**
+     * Deletes a {@link SchemaFieldGroup}.
+     *
+     * @param schemaFieldGroup the schema field group to delete
+     */
+    public void deleteSchemaFieldGroup(SchemaFieldGroup schemaFieldGroup) {
+        schemaFieldGroups.remove(schemaFieldGroup);
+    }
+
+    /**
+     * Deletes a {@link SchemaFieldGroup}.
+     *
+     * @param name the name of the schema field group to delete
+     */
+    public void deleteSchemaFieldGroup(String name) {
+        for (SchemaFieldGroup schemaFieldGroup : schemaFieldGroups) {
+            if (schemaFieldGroup.getName().equals(name)) {
+                this.deleteSchemaFieldGroup(schemaFieldGroup);
+                break;
+            }
+        }
+    }
+
+    /**
      * Generates a JSON object containing all the fields of the SchemaType, classified by types.
      *
      * @return the json object containing all the fields of the SchemaType
@@ -193,6 +249,7 @@ public class SchemaType implements Serializable {
         entities.put("numericFieldEntity", new JSONObject());
         entities.put("dateFieldEntity", new JSONObject());
         entities.put("textualFieldEntity", new JSONObject());
+        entities.put("fieldGroups", new JSONObject());
         for (SchemaField schemaField : schemaFields) {
             JSONObject entity = schemaField.generateFieldJson();
             switch (schemaField.getType()) {
@@ -206,6 +263,12 @@ public class SchemaType implements Serializable {
                 case EMPTY:
                     entities.getJSONObject("textualFieldEntity").put(schemaField.getOriginalName(), entity);
                     break;
+            }
+        }
+        for (SchemaFieldGroup schemaFieldGroup : schemaFieldGroups) {
+            if (schemaFieldGroup.getSchemaFields().size() >= 2) {
+                JSONObject entity = schemaFieldGroup.generateFieldGroupJson();
+                entities.getJSONObject("fieldGroups").put(schemaFieldGroup.getName(), entity);
             }
         }
         return entities;

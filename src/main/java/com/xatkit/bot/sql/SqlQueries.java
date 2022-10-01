@@ -1,11 +1,15 @@
 package com.xatkit.bot.sql;
 
+import com.google.common.collect.Streams;
 import lombok.Getter;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * The SQL queries generator.
@@ -52,6 +56,24 @@ public class SqlQueries {
      */
     private static String toDecimal(String field) {
         return "CAST(" + field + " AS DECIMAL(38," + SCALE + "))";
+    }
+
+    /**
+     * Replaces all special characters of a text by the underscore character (i.e. {@code _}).
+     * <p>
+     * Special characters are all characters but alphanumeric ones.
+     * <p>
+     * This is necessary to preprocess field names since some databases do not support special characters in column
+     * names.
+     * @param text
+     * @return
+     */
+    private static String replaceSpecialChars(String text) {
+        String result = text.replaceAll("[^a-zA-Z0-9]", "_");
+        if (result.charAt(0) == '_') {
+            result = "col" + result;
+        }
+        return result;
     }
 
     /**
@@ -103,6 +125,8 @@ public class SqlQueries {
      * <p>
      * The field names are replaced by readable names stored in a {@link Map}.
      *
+     * @param readableNames the readable names of the fields
+     *
      * @return the fields as strings
      * @see com.xatkit.bot.library.Entities#readableNames
      */
@@ -121,9 +145,10 @@ public class SqlQueries {
      *
      * @return the filters as sql conditions
      */
-    public List<String> getFiltersAsSqlConditions() {
-        List<String> sqlFilters = new ArrayList<>();
+    public Set<String> getFiltersAsSqlConditions() {
+        Set<String> sqlFilters = new HashSet<>();
         for (ImmutableTriple<String, String, String> f : filters) {
+            String field = replaceSpecialChars(f.left);
             switch (f.middle) {
                 // Numeric Filters
                 case "=":
@@ -131,33 +156,35 @@ public class SqlQueries {
                 case "<=":
                 case ">":
                 case ">=":
-                    sqlFilters.add(toDecimal(f.left) + " " + f.middle + " " + f.right);
+                    sqlFilters.add(toDecimal(field) + " " + f.middle + " " + f.right);
+                    sqlFilters.add(field + " <> ''");
                     break;
                 case "!=":
-                    sqlFilters.add(toDecimal(f.left) + " <> " + f.right);
+                    sqlFilters.add(toDecimal(field) + " <> " + f.right);
+                    sqlFilters.add(field + " <> ''");
                     break;
                     // Textual Filters
                 case "equals": // Also a date filter
-                    sqlFilters.add("UPPER(" + f.left + ") = UPPER('" + f.right + "')");
+                    sqlFilters.add("UPPER(" + field + ") = UPPER('" + f.right + "')");
                     break;
                 case "different": // Also a date filter
-                    sqlFilters.add("UPPER(" + f.left + ") <> UPPER('" + f.right + "')");
+                    sqlFilters.add("UPPER(" + field + ") <> UPPER('" + f.right + "')");
                     break;
                 case "contains":
-                    sqlFilters.add("UPPER(" + f.left + ") LIKE UPPER('%" + f.right + "%')");
+                    sqlFilters.add("UPPER(" + field + ") LIKE UPPER('%" + f.right + "%')");
                     break;
                 case "starts with":
-                    sqlFilters.add("UPPER(" + f.left + ") LIKE UPPER('" + f.right + "%')");
+                    sqlFilters.add("UPPER(" + field + ") LIKE UPPER('" + f.right + "%')");
                     break;
                 case "ends with":
-                    sqlFilters.add("UPPER(" + f.left + ") LIKE UPPER('%" + f.right + "')");
+                    sqlFilters.add("UPPER(" + field + ") LIKE UPPER('%" + f.right + "')");
                     break;
                 // Date Filters
                 case "before":
-                    sqlFilters.add("date(" + f.left + ") < date('" + f.right + "')");
+                    sqlFilters.add("date(" + field + ") < date('" + f.right + "')");
                     break;
                 case "after":
-                    sqlFilters.add("date(" + f.left + ") > date('" + f.right + "')");
+                    sqlFilters.add("date(" + field + ") > date('" + f.right + "')");
                     break;
                 default:
                     break;
@@ -166,14 +193,15 @@ public class SqlQueries {
         return sqlFilters;
     }
 
-
     /**
      * Generates a SQL query to select all data.
      *
      * @return the sql query
      */
     public String selectAll() {
-        String sqlQuery = "SELECT * FROM " + table;
+        List<String> fieldsClean = allFields.stream().map(SqlQueries::replaceSpecialChars).collect(Collectors.toList());
+        String fieldsString = String.join(", ", Streams.zip(fieldsClean.stream(), allFields.stream(), (fClean, f) -> fClean + " AS `" + f + "`").collect(Collectors.toList()));
+        String sqlQuery = "SELECT " + fieldsString + " FROM " + table;
         if (!filters.isEmpty()) {
             sqlQuery += " WHERE " + String.join(" AND ", getFiltersAsSqlConditions());
         }
@@ -187,7 +215,8 @@ public class SqlQueries {
      * @return the sql query
      */
     public String showFieldDistinct(String field) {
-        String sqlQuery = "SELECT DISTINCT " + field + " FROM " + table;
+        String fieldClean = replaceSpecialChars(field);
+        String sqlQuery = "SELECT DISTINCT " + fieldClean + " AS `" + field + "` FROM " + table;
         if (!filters.isEmpty()) {
             sqlQuery += " WHERE " + String.join(" AND ", getFiltersAsSqlConditions());
         }
@@ -205,12 +234,13 @@ public class SqlQueries {
      * @return the sql query
      */
     public String frequentValueInField(String field, boolean mostFrequent) {
+        String fieldClean = replaceSpecialChars(field);
         String order = (mostFrequent ? "DESC" : "ASC");
-        String sqlQuery = "SELECT " + field + ", COUNT(" + field + ") AS freq FROM " + table;
+        String sqlQuery = "SELECT " + fieldClean + " AS `" + field + "`, COUNT(" + fieldClean + ") AS freq FROM " + table;
         if (!filters.isEmpty()) {
             sqlQuery += " WHERE " + String.join(" AND ", getFiltersAsSqlConditions());
         }
-        sqlQuery += " GROUP BY " + field + " ORDER BY freq " + order + " LIMIT 1";
+        sqlQuery += " GROUP BY `" + field + "` ORDER BY freq " + order + " LIMIT 1";
         return sqlQuery;
     }
 
@@ -225,11 +255,12 @@ public class SqlQueries {
      * @return the sql query
      */
     public String frequentValueInFieldMatch(String field, int frequency) {
-        String sqlQuery = "SELECT " + field + ", COUNT(" + field + ") AS freq FROM " + table;
+        String fieldClean = replaceSpecialChars(field);
+        String sqlQuery = "SELECT " + fieldClean  + " AS `" + field + "`, COUNT(" + fieldClean + ") AS freq FROM " + table;
         if (!filters.isEmpty()) {
             sqlQuery += " WHERE " + String.join(" AND ", getFiltersAsSqlConditions());
         }
-        sqlQuery += " GROUP BY " + field + " HAVING freq = " + frequency;
+        sqlQuery += " GROUP BY `" + field + "` HAVING freq = " + frequency;
         return sqlQuery;
     }
 
@@ -243,7 +274,8 @@ public class SqlQueries {
      * @return the sql query
      */
     public String valueFrequency(String field, String value) {
-        String sqlQuery = "SELECT COUNT(" + field + ") AS freq FROM " + table + " WHERE " + field + " = '" + value + "'";
+        String fieldClean = replaceSpecialChars(field);
+        String sqlQuery = "SELECT COUNT(" + fieldClean + ") AS freq FROM " + table + " WHERE " + fieldClean + " = '" + value + "'";
         if (!filters.isEmpty()) {
             sqlQuery += " AND " + String.join(" AND ", getFiltersAsSqlConditions());
         }
@@ -258,8 +290,9 @@ public class SqlQueries {
      * @return the sql query
      */
     public String numericFieldFunction(String field, String operator) {
-        String sqlQuery = "SELECT " + operator + "(" + toDecimal(field) + ") AS " + field + " FROM "
-                + table + " WHERE " + field + " <> ''";
+        String fieldClean = replaceSpecialChars(field);
+        String sqlQuery = "SELECT " + operator + "(" + toDecimal(fieldClean) + ") AS `" + field + "` FROM "
+                + table + " WHERE " + fieldClean + " <> ''";
         if (!filters.isEmpty()) {
             sqlQuery += " AND " + String.join(" AND ", getFiltersAsSqlConditions());
         }
@@ -279,9 +312,11 @@ public class SqlQueries {
         if (!fields.contains(field)) {
             fields.add(field);
         }
-        String fieldsString = String.join(", ", fields);
-        String sqlQuery = "SELECT DISTINCT " + fieldsString + " FROM " + table + " WHERE " + field + " <> '' AND "
-                + toDecimal(field) + " = (" + numericFieldFunction(field, operator) + ")";
+        List<String> fieldsClean = fields.stream().map(SqlQueries::replaceSpecialChars).collect(Collectors.toList());
+        String fieldsString = String.join(", ", Streams.zip(fieldsClean.stream(), fields.stream(), (fClean, f) -> fClean + " AS `" + f + "`").collect(Collectors.toList()));
+        String fieldClean = replaceSpecialChars(field);
+        String sqlQuery = "SELECT DISTINCT " + fieldsString + " FROM " + table + " WHERE " + fieldClean + " <> '' AND "
+                + toDecimal(fieldClean) + " = (" + numericFieldFunction(field, operator) + ")";
         if (!filters.isEmpty()) {
             sqlQuery += " AND " + String.join(" AND ", getFiltersAsSqlConditions());
         }
@@ -311,9 +346,11 @@ public class SqlQueries {
      * @return the sql query
      */
     public String fieldOfValue(String targetField, String field, String value, boolean isDistinct) {
-        String distinct = (isDistinct ? "DISTINCT" : "");
-        String sqlQuery = "SELECT " + distinct + " " + targetField + " FROM " + table + " WHERE "
-            + field + " = '" + value + "'";
+        String targetFieldClean = replaceSpecialChars(targetField);
+        String fieldClean = replaceSpecialChars(field);
+        String distinct = (isDistinct ? "DISTINCT " : "");
+        String sqlQuery = "SELECT " + distinct + targetFieldClean + " AS `" + targetField + "` FROM " + table + " WHERE "
+            + fieldClean + " = '" + value + "'";
         if (!filters.isEmpty()) {
             sqlQuery += " AND " + String.join(" AND ", getFiltersAsSqlConditions());
         }
@@ -324,14 +361,16 @@ public class SqlQueries {
      * Generates a SQL query for the {@link com.xatkit.bot.customQuery.CustomFieldOfValue} workflow (with operator).
      *
      * @param targetField the field to be selected
-     * @param field1      the field of the 'where' condition
-     * @param value1      the value of the 'where' condition
+     * @param field       the field of the 'where' condition
+     * @param value       the value of the 'where' condition
      * @param operator    the operator
      * @return the sql query
      */
-    public String fieldOfValueOperator(String targetField, String field1, String value1, String operator) {
-        String sqlQuery = "SELECT " + operator + "(" + toDecimal(targetField) + ") AS " + targetField
-                + " FROM " + table + " WHERE " + targetField + " <> '' AND " + field1 + " = '" + value1 + "'";
+    public String fieldOfValueOperator(String targetField, String field, String value, String operator) {
+        String targetFieldClean = replaceSpecialChars(targetField);
+        String fieldClean = replaceSpecialChars(field);
+        String sqlQuery = "SELECT " + operator + "(" + toDecimal(targetFieldClean) + ") AS `" + targetField
+                + "` FROM " + table + " WHERE " + targetFieldClean + " <> '' AND " + fieldClean + " = '" + value + "'";
         if (!filters.isEmpty()) {
             sqlQuery += " AND " + String.join(" AND ", getFiltersAsSqlConditions());
         }
@@ -351,8 +390,10 @@ public class SqlQueries {
         if (!fields.contains(field)) {
             fields.add(field);
         }
-        String fieldsString = String.join(", ", fields);
-        String sqlQuery = "SELECT DISTINCT " + fieldsString + " FROM " + table + " WHERE " + field + " = '" + value + "'";
+        List<String> fieldsClean = fields.stream().map(SqlQueries::replaceSpecialChars).collect(Collectors.toList());
+        String fieldsString = String.join(", ", Streams.zip(fieldsClean.stream(), fields.stream(), (fClean, f) -> fClean + " AS `" + f + "`").collect(Collectors.toList()));
+        String fieldClean = replaceSpecialChars(field);
+        String sqlQuery = "SELECT DISTINCT " + fieldsString + " FROM " + table + " WHERE " + fieldClean + " = '" + value + "'";
         if (!filters.isEmpty()) {
             sqlQuery += " AND " + String.join(" AND ", getFiltersAsSqlConditions());
         }
@@ -377,9 +418,12 @@ public class SqlQueries {
         if (!fields.contains(field2)) {
             fields.add(field2);
         }
-        String fieldsString = String.join(", ", fields);
-        String sqlQuery = "SELECT DISTINCT " + fieldsString + " FROM " + table + " WHERE " + field1 + " = '" + value1
-            + "' AND " + field2 + " = '" + value2 + "'";
+        List<String> fieldsClean = fields.stream().map(SqlQueries::replaceSpecialChars).collect(Collectors.toList());
+        String fieldsString = String.join(", ", Streams.zip(fieldsClean.stream(), fields.stream(), (fClean, f) -> fClean + " AS `" + f + "`").collect(Collectors.toList()));
+        String field1Clean = replaceSpecialChars(field1);
+        String field2Clean = replaceSpecialChars(field2);
+        String sqlQuery = "SELECT DISTINCT " + fieldsString + " FROM " + table + " WHERE " + field1Clean + " = '" + value1
+            + "' AND " + field2Clean + " = '" + value2 + "'";
         if (!filters.isEmpty()) {
             sqlQuery += " AND " + String.join(" AND ", getFiltersAsSqlConditions());
         }
@@ -397,12 +441,15 @@ public class SqlQueries {
      */
     public String fieldOfNumericFieldFunction(String field1, String field2, String operator, String number) {
         String order = (operator.equals("min") ? "ASC" : "DESC");
-        String sqlQuery = "SELECT " + field1 + ", " + operator + "(" + toDecimal(field2) + ") AS " + field2 + " FROM "
-            + table + " WHERE " + field2 + " <> ''";
+        String field1Clean = replaceSpecialChars(field1);
+        String field2Clean = replaceSpecialChars(field2);
+        String sqlQuery = "SELECT " + field1Clean + " AS `" + field1 + "`, "
+                + operator + "(" + toDecimal(field2Clean) + ") AS `" + field2 + "` FROM " + table
+                + " WHERE " + field2Clean + " <> ''";
         if (!filters.isEmpty()) {
             sqlQuery += " AND " + String.join(" AND ", getFiltersAsSqlConditions());
         }
-        sqlQuery += " GROUP BY " + field1 + " ORDER BY " + field2 + " " + order + " LIMIT " + number;
+        sqlQuery += " GROUP BY `" + field1 + "` ORDER BY `" + field2 + "` " + order + " LIMIT " + number;
         return sqlQuery;
     }
 }

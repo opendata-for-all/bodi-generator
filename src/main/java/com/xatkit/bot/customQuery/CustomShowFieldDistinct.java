@@ -3,6 +3,7 @@ package com.xatkit.bot.customQuery;
 import bodi.generator.dataSource.ResultSet;
 import com.xatkit.bot.Bot;
 import com.xatkit.bot.library.ContextKeys;
+import com.xatkit.bot.sql.SqlQueries;
 import com.xatkit.execution.State;
 import lombok.Getter;
 import lombok.val;
@@ -29,11 +30,6 @@ public class CustomShowFieldDistinct {
     private final State processCustomShowFieldDistinctState;
 
     /**
-     * This variable stores the error condition of the workflow (i.e. if some parameter was not recognized properly)
-     */
-    private boolean error;
-
-    /**
      * Instantiates a new Custom Show Field Distinct workflow.
      *
      * @param bot         the chatbot that uses this workflow
@@ -44,19 +40,20 @@ public class CustomShowFieldDistinct {
 
         processCustomShowFieldDistinctState
                 .body(context -> {
-                    error = false;
-                    String field = (String) context.getIntent().getValue(ContextKeys.FIELD);
+                    context.getSession().put(ContextKeys.ERROR, false);
+                    String field = (String) context.getSession().get(ContextKeys.FIELD);
                     if (!isEmpty(field)) {
-                        String sqlQuery = bot.sqlQueries.showFieldDistinct(field);
+                        SqlQueries sqlQueries = (SqlQueries) context.getSession().get(ContextKeys.SQL_QUERIES);
+                        String sqlQuery = sqlQueries.showFieldDistinct(field);
                         ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
-                        bot.getResult.setResultSet(resultSet);
+                        context.getSession().put(ContextKeys.RESULTSET, resultSet);
                     } else {
-                        error = true;
+                        context.getSession().put(ContextKeys.ERROR, true);
                     }
                 })
                 .next()
-                .when(context -> error).moveTo(bot.getResult.getGenerateResultSetFromQueryState())
-                .when(context -> !error).moveTo(bot.getResult.getShowDataState());
+                .when(context -> (boolean) context.getSession().get(ContextKeys.ERROR)).moveTo(bot.getResult.getGenerateResultSetFromQueryState())
+                .when(context -> !(boolean) context.getSession().get(ContextKeys.ERROR)).moveTo(bot.getResult.getShowDataState());
 
         this.processCustomShowFieldDistinctState = processCustomShowFieldDistinctState.getState();
     }

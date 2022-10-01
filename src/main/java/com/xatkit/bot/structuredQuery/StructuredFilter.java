@@ -4,6 +4,7 @@ import bodi.generator.dataSource.ResultSet;
 import com.xatkit.bot.Bot;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Utils;
+import com.xatkit.bot.sql.SqlQueries;
 import com.xatkit.execution.State;
 import lombok.Getter;
 import lombok.val;
@@ -54,27 +55,6 @@ public class StructuredFilter {
     private final State selectFilterToRemoveState;
 
     /**
-     * This variable stores the number of rows of the generated result set.
-     */
-    private int resultSetNumRows;
-
-    /**
-     * Used to store the field data type when selecting the field. Later, in SaveOperator, it is used to transition
-     * to the datatype-dependant proper state.
-     */
-    private String fieldIntentName;
-
-    /**
-     * This variable stores the {@code field} parameter recognized from the matched intent.
-     */
-    private String field;
-
-    /**
-     * This variable stores the {@code operator} parameter recognized from the matched intent.
-     */
-    private String operator;
-
-    /**
      * Instantiates a new Structured Filter workflow.
      *
      * @param bot         the chatbot that uses this workflow
@@ -97,7 +77,8 @@ public class StructuredFilter {
 
         selectFieldState
                 .body(context -> {
-                    List<String> fields = (List<String>) context.getSession().get(ContextKeys.FILTER_FIELD_OPTIONS);
+                    SqlQueries sqlQueries = (SqlQueries) context.getSession().get(ContextKeys.SQL_QUERIES);
+                    List<String> fields = sqlQueries.getAllFields();
                     List<String> fieldsRN = fields.stream().map(field -> bot.entities.readableNames.get(field)).collect(Collectors.toList());
                     bot.reactPlatform.reply(context, bot.messages.getString("SelectField"), fieldsRN);
                 })
@@ -110,8 +91,8 @@ public class StructuredFilter {
 
         saveFieldState
                 .body(context -> {
-                    field = (String) context.getIntent().getValue(ContextKeys.VALUE);
-                    fieldIntentName = context.getIntent().getDefinition().getName();
+                    context.getSession().put(ContextKeys.FIELD, context.getIntent().getValue(ContextKeys.VALUE));
+                    context.getSession().put(ContextKeys.INTENT_NAME, context.getIntent().getDefinition().getName());
                 })
                 .next()
                 .moveTo(selectOperatorState);
@@ -121,6 +102,7 @@ public class StructuredFilter {
         selectOperatorState
                 .body(context -> {
                     List<String> operators = new ArrayList<>();
+                    String fieldIntentName = (String) context.getSession().get(ContextKeys.INTENT_NAME);
                     if (fieldIntentName.equals(bot.intents.textualFieldIntent.getName())) {
                         operators = Utils.getEntityValues(bot.entities.textualOperatorEntity);
                     } else if (fieldIntentName.equals(bot.intents.numericFieldIntent.getName())) {
@@ -139,12 +121,12 @@ public class StructuredFilter {
 
         saveOperatorState
                 .body(context -> {
-                    operator = (String) context.getIntent().getValue(ContextKeys.VALUE);
+                    context.getSession().put(ContextKeys.OPERATOR, context.getIntent().getValue(ContextKeys.VALUE));
                 })
                 .next()
-                .when(context -> fieldIntentName.equals(bot.intents.textualFieldIntent.getName())).moveTo(writeTextualValueState)
-                .when(context -> fieldIntentName.equals(bot.intents.numericFieldIntent.getName())).moveTo(writeNumericValueState)
-                .when(context -> fieldIntentName.equals(bot.intents.dateFieldIntent.getName())).moveTo(writeDateValueState);
+                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.textualFieldIntent.getName())).moveTo(writeTextualValueState)
+                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.numericFieldIntent.getName())).moveTo(writeNumericValueState)
+                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.dateFieldIntent.getName())).moveTo(writeDateValueState);
 
         // Input the VALUE
         // Divided by data types for safety (e.g. a date may be recognized as a text if we don't separate data types)
@@ -174,13 +156,17 @@ public class StructuredFilter {
 
         saveStructuredFilterState
                 .body(context -> {
+                    String field = (String) context.getSession().get(ContextKeys.FIELD);
+                    String operator = (String) context.getSession().get(ContextKeys.OPERATOR);
                     String value = (String) context.getIntent().getValue(ContextKeys.VALUE);
                     if (!isEmpty(field) && !isEmpty(operator) && !isEmpty(value)) {
-                        bot.sqlQueries.addFilter(field, operator, value);
-                        String sqlQuery =  bot.sqlQueries.selectAll();
+                        SqlQueries sqlQueries = (SqlQueries) context.getSession().get(ContextKeys.SQL_QUERIES);
+                        sqlQueries.addFilter(field, operator, value);
+                        String sqlQuery =  sqlQueries.selectAll();
                         ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
-                        bot.getResult.setResultSet(resultSet);
-                        resultSetNumRows = resultSet.getNumRows();
+                        context.getSession().put(ContextKeys.RESULTSET, resultSet);
+                        int resultSetNumRows = resultSet.getNumRows();
+                        context.getSession().put(ContextKeys.RESULTSET_NUM_ROWS, resultSet.getNumRows());
                         String fieldRN = bot.entities.readableNames.get(field);
                         bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("FilterAdded"),
                                 fieldRN, operator, value, resultSetNumRows));
@@ -189,8 +175,8 @@ public class StructuredFilter {
                     }
                 })
                 .next()
-                .when(context -> resultSetNumRows <= bot.maxEntriesToDisplay).moveTo(bot.getResult.getShowDataState())
-                .when(context -> resultSetNumRows > bot.maxEntriesToDisplay).moveTo(returnState);
+                .when(context -> (int) context.getSession().get(ContextKeys.RESULTSET_NUM_ROWS) <= bot.maxEntriesToDisplay).moveTo(bot.getResult.getShowDataState())
+                .when(context -> (int) context.getSession().get(ContextKeys.RESULTSET_NUM_ROWS) > bot.maxEntriesToDisplay).moveTo(returnState);
 
         this.selectFieldState = selectFieldState.getState();
 
@@ -201,7 +187,8 @@ public class StructuredFilter {
 
         selectFilterToRemoveState
                 .body(context -> {
-                    List<String> currentFilters = bot.sqlQueries.getFiltersAsStrings(bot.entities.readableNames);
+                    SqlQueries sqlQueries = (SqlQueries) context.getSession().get(ContextKeys.SQL_QUERIES);
+                    List<String> currentFilters = sqlQueries.getFiltersAsStrings(bot.entities.readableNames);
                     if (currentFilters.isEmpty()) {
                         bot.reactPlatform.reply(context, bot.messages.getString("NoFilters"),
                                 Utils.getFirstTrainingSentences(bot.coreLibraryI18n.Quit));
@@ -222,8 +209,9 @@ public class StructuredFilter {
                     String operator = (String) context.getIntent().getValue(ContextKeys.OPERATOR);
                     String value = (String) context.getIntent().getValue(ContextKeys.VALUE);
                     if (!isEmpty(field) && !isEmpty(operator) && !isEmpty(value)) {
-                        bot.sqlQueries.removeFilter(field, operator, value);
-                        String sqlQuery =  bot.sqlQueries.selectAll();
+                        SqlQueries sqlQueries = (SqlQueries) context.getSession().get(ContextKeys.SQL_QUERIES);
+                        sqlQueries.removeFilter(field, operator, value);
+                        String sqlQuery =  sqlQueries.selectAll();
                         ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
                         String fieldRN = bot.entities.readableNames.get(field);
                         bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("FilterRemoved"),

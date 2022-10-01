@@ -2,6 +2,7 @@ package com.xatkit.bot.customQuery;
 
 import com.xatkit.bot.Bot;
 import com.xatkit.bot.getResult.GetResult;
+import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.execution.State;
 import lombok.Getter;
 import lombok.val;
@@ -25,6 +26,7 @@ import static com.xatkit.dsl.DSL.state;
  *     <li>{@link CustomRowCount}</li>
  *     <li>{@link CustomFieldOfValue}</li>
  *     <li>{@link CustomRowOfValues}</li>
+ *     <li>{@link CustomFieldOfNumericFieldFunction}</li>
  * </ul>
  * When no pre-defined query is matched, it is executed {@link GetResult#getGenerateResultSetFromQueryState()}
  */
@@ -92,12 +94,22 @@ public class CustomQuery {
     public CustomFieldOfNumericFieldFunction customFieldOfNumericFieldFunction;
 
     /**
+     * The Specify Entities workflow.
+     */
+    public SpecifyEntities specifyEntities;
+
+    /**
      * Instantiates a new Custom Query workflow.
      *
      * @param bot         the chatbot that uses this workflow
      * @param returnState the state where the chatbot ends up arriving once the workflow is finished
      */
     public CustomQuery(Bot bot, State returnState) {
+        val awaitingCustomQueryState = state("AwaitingCustomQuery");
+        val redirectCustomQueryState = state("RedirectCustomQuery");
+
+        specifyEntities = new SpecifyEntities(bot, redirectCustomQueryState.getState());
+
         customFilter = new CustomFilter(bot, returnState);
         customShowFieldDistinct = new CustomShowFieldDistinct(bot, returnState);
         customFrequentValueInField = new CustomFrequentValueInField(bot, returnState);
@@ -110,33 +122,53 @@ public class CustomQuery {
         customRowOfValues = new CustomRowOfValues(bot, returnState);
         customFieldOfNumericFieldFunction = new CustomFieldOfNumericFieldFunction(bot, returnState);
 
-        val awaitingCustomQueryState = state("AwaitingCustomQuery");
-
         awaitingCustomQueryState
                 .body(context -> {
                     bot.reactPlatform.reply(context, bot.messages.getString("WriteYourQuery"));
                 })
                 .next()
-                .when(intentIs(bot.intents.customShowFieldDistinctIntent)).moveTo(customShowFieldDistinct.getProcessCustomShowFieldDistinctState())
-                .when(intentIs(bot.intents.customMostFrequentValueInFieldIntent)).moveTo(customFrequentValueInField.getProcessCustomFrequentValueInFieldState())
-                .when(intentIs(bot.intents.customLeastFrequentValueInFieldIntent)).moveTo(customFrequentValueInField.getProcessCustomFrequentValueInFieldState())
-                .when(intentIs(bot.intents.customValueFrequencyIntent)).moveTo(customValueFrequency.getProcessCustomValueFrequencyState())
-                .when(intentIs(bot.intents.customValue1MoreThanValue2Intent)).moveTo(customValue1vsValue2.getProcessCustomValue1vsValue2State())
-                .when(intentIs(bot.intents.customValue1LessThanValue2Intent)).moveTo(customValue1vsValue2.getProcessCustomValue1vsValue2State())
-                .when(intentIs(bot.intents.customNumericFieldFunctionIntent)).moveTo(customNumericFieldFunction.getProcessCustomNumericFieldFunctionState())
-                .when(intentIs(bot.intents.customRowOfNumericFieldFunctionIntent)).moveTo(customRowOfNumericFieldFunction.getProcessCustomRowOfNumericFieldFunctionState())
-                .when(intentIs(bot.intents.customRowCountIntent)).moveTo(customRowCount.getProcessCustomRowCountState())
-                .when(intentIs(bot.intents.customFieldOfValueIntent)).moveTo(customFieldOfValue.getProcessCustomFieldOfValueState())
-                .when(intentIs(bot.intents.customFieldOfValueOperatorIntent)).moveTo(customFieldOfValue.getProcessCustomFieldOfValueState())
-                .when(intentIs(bot.intents.customRowOfValuesIntent)).moveTo(customRowOfValues.getProcessCustomRowOfValuesState())
-                .when(intentIs(bot.intents.customFieldOfNumericFieldFunctionIntent)).moveTo(customFieldOfNumericFieldFunction.getProcessCustomFieldOfNumericFieldFunctionState())
+                .when(intentIs(bot.intents.customShowFieldDistinctIntent)).moveTo(specifyEntities.getCheckEntitiesState())
+                .when(intentIs(bot.intents.customMostFrequentValueInFieldIntent)).moveTo(specifyEntities.getCheckEntitiesState())
+                .when(intentIs(bot.intents.customLeastFrequentValueInFieldIntent)).moveTo(specifyEntities.getCheckEntitiesState())
+                .when(intentIs(bot.intents.customValueFrequencyIntent)).moveTo(specifyEntities.getCheckEntitiesState())
+                .when(intentIs(bot.intents.customValue1MoreThanValue2Intent)).moveTo(specifyEntities.getCheckEntitiesState())
+                .when(intentIs(bot.intents.customValue1LessThanValue2Intent)).moveTo(specifyEntities.getCheckEntitiesState())
+                .when(intentIs(bot.intents.customNumericFieldFunctionIntent)).moveTo(specifyEntities.getCheckEntitiesState())
+                .when(intentIs(bot.intents.customRowOfNumericFieldFunctionIntent)).moveTo(specifyEntities.getCheckEntitiesState())
+                .when(intentIs(bot.intents.customRowCountIntent)).moveTo(specifyEntities.getCheckEntitiesState())
+                .when(intentIs(bot.intents.customFieldOfValueIntent)).moveTo(specifyEntities.getCheckEntitiesState())
+                .when(intentIs(bot.intents.customFieldOfValueOperatorIntent)).moveTo(specifyEntities.getCheckEntitiesState())
+                .when(intentIs(bot.intents.customRowOfValuesIntent)).moveTo(specifyEntities.getCheckEntitiesState())
+                .when(intentIs(bot.intents.customFieldOfNumericFieldFunctionIntent)).moveTo(specifyEntities.getCheckEntitiesState())
 
-                .when(intentIs(bot.intents.customNumericFilterIntent)).moveTo(customFilter.getSaveCustomFilterState())
-                .when(intentIs(bot.intents.customDateFilterIntent)).moveTo(customFilter.getSaveCustomFilterState())
-                .when(intentIs(bot.intents.customTextualFilterIntent)).moveTo(customFilter.getSaveCustomFilterState())
+                .when(intentIs(bot.intents.customNumericFilterIntent)).moveTo(specifyEntities.getCheckEntitiesState())
+                .when(intentIs(bot.intents.customDateFilterIntent)).moveTo(specifyEntities.getCheckEntitiesState())
+                .when(intentIs(bot.intents.customTextualFilterIntent)).moveTo(specifyEntities.getCheckEntitiesState())
+
                 .when(intentIs(bot.intents.showDataIntent)).moveTo(bot.getResult.getGenerateResultSetState())
                 .when(intentIs(bot.coreLibraryI18n.Quit)).moveTo(returnState)
                 .when(intentIs(bot.coreLibraryI18n.AnyValue)).moveTo(bot.getResult.getGenerateResultSetFromQueryState());
+
+        redirectCustomQueryState
+                .body(context -> { })
+                .next()
+                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customShowFieldDistinctIntent.getName())).moveTo(customShowFieldDistinct.getProcessCustomShowFieldDistinctState())
+                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customMostFrequentValueInFieldIntent.getName())).moveTo(customFrequentValueInField.getProcessCustomFrequentValueInFieldState())
+                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customLeastFrequentValueInFieldIntent.getName())).moveTo(customFrequentValueInField.getProcessCustomFrequentValueInFieldState())
+                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customValueFrequencyIntent.getName())).moveTo(customValueFrequency.getProcessCustomValueFrequencyState())
+                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customValue1MoreThanValue2Intent.getName())).moveTo(customValue1vsValue2.getProcessCustomValue1vsValue2State())
+                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customValue1LessThanValue2Intent.getName())).moveTo(customValue1vsValue2.getProcessCustomValue1vsValue2State())
+                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customNumericFieldFunctionIntent.getName())).moveTo(customNumericFieldFunction.getProcessCustomNumericFieldFunctionState())
+                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customRowOfNumericFieldFunctionIntent.getName())).moveTo(customRowOfNumericFieldFunction.getProcessCustomRowOfNumericFieldFunctionState())
+                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customRowCountIntent.getName())).moveTo(customRowCount.getProcessCustomRowCountState())
+                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customFieldOfValueIntent.getName())).moveTo(customFieldOfValue.getProcessCustomFieldOfValueState())
+                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customFieldOfValueOperatorIntent.getName())).moveTo(customFieldOfValue.getProcessCustomFieldOfValueState())
+                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customRowOfValuesIntent.getName())).moveTo(customRowOfValues.getProcessCustomRowOfValuesState())
+                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customFieldOfNumericFieldFunctionIntent.getName())).moveTo(customFieldOfNumericFieldFunction.getProcessCustomFieldOfNumericFieldFunctionState())
+
+                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customNumericFilterIntent.getName())).moveTo(customFilter.getSaveCustomFilterState())
+                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customDateFilterIntent.getName())).moveTo(customFilter.getSaveCustomFilterState())
+                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customTextualFilterIntent.getName())).moveTo(customFilter.getSaveCustomFilterState());
 
         this.awaitingCustomQueryState = awaitingCustomQueryState.getState();
     }

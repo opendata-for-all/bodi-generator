@@ -3,6 +3,7 @@ package com.xatkit.bot.customQuery;
 import bodi.generator.dataSource.ResultSet;
 import com.xatkit.bot.Bot;
 import com.xatkit.bot.library.ContextKeys;
+import com.xatkit.bot.sql.SqlQueries;
 import com.xatkit.execution.State;
 import lombok.Getter;
 import lombok.val;
@@ -31,11 +32,6 @@ public class CustomFrequentValueInField {
     private final State processCustomFrequentValueInFieldState;
 
     /**
-     * This variable stores the error condition of the workflow (i.e. if some parameter was not recognized properly)
-     */
-    private boolean error;
-
-    /**
      * Instantiates a new Custom Frequent Value In Field workflow.
      *
      * @param bot         the chatbot that uses this workflow
@@ -46,31 +42,32 @@ public class CustomFrequentValueInField {
 
         processCustomFrequentValueInFieldState
                 .body(context -> {
-                    error = false;
-                    String field = (String) context.getIntent().getValue(ContextKeys.FIELD);
+                    context.getSession().put(ContextKeys.ERROR, false);
+                    String field = (String) context.getSession().get(ContextKeys.FIELD);
                     if (!isEmpty(field)) {
                         boolean mostFrequent = false;
                         String messageName = "CustomLeastFrequentValueInField";
-                        if (context.getIntent().getDefinition().getName().equals(bot.intents.customMostFrequentValueInFieldIntent.getName())) {
+                        if (context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customMostFrequentValueInFieldIntent.getName())) {
                             mostFrequent = true;
                             messageName = "CustomMostFrequentValueInField";
                         }
-                        String sqlQuery = bot.sqlQueries.frequentValueInField(field, mostFrequent);
+                        SqlQueries sqlQueries = (SqlQueries) context.getSession().get(ContextKeys.SQL_QUERIES);
+                        String sqlQuery = sqlQueries.frequentValueInField(field, mostFrequent);
                         ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
                         int frequency = Integer.parseInt(resultSet.getRow(0).getColumnValue(1));
-                        sqlQuery = bot.sqlQueries.frequentValueInFieldMatch(field, frequency);
+                        sqlQuery = sqlQueries.frequentValueInFieldMatch(field, frequency);
                         resultSet = sql.runSqlQuery(bot, sqlQuery);
-                        bot.getResult.setResultSet(resultSet);
+                        context.getSession().put(ContextKeys.RESULTSET, resultSet);
                         String fieldRN = bot.entities.readableNames.get(field);
                         bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString(messageName),
                                 fieldRN, frequency));
                     } else {
-                        error = true;
+                        context.getSession().put(ContextKeys.ERROR, true);
                     }
                 })
                 .next()
-                .when(context -> error).moveTo(bot.getResult.getGenerateResultSetFromQueryState())
-                .when(context -> !error).moveTo(bot.getResult.getShowDataState());
+                .when(context -> (boolean) context.getSession().get(ContextKeys.ERROR)).moveTo(bot.getResult.getGenerateResultSetFromQueryState())
+                .when(context -> !(boolean) context.getSession().get(ContextKeys.ERROR)).moveTo(bot.getResult.getShowDataState());
 
         this.processCustomFrequentValueInFieldState = processCustomFrequentValueInFieldState.getState();
     }

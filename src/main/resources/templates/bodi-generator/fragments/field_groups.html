@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<!--/*@thymesVar id="schemaType" type="bodi.generator.dataSchema.SchemaType"*/-->
+<!--/*@thymesVar id="schemaFieldGroup" type="bodi.generator.dataSchema.SchemaFieldGroup"*/-->
+<!--/*@thymesVar id="newFieldGroup" type="java.lang.String"*/-->
+<!--/*@thymesVar id="fieldToAdd" type="java.lang.String"*/-->
+<!--/*@thymesVar id="errors" type="java.util.List<java.lang.String>"*/-->
+<div class="app-dashboard-body-content off-canvas-content" data-off-canvas-content th:fragment="content">
+    <div class="grid-x"
+         th:if="${schemaType == null}">
+        <div class="grid-x cell small-6 callout">
+            <div class="cell small-1 logo blue">
+                <i class="fas fa-info-circle"></i>
+            </div>
+            <div class="cell auto content">
+                <p>You need to import data to create field groups.</p>
+            </div>
+        </div>
+    </div>
+    <div class="grid-x">
+        <div class="cell small-6 callout">
+            <p><b>What are 'field groups'?</b></p>
+            <p>As its name suggests, a field group is simply a set of fields, with 1 or more aliases associated to
+            it.</p>
+            <p>Field groups help the chatbot when a user asks for a field, but it does not know at all which field is
+            the user referring to. Example situations may be:</p>
+            <ul>
+                <li>When some fields have similar names (e.g. 'salary1', 'salary2' and the user asks for 'salary')</li>
+                <li>When some fields are under some higher-level category (e.g. 't-shirts', 'trousers' and the user
+                    asks for 'clothes')</li>
+            </ul>
+            <p><i class="fas fa-triangle-exclamation"></i>  Field groups must have at least 2 fields.</p>
+            <p><i class="fas fa-triangle-exclamation"></i>  Field groups must have at least 1 name in each language the
+                chatbot is intended to be used.</p>
+            <img src="/images/field_groups-demo.png" alt="field_groups demo">
+        </div>
+        <div class="cell auto"
+             th:if="${schemaType != null}">
+            <div class="grid-x">
+                <!-- FIELD GROUP LIST -->
+                <div class="cell small-6 card-container card">
+                    <div class="card-section card-header" style="max-height: 2em;">
+                        <h2>Field Groups</h2>
+                    </div>
+                    <div class="card-section card-content">
+                        <form>
+                            <div th:each="fieldGroup : ${schemaType.getSchemaFieldGroups()}">
+                                <button
+                                        th:if="${schemaFieldGroup != null} and ${fieldGroup.getName()} == ${schemaFieldGroup.getName()}"
+                                        class="button"
+                                        style="background-color: royalblue;"
+                                        th:text="${fieldGroup.getName()}"
+                                        th:name="fieldGroup"
+                                        th:value="${fieldGroup.getName()}">
+                                </button>
+                                <button th:if="${schemaFieldGroup == null} or ${fieldGroup.getName()} != ${schemaFieldGroup.getName()}"
+                                        class="button"
+                                        th:text="${fieldGroup.getName()}"
+                                        th:name="fieldGroup"
+                                        th:value="${fieldGroup.getName()}">
+                                </button>
+                            </div>
+                        </form>
+                        <form th:action="@{/bodi-generator/field_groups/create}"
+                              method="POST">
+                            <input type="text" name="newFieldGroup" th:value="${newFieldGroup}"/>
+                            <button type="submit" class="button" style="display: inline;">
+                                Add
+                            </button>
+                            <ul th:if="${errors != null} and ${!errors.isEmpty()}">
+                                <li th:each="error : ${errors}"
+                                    style="color:darkred; font-weight: bold;"
+                                    th:text="${error}"></li>
+                            </ul>
+                        </form>
+                    </div>
+                </div>
+                <!-- FIELD GROUP -->
+                <div class="cell small-6 card-container card"
+                    th:if="${schemaFieldGroup != null}">
+                    <div class="card-section card-header" style="max-height: 2em;">
+                        <h2 th:text="${schemaFieldGroup.getName()}"></h2>
+                    </div>
+                    <div class="card-section card-content">
+                        <form th:object="${schemaFieldGroup}"
+                              th:action="@{/bodi-generator/field_groups/update}"
+                              method="POST">
+                            <b><p>Names</p></b>
+                            <br>
+                            <div th:each="entry : *{languageNames.entrySet()}"
+                                 class="form-group" style="display: flex">
+                                <p style="margin-right: 10px;" th:text="${entry.key}"></p>
+                                <input th:id="*{languageNames['__${entry.key}__']}" type="text"
+                                       th:field="*{languageNames['__${entry.key}__']}">
+                            </div>
+                            <br>
+                            <b><p th:text="'Data type: ' + *{getType()}"></p></b>
+                            <br>
+                            <b><p>List of fields</p></b>
+                            <br>
+                            <div th:each="field : ${schemaFieldGroup.getSchemaFields()}">
+                                <button type="submit"
+                                        name="fieldToDelete"
+                                        th:value="${field.getOriginalName()}">
+                                    <a><i class="large fa fa-circle-xmark"></i></a>
+                                </button>
+                                <p style="display: inline;" th:text="${field.getOriginalName()}"></p>
+                            </div>
+                            <select th:value="${fieldToAdd}"
+                                    name="fieldToAdd">
+                                <option th:value="''"
+                                        th:text="'Select a field'"></option>
+                                <div th:each="field : ${schemaType.getSchemaFields()}">
+                                    <option th:if="!${schemaFieldGroup.getSchemaFields().contains(field)}"
+                                            th:value="${field.getOriginalName()}"
+                                            th:text="${field.getOriginalName()}"></option>
+                                </div>
+                            </select>
+                            <button type="submit" class="button" style="display: inline;">
+                                Add
+                            </button>
+                            <br>
+                            <br>
+                            <br>
+                            <button type="submit" class="button" onclick="return confirm('Are you sure you want to save the field group?')">Save changes</button>
+                            <br>
+                            <button type="submit" class="button alert" onclick="return confirm('Are you sure you want to delete the field group?')"
+                                    th:name="deleteFieldGroup"
+                                    th:value="true">Delete field group
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</html>
