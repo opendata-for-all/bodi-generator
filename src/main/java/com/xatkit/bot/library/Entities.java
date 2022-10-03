@@ -6,8 +6,10 @@ import com.xatkit.dsl.entity.MappingSynonymStep;
 import com.xatkit.intent.EntityDefinition;
 import com.xatkit.intent.MappingEntityDefinition;
 import com.xatkit.intent.MappingEntityDefinitionEntry;
+import fr.inria.atlanmod.commons.log.Log;
 import lombok.NonNull;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -318,59 +320,63 @@ public class Entities {
      */
     private void readFieldGroups() {
         String entityName = "fieldGroups";
-        JSONObject fieldGroupsJson = entitiesJson.getJSONObject(entityName);
-        MappingEntryStep numericFieldGroupsEntity = mapping("numericFieldGroupsEntity");
-        MappingEntryStep textualFieldGroupsEntity = mapping("textualFieldGroupsEntity");
-        MappingEntryStep dateFieldGroupsEntity = mapping("dateFieldGroupsEntity");
-        for (String entry : fieldGroupsJson.keySet()) {
-            JSONObject fieldGroupJson = fieldGroupsJson.getJSONObject(entry);
-            String type = fieldGroupJson.getString("type");
-            JSONArray fieldGroupNames = fieldGroupJson.getJSONArray(language);
-            List<String> fieldList = fieldGroupJson.getJSONArray("fields").toList().stream()
-                    .map(object -> Objects.toString(object, null))
-                    .collect(Collectors.toList());
-            // check fields in the list actually exist, if not, remove them
-            List<String> realFields = null;
-            switch (type) {
-                case "NUMBER":
-                    realFields = Utils.getEntityValues(numericFieldEntity);
-                    break;
-                case "TEXT":
-                    realFields = Utils.getEntityValues(textualFieldEntity);
-                    break;
-                case "DATE":
-                    realFields = Utils.getEntityValues(dateFieldEntity);
-                    break;
-                default:
-                    realFields = new ArrayList<>();
-            }
-            for (String field : fieldList) {
-                if (!realFields.contains(field)) {
-                    fieldList.remove(field);
+        try {
+            JSONObject fieldGroupsJson = entitiesJson.getJSONObject(entityName);
+            MappingEntryStep numericFieldGroupsEntity = mapping("numericFieldGroupsEntity");
+            MappingEntryStep textualFieldGroupsEntity = mapping("textualFieldGroupsEntity");
+            MappingEntryStep dateFieldGroupsEntity = mapping("dateFieldGroupsEntity");
+            for (String entry : fieldGroupsJson.keySet()) {
+                JSONObject fieldGroupJson = fieldGroupsJson.getJSONObject(entry);
+                String type = fieldGroupJson.getString("type");
+                JSONArray fieldGroupNames = fieldGroupJson.getJSONArray(language);
+                List<String> fieldList = fieldGroupJson.getJSONArray("fields").toList().stream()
+                        .map(object -> Objects.toString(object, null))
+                        .collect(Collectors.toList());
+                // check fields in the list actually exist, if not, remove them
+                List<String> realFields = null;
+                switch (type) {
+                    case "NUMBER":
+                        realFields = Utils.getEntityValues(numericFieldEntity);
+                        break;
+                    case "TEXT":
+                        realFields = Utils.getEntityValues(textualFieldEntity);
+                        break;
+                    case "DATE":
+                        realFields = Utils.getEntityValues(dateFieldEntity);
+                        break;
+                    default:
+                        realFields = new ArrayList<>();
                 }
-            }
-            if (!fieldList.isEmpty()) {
-                for (Object fieldGroupName : fieldGroupNames) {
-                    String fieldGroupNameString = (String) fieldGroupName;
-                    fieldGroups.put(fieldGroupNameString, new HashSet<>(fieldList));
-                    switch (type) {
-                        case "NUMBER":
-                            numericFieldGroupsEntity.entry().value(fieldGroupNameString);
-                            break;
-                        case "TEXT":
-                            textualFieldGroupsEntity.entry().value(fieldGroupNameString);
-                            break;
-                        case "DATE":
-                            dateFieldGroupsEntity.entry().value(fieldGroupNameString);
-                            break;
-                        default:
-                            break;
+                for (String field : fieldList) {
+                    if (!realFields.contains(field)) {
+                        fieldList.remove(field);
+                    }
+                }
+                if (!fieldList.isEmpty()) {
+                    for (Object fieldGroupName : fieldGroupNames) {
+                        String fieldGroupNameString = (String) fieldGroupName;
+                        fieldGroups.put(fieldGroupNameString, new HashSet<>(fieldList));
+                        switch (type) {
+                            case "NUMBER":
+                                numericFieldGroupsEntity.entry().value(fieldGroupNameString);
+                                break;
+                            case "TEXT":
+                                textualFieldGroupsEntity.entry().value(fieldGroupNameString);
+                                break;
+                            case "DATE":
+                                dateFieldGroupsEntity.entry().value(fieldGroupNameString);
+                                break;
+                            default:
+                                break;
+                        }
                     }
                 }
             }
+            numericFieldEntity = mergeEntities("numericFieldEntity", numericFieldEntity, (EntityDefinitionReferenceProvider) numericFieldGroupsEntity);
+            textualFieldEntity = mergeEntities("textualFieldEntity", textualFieldEntity, (EntityDefinitionReferenceProvider) textualFieldGroupsEntity);
+            dateFieldEntity = mergeEntities("dateFieldEntity", dateFieldEntity, (EntityDefinitionReferenceProvider) dateFieldGroupsEntity);
+        } catch (JSONException e) {
+            Log.warn(e.getMessage());
         }
-        numericFieldEntity = mergeEntities("numericFieldEntity", numericFieldEntity, (EntityDefinitionReferenceProvider) numericFieldGroupsEntity);
-        textualFieldEntity = mergeEntities("textualFieldEntity", textualFieldEntity, (EntityDefinitionReferenceProvider) textualFieldGroupsEntity);
-        dateFieldEntity = mergeEntities("dateFieldEntity", dateFieldEntity, (EntityDefinitionReferenceProvider) dateFieldGroupsEntity);
     }
 }
