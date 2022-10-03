@@ -49,7 +49,7 @@ public class CustomFieldOfNumericFieldFunction {
                     String field1 = (String) context.getSession().get(ContextKeys.FIELD + "1");
                     String field2 = (String) context.getSession().get(ContextKeys.FIELD + "2");
                     String operator = (String) context.getSession().get(ContextKeys.OPERATOR);
-                    String number = (String) context.getIntent().getValue(ContextKeys.NUMBER);
+                    String number = (String) context.getSession().get(ContextKeys.NUMBER);
                     if (!isEmpty(field1) && !isEmpty(field2) && !isEmpty(operator) && (operator.equals("max") || operator.equals("min"))) {
                         if (isEmpty(number)) {
                             // if no number is specified, get the top 1
