@@ -337,7 +337,8 @@
           "maximum",
           "highest",
           "biggest",
-          "greatest"
+          "greatest",
+          "top"
         ]
       },
       "ca": {
@@ -345,7 +346,8 @@
           "màxim",
           "més alt",
           "més gran",
-          "major"
+          "major",
+          "top"
         ]
       },
       "es": {
@@ -353,7 +355,8 @@
           "máximo",
           "más alto",
           "más grande",
-          "mayor"
+          "mayor",
+          "top"
         ]
       }
     },
