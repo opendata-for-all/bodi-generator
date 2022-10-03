@@ -1,6 +1,7 @@
 package com.xatkit.bot.customQuery;
 
 import bodi.generator.dataSource.ResultSet;
+import com.google.common.collect.Streams;
 import com.xatkit.bot.Bot;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Entities;
@@ -12,7 +13,10 @@ import lombok.val;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.xatkit.bot.App.sql;
 import static com.xatkit.dsl.DSL.intentIs;
@@ -58,33 +62,53 @@ public class CustomFieldOfValue {
                     context.getSession().put(ContextKeys.CONTINUE, false);
                     String field = (String) context.getSession().get(ContextKeys.FIELD);
                     String operator = (String) context.getSession().get(ContextKeys.OPERATOR);
-                    String value = (String) context.getSession().get(ContextKeys.VALUE);
-                    String valueField = null;
-                    if (!isEmpty(value)) {
-                        valueField = Entities.fieldValueMap.get(value);
-                        context.getSession().put(ContextKeys.VALUE_FIELD, valueField);
-                    }
+                    String value1 = (String) context.getSession().get(ContextKeys.VALUE + "1");
+                    String value2 = (String) context.getSession().get(ContextKeys.VALUE + "2");
+                    String value3 = (String) context.getSession().get(ContextKeys.VALUE + "3");
+                    String value1Field = Entities.fieldValueMap.get(value1);
+                    String value2Field = Entities.fieldValueMap.get(value2);
+                    String value3Field = Entities.fieldValueMap.get(value3);
                     if (context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customFieldOfValueIntent.getName())) {
                         // operator may have a value from another previous intent
                         operator = null;
                         context.getSession().put(ContextKeys.OPERATOR, operator);
                     }
-                    if (!isEmpty(field) && !isEmpty(value) && !isEmpty(valueField)) {
+                    Map<String, String> valueFieldMap = new HashMap<>();
+                    if (!isEmpty(field)) {
+                        if (!isEmpty(value1) && !isEmpty(value1Field)) {
+                            valueFieldMap.put(value1, value1Field);
+                        }
+                        if (!isEmpty(value2) && !isEmpty(value2Field)) {
+                            valueFieldMap.put(value2, value2Field);
+                        }
+                        if (!isEmpty(value3) && !isEmpty(value3Field)) {
+                            valueFieldMap.put(value3, value3Field);
+                        }
+                        if (valueFieldMap.isEmpty()) {
+                            context.getSession().put(ContextKeys.ERROR, true);
+                        }
+                        context.getSession().put(ContextKeys.VALUE_FIELD_MAP, valueFieldMap);
+                    } else {
+                        context.getSession().put(ContextKeys.ERROR, true);
+                    }
+                    System.out.println(valueFieldMap);
+                    if (!(boolean) context.getSession().get(ContextKeys.ERROR)) {
                         if (isEmpty(operator)) {
                             String fieldRN = bot.entities.readableNames.get(field);
-                            String valueFieldRN = bot.entities.readableNames.get(valueField);
                             SqlQueries sqlQueries = (SqlQueries) context.getSession().get(ContextKeys.SQL_QUERIES);
-                            String sqlQuery = sqlQueries.fieldOfValue(field, valueField, value, false);
+                            String sqlQuery = sqlQueries.fieldOfValue(field, valueFieldMap, false);
                             ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
+                            String conditions = String.join(", ", Streams.zip(valueFieldMap.keySet().stream(),
+                                    valueFieldMap.values().stream(), (v, f) -> bot.entities.readableNames.get(f) + " " + "= " + v).collect(Collectors.toList()));
                             if (resultSet.getNumRows() == 0
                                     || (resultSet.getNumRows() == 1 && isEmpty(resultSet.getRow(0).getColumnValue(0)))) {
                                 bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString(
-                                        "FieldOfValue0"), fieldRN, valueFieldRN, value));
+                                        "FieldOfValue0"), fieldRN, conditions));
                                 context.getSession().put(ContextKeys.STOP, true);
                             } else if (resultSet.getNumRows() == 1) {
                                 String result = resultSet.getRow(0).getColumnValue(0);
                                 bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString(
-                                        "FieldOfValue1"), fieldRN, valueFieldRN, value, result));
+                                        "FieldOfValue1"), fieldRN, conditions, result));
                                 context.getSession().put(ContextKeys.STOP, true);
                             } else if (resultSet.getNumRows() > 1) {
                                 List<String> buttons = new ArrayList<>();
@@ -97,12 +121,12 @@ public class CustomFieldOfValue {
                                 } else if (Utils.getEntityValues(bot.entities.textualFieldEntity).contains(field)) {
                                     // textual operators here
                                 }
-                                sqlQuery = sqlQueries.fieldOfValue(field, valueField, value, true);
+                                sqlQuery = sqlQueries.fieldOfValue(field, valueFieldMap, true);
                                 ResultSet resultSetDistinct = sql.runSqlQuery(bot, sqlQuery);
                                 buttons.add(Utils.getFirstTrainingSentences(bot.coreLibraryI18n.Quit).get(0));
                                 bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString(
                                                 "AskFieldOfValueOperation"), resultSet.getNumRows(), fieldRN,
-                                        resultSetDistinct.getNumRows(), valueFieldRN, value), buttons);
+                                        resultSetDistinct.getNumRows(), conditions), buttons);
                             }
                         } else if (!isEmpty(operator)
                                 && !(Utils.getEntityValues(bot.entities.numericFunctionOperatorEntity).contains(operator) && Utils.getEntityValues(bot.entities.numericFieldEntity).contains(field))
@@ -112,8 +136,6 @@ public class CustomFieldOfValue {
                         } else if (!isEmpty(operator)) {
                             context.getSession().put(ContextKeys.CONTINUE, true);
                         }
-                    } else {
-                        context.getSession().put(ContextKeys.ERROR, true);
                     }
                 })
                 .next()
@@ -132,10 +154,9 @@ public class CustomFieldOfValue {
                 .body(context -> {
                     boolean isDistinct = (context.getIntent().getDefinition().getName().equals(bot.intents.showAllDistinctIntent.getName()));
                     String field = (String) context.getSession().get(ContextKeys.FIELD);
-                    String value = (String) context.getSession().get(ContextKeys.VALUE);
-                    String valueField = (String) context.getSession().get(ContextKeys.VALUE_FIELD);
+                    Map<String, String> fieldValueMap = (Map<String, String>) context.getSession().get(ContextKeys.VALUE_FIELD_MAP);
                     SqlQueries sqlQueries = (SqlQueries) context.getSession().get(ContextKeys.SQL_QUERIES);
-                    String sqlQuery = sqlQueries.fieldOfValue(field, valueField, value, isDistinct);
+                    String sqlQuery = sqlQueries.fieldOfValue(field, fieldValueMap, isDistinct);
                     ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
                     context.getSession().put(ContextKeys.RESULTSET, resultSet);
                 })
@@ -146,20 +167,20 @@ public class CustomFieldOfValue {
                 .body(context -> {
                     String field = (String) context.getSession().get(ContextKeys.FIELD);
                     String operator = (String) context.getSession().get(ContextKeys.OPERATOR);
-                    String value = (String) context.getSession().get(ContextKeys.VALUE);
-                    String valueField = (String) context.getSession().get(ContextKeys.VALUE_FIELD);
+                    Map<String, String> valueFieldMap = (Map<String, String>) context.getSession().get(ContextKeys.VALUE_FIELD_MAP);
+                    String conditions = String.join(", ", Streams.zip(valueFieldMap.keySet().stream(),
+                            valueFieldMap.values().stream(), (v, f) -> bot.entities.readableNames.get(f) + " " + "= " + v).collect(Collectors.toList()));
                     if (context.getIntent().getDefinition().getName().equals(bot.intents.numericFunctionOperatorIntent.getName())
                             || context.getIntent().getDefinition().getName().equals(bot.intents.dateFunctionOperatorIntent.getName())) {
                         operator = (String) context.getIntent().getValue(ContextKeys.VALUE);
                     }
                     SqlQueries sqlQueries = (SqlQueries) context.getSession().get(ContextKeys.SQL_QUERIES);
-                    String sqlQuery = sqlQueries.fieldOfValueOperator(field, valueField, value, operator);
+                    String sqlQuery = sqlQueries.fieldOfValueOperator(field, valueFieldMap, operator);
                     ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
                     String result = resultSet.getRow(0).getColumnValue(0);
                     String fieldRN = bot.entities.readableNames.get(field);
-                    String valueFieldRN = bot.entities.readableNames.get(valueField);
                     bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString(
-                                    "FieldOfValueWithOperation"), operator, fieldRN, valueFieldRN, value, result));
+                                    "FieldOfValueWithOperation"), operator, fieldRN, conditions, result));
                 })
                 .next()
                 .moveTo(returnState);

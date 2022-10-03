@@ -368,14 +368,18 @@ public class Intents {
         customFieldOfValueIntent = intent("CustomFieldOfValue")
                 .trainingSentences(BUNDLE.getStringArray("CustomFieldOfValue"))
                 .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(entities.fieldEntity)
-                .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(entities.fieldValueEntity)
+                .parameter(ContextKeys.VALUE + "1").fromFragment("VALUE1").entity(entities.fieldValueEntity)
+                .parameter(ContextKeys.VALUE + "2").fromFragment("VALUE2").entity(entities.fieldValueEntity)
+                .parameter(ContextKeys.VALUE + "3").fromFragment("VALUE3").entity(entities.fieldValueEntity)
                 .parameter(ContextKeys.ROW_NAME).fromFragment("ROW_NAME").entity(entities.rowNameEntity)
                 .getIntentDefinition();
         customFieldOfValueOperatorIntent = intent("CustomFieldOfValueOperator")
                 .trainingSentences(BUNDLE.getStringArray("CustomFieldOfValueOperator"))
                 .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(entities.fieldEntity)
                 .parameter(ContextKeys.OPERATOR).fromFragment("OPERATOR").entity(entities.functionOperatorEntity)
-                .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(entities.fieldValueEntity)
+                .parameter(ContextKeys.VALUE + "1").fromFragment("VALUE1").entity(entities.fieldValueEntity)
+                .parameter(ContextKeys.VALUE + "2").fromFragment("VALUE2").entity(entities.fieldValueEntity)
+                .parameter(ContextKeys.VALUE + "3").fromFragment("VALUE3").entity(entities.fieldValueEntity)
                 .parameter(ContextKeys.ROW_NAME).fromFragment("ROW_NAME").entity(entities.rowNameEntity)
                 .getIntentDefinition();
 

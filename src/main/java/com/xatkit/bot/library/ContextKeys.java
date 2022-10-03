@@ -59,9 +59,9 @@ public final class ContextKeys {
      */
     public static final String ENTITY_TO_SPECIFY = "entity_to_specify";
     /**
-     * The constant VALUE_FIELD.
+     * The constant VALUE_FIELD_MAP.
      */
-    public static final String VALUE_FIELD = "value_field";
+    public static final String VALUE_FIELD_MAP = "value_field_map";
 
     // Intent Parameter Keys
 

@@ -5,6 +5,7 @@ import lombok.Getter;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -339,18 +340,21 @@ public class SqlQueries {
     /**
      * Generates a SQL query for the {@link com.xatkit.bot.customQuery.CustomFieldOfValue} workflow (without operator).
      *
-     * @param targetField the field to be selected
-     * @param field       the field of the 'where' condition
-     * @param value       the value of the 'where' condition
-     * @param isDistinct  indicates weather to select distinct (if true) or not (if false)
+     * @param targetField   the field to be selected
+     * @param valueFieldMap the field-value conditions
+     * @param isDistinct    indicates weather to select distinct (if true) or not (if false)
      * @return the sql query
      */
-    public String fieldOfValue(String targetField, String field, String value, boolean isDistinct) {
+    public String fieldOfValue(String targetField, Map<String, String> valueFieldMap, boolean isDistinct) {
         String targetFieldClean = replaceSpecialChars(targetField);
-        String fieldClean = replaceSpecialChars(field);
+        Map<String, String> fieldValueMapClean = new HashMap<>();
+        for (Map.Entry<String, String> entry : valueFieldMap.entrySet()) {
+            fieldValueMapClean.put(entry.getKey(), replaceSpecialChars(entry.getValue()));
+        }
+        String fieldsValuesString = String.join(" AND ", Streams.zip(fieldValueMapClean.keySet().stream(), fieldValueMapClean.values().stream(),
+                (v, f) -> f + " = '" + v + "'").collect(Collectors.toList()));
         String distinct = (isDistinct ? "DISTINCT " : "");
-        String sqlQuery = "SELECT " + distinct + targetFieldClean + " AS `" + targetField + "` FROM " + table + " WHERE "
-            + fieldClean + " = '" + value + "'";
+        String sqlQuery = "SELECT " + distinct + targetFieldClean + " AS `" + targetField + "` FROM " + table + " WHERE " + fieldsValuesString;
         if (!filters.isEmpty()) {
             sqlQuery += " AND " + String.join(" AND ", getFiltersAsSqlConditions());
         }
@@ -360,17 +364,21 @@ public class SqlQueries {
     /**
      * Generates a SQL query for the {@link com.xatkit.bot.customQuery.CustomFieldOfValue} workflow (with operator).
      *
-     * @param targetField the field to be selected
-     * @param field       the field of the 'where' condition
-     * @param value       the value of the 'where' condition
-     * @param operator    the operator
+     * @param targetField   the field to be selected
+     * @param valueFieldMap the field-value conditions
+     * @param operator      the operator
      * @return the sql query
      */
-    public String fieldOfValueOperator(String targetField, String field, String value, String operator) {
+    public String fieldOfValueOperator(String targetField, Map<String, String> valueFieldMap, String operator) {
         String targetFieldClean = replaceSpecialChars(targetField);
-        String fieldClean = replaceSpecialChars(field);
+        Map<String, String> fieldValueMapClean = new HashMap<>();
+        for (Map.Entry<String, String> entry : valueFieldMap.entrySet()) {
+            fieldValueMapClean.put(entry.getKey(), replaceSpecialChars(entry.getValue()));
+        }
+        String fieldsValuesString = String.join(" AND ", Streams.zip(fieldValueMapClean.keySet().stream(), fieldValueMapClean.values().stream(),
+                (v, f) -> f + " = '" + v + "'").collect(Collectors.toList()));
         String sqlQuery = "SELECT " + operator + "(" + toDecimal(targetFieldClean) + ") AS `" + targetField
-                + "` FROM " + table + " WHERE " + targetFieldClean + " <> '' AND " + fieldClean + " = '" + value + "'";
+                + "` FROM " + table + " WHERE " + targetFieldClean + " <> '' AND " + fieldsValuesString;
         if (!filters.isEmpty()) {
             sqlQuery += " AND " + String.join(" AND ", getFiltersAsSqlConditions());
         }
