@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.val;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.xatkit.bot.App.sql;
 import static com.xatkit.dsl.DSL.state;
@@ -56,7 +58,8 @@ public class CustomFieldOfNumericFieldFunction {
                             number = "1";
                         }
                         SqlQueries sqlQueries = (SqlQueries) context.getSession().get(ContextKeys.SQL_QUERIES);
-                        String sqlQuery = sqlQueries.fieldOfNumericFieldFunction(field1, field2, operator, number);
+                        List<String> keyFields = new ArrayList<>(bot.entities.keyFields);
+                        String sqlQuery = sqlQueries.fieldOfNumericFieldFunction(keyFields, field1, field2, operator, number);
                         ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
                         context.getSession().put(ContextKeys.RESULTSET, resultSet);
                         String field1RN = bot.entities.readableNames.get(field1);

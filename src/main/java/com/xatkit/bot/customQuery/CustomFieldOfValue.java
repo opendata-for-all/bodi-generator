@@ -94,9 +94,10 @@ public class CustomFieldOfValue {
                     System.out.println(valueFieldMap);
                     if (!(boolean) context.getSession().get(ContextKeys.ERROR)) {
                         if (isEmpty(operator)) {
+                            List<String> keyFields = new ArrayList<>(bot.entities.keyFields);
                             String fieldRN = bot.entities.readableNames.get(field);
                             SqlQueries sqlQueries = (SqlQueries) context.getSession().get(ContextKeys.SQL_QUERIES);
-                            String sqlQuery = sqlQueries.fieldOfValue(field, valueFieldMap, false);
+                            String sqlQuery = sqlQueries.fieldOfValue(keyFields, field, valueFieldMap, false);
                             ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
                             String conditions = String.join(", ", Streams.zip(valueFieldMap.keySet().stream(),
                                     valueFieldMap.values().stream(), (v, f) -> bot.entities.readableNames.get(f) + " " + "= " + v).collect(Collectors.toList()));
@@ -121,7 +122,7 @@ public class CustomFieldOfValue {
                                 } else if (Utils.getEntityValues(bot.entities.textualFieldEntity).contains(field)) {
                                     // textual operators here
                                 }
-                                sqlQuery = sqlQueries.fieldOfValue(field, valueFieldMap, true);
+                                sqlQuery = sqlQueries.fieldOfValue(keyFields, field, valueFieldMap, true);
                                 ResultSet resultSetDistinct = sql.runSqlQuery(bot, sqlQuery);
                                 buttons.add(Utils.getFirstTrainingSentences(bot.coreLibraryI18n.Quit).get(0));
                                 bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString(
@@ -156,7 +157,8 @@ public class CustomFieldOfValue {
                     String field = (String) context.getSession().get(ContextKeys.FIELD);
                     Map<String, String> fieldValueMap = (Map<String, String>) context.getSession().get(ContextKeys.VALUE_FIELD_MAP);
                     SqlQueries sqlQueries = (SqlQueries) context.getSession().get(ContextKeys.SQL_QUERIES);
-                    String sqlQuery = sqlQueries.fieldOfValue(field, fieldValueMap, isDistinct);
+                    List<String> keyFields = new ArrayList<>(bot.entities.keyFields);
+                    String sqlQuery = sqlQueries.fieldOfValue(keyFields, field, fieldValueMap, isDistinct);
                     ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
                     context.getSession().put(ContextKeys.RESULTSET, resultSet);
                 })
@@ -173,16 +175,22 @@ public class CustomFieldOfValue {
                     if (context.getIntent().getDefinition().getName().equals(bot.intents.numericFunctionOperatorIntent.getName())
                             || context.getIntent().getDefinition().getName().equals(bot.intents.dateFunctionOperatorIntent.getName())) {
                         operator = (String) context.getIntent().getValue(ContextKeys.VALUE);
+                        context.getSession().put(ContextKeys.OPERATOR, operator);
                     }
                     SqlQueries sqlQueries = (SqlQueries) context.getSession().get(ContextKeys.SQL_QUERIES);
-                    String sqlQuery = sqlQueries.fieldOfValueOperator(field, valueFieldMap, operator);
+                    List<String> keyFields = new ArrayList<>(bot.entities.keyFields);
+                    String sqlQuery = sqlQueries.fieldOfValueOperator(keyFields, field, valueFieldMap, operator);
                     ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
-                    String result = resultSet.getRow(0).getColumnValue(0);
+                    context.getSession().put(ContextKeys.RESULTSET, resultSet);
+                    String result = resultSet.getRow(0).getColumnValue(resultSet.getNumColumns() - 1);
                     String fieldRN = bot.entities.readableNames.get(field);
                     bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString(
                                     "FieldOfValueWithOperation"), operator, fieldRN, conditions, result));
                 })
                 .next()
-                .moveTo(returnState);
+                .when(context -> context.getSession().get(ContextKeys.OPERATOR).equals("min")
+                        || context.getSession().get(ContextKeys.OPERATOR).equals("max")).moveTo(bot.getResult.getShowDataState())
+                .when(context -> !(context.getSession().get(ContextKeys.OPERATOR).equals("min")
+                        || context.getSession().get(ContextKeys.OPERATOR).equals("max"))).moveTo(returnState);
     }
 }
