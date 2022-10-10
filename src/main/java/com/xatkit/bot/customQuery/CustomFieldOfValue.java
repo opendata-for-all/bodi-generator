@@ -107,7 +107,7 @@ public class CustomFieldOfValue {
                                         "FieldOfValue0"), fieldRN, conditions));
                                 context.getSession().put(ContextKeys.STOP, true);
                             } else if (resultSet.getNumRows() == 1) {
-                                String result = resultSet.getRow(0).getColumnValue(0);
+                                String result = resultSet.getRow(0).getColumnValue(resultSet.getNumColumns() - 1);
                                 bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString(
                                         "FieldOfValue1"), fieldRN, conditions, result));
                                 context.getSession().put(ContextKeys.STOP, true);
