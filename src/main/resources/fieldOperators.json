@@ -338,7 +338,8 @@
           "highest",
           "biggest",
           "greatest",
-          "top"
+          "top",
+          "more"
         ]
       },
       "ca": {
@@ -347,7 +348,8 @@
           "més alt",
           "més gran",
           "major",
-          "top"
+          "top",
+          "més"
         ]
       },
       "es": {
@@ -356,7 +358,8 @@
           "más alto",
           "más grande",
           "mayor",
-          "top"
+          "top",
+          "más"
         ]
       }
     },
@@ -366,7 +369,9 @@
           "minimum",
           "lowest",
           "smallest",
-          "minor"
+          "minor",
+          "fewer",
+          "less"
         ]
       },
       "ca": {
@@ -374,7 +379,8 @@
           "mínim",
           "més baix",
           "més petit",
-          "menor"
+          "menor",
+          "menys"
         ]
       },
       "es": {
@@ -382,7 +388,8 @@
           "mínimo",
           "más bajo",
           "más pequeño",
-          "menor"
+          "menor",
+          "menos"
         ]
       }
     },
