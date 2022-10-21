@@ -66,8 +66,8 @@ public class SqlQueries {
      * <p>
      * This is necessary to preprocess field names since some databases do not support special characters in column
      * names.
-     * @param text
-     * @return
+     * @param text the text
+     * @return the processed text
      */
     private static String replaceSpecialChars(String text) {
         String result = text.replaceAll("[^a-zA-Z0-9]", "_");
@@ -75,6 +75,17 @@ public class SqlQueries {
             result = "col" + result;
         }
         return result;
+    }
+
+    /**
+     * Escapes all quotes in a text by duplicating them.
+     * <p>
+     * This is necessary since values of sql statement conditions must escape them.
+     * @param text text
+     * @return the processed text
+     */
+    private static String escapeQuotes(String text) {
+        return text.replaceAll("'", "''");
     }
 
     /**
@@ -150,6 +161,7 @@ public class SqlQueries {
         Set<String> sqlFilters = new HashSet<>();
         for (ImmutableTriple<String, String, String> f : filters) {
             String field = replaceSpecialChars(f.left);
+            String value = escapeQuotes(f.right);
             switch (f.middle) {
                 // Numeric Filters
                 case "=":
@@ -157,35 +169,35 @@ public class SqlQueries {
                 case "<=":
                 case ">":
                 case ">=":
-                    sqlFilters.add(toDecimal(field) + " " + f.middle + " " + f.right);
+                    sqlFilters.add(toDecimal(field) + " " + f.middle + " " + value);
                     sqlFilters.add(field + " <> ''");
                     break;
                 case "!=":
-                    sqlFilters.add(toDecimal(field) + " <> " + f.right);
+                    sqlFilters.add(toDecimal(field) + " <> " + value);
                     sqlFilters.add(field + " <> ''");
                     break;
                     // Textual Filters
                 case "equals": // Also a date filter
-                    sqlFilters.add("UPPER(" + field + ") = UPPER('" + f.right + "')");
+                    sqlFilters.add("UPPER(" + field + ") = UPPER('" + value + "')");
                     break;
                 case "different": // Also a date filter
-                    sqlFilters.add("UPPER(" + field + ") <> UPPER('" + f.right + "')");
+                    sqlFilters.add("UPPER(" + field + ") <> UPPER('" + value + "')");
                     break;
                 case "contains":
-                    sqlFilters.add("UPPER(" + field + ") LIKE UPPER('%" + f.right + "%')");
+                    sqlFilters.add("UPPER(" + field + ") LIKE UPPER('%" + value + "%')");
                     break;
                 case "starts with":
-                    sqlFilters.add("UPPER(" + field + ") LIKE UPPER('" + f.right + "%')");
+                    sqlFilters.add("UPPER(" + field + ") LIKE UPPER('" + value + "%')");
                     break;
                 case "ends with":
-                    sqlFilters.add("UPPER(" + field + ") LIKE UPPER('%" + f.right + "')");
+                    sqlFilters.add("UPPER(" + field + ") LIKE UPPER('%" + value + "')");
                     break;
                 // Date Filters
                 case "before":
-                    sqlFilters.add("date(" + field + ") < date('" + f.right + "')");
+                    sqlFilters.add("date(" + field + ") < date('" + value + "')");
                     break;
                 case "after":
-                    sqlFilters.add("date(" + field + ") > date('" + f.right + "')");
+                    sqlFilters.add("date(" + field + ") > date('" + value + "')");
                     break;
                 default:
                     break;
@@ -276,7 +288,7 @@ public class SqlQueries {
      */
     public String valueFrequency(String field, String value) {
         String fieldClean = replaceSpecialChars(field);
-        String sqlQuery = "SELECT COUNT(" + fieldClean + ") AS freq FROM " + table + " WHERE " + fieldClean + " = '" + value + "'";
+        String sqlQuery = "SELECT COUNT(" + fieldClean + ") AS freq FROM " + table + " WHERE " + fieldClean + " = '" + escapeQuotes(value) + "'";
         if (!filters.isEmpty()) {
             sqlQuery += " AND " + String.join(" AND ", getFiltersAsSqlConditions());
         }
@@ -299,7 +311,7 @@ public class SqlQueries {
         String fieldClean = replaceSpecialChars(field);
         Map<String, String> fieldValueMapClean = new HashMap<>();
         for (Map.Entry<String, String> entry : valueFieldMap.entrySet()) {
-            fieldValueMapClean.put(entry.getKey(), replaceSpecialChars(entry.getValue()));
+            fieldValueMapClean.put(escapeQuotes(entry.getKey()), replaceSpecialChars(entry.getValue()));
         }
         String fieldsValuesString = String.join(" AND ", Streams.zip(fieldValueMapClean.keySet().stream(), fieldValueMapClean.values().stream(),
                 (v, f) -> f + " = '" + v + "'").collect(Collectors.toList()));
@@ -372,7 +384,7 @@ public class SqlQueries {
 
         Map<String, String> fieldValueMapClean = new HashMap<>();
         for (Map.Entry<String, String> entry : valueFieldMap.entrySet()) {
-            fieldValueMapClean.put(entry.getKey(), replaceSpecialChars(entry.getValue()));
+            fieldValueMapClean.put(escapeQuotes(entry.getKey()), replaceSpecialChars(entry.getValue()));
         }
         String fieldsValuesString = String.join(" AND ", Streams.zip(fieldValueMapClean.keySet().stream(), fieldValueMapClean.values().stream(),
                 (v, f) -> f + " = '" + v + "'").collect(Collectors.toList()));
@@ -404,7 +416,7 @@ public class SqlQueries {
         String targetFieldClean = replaceSpecialChars(targetField);
         Map<String, String> fieldValueMapClean = new HashMap<>();
         for (Map.Entry<String, String> entry : valueFieldMap.entrySet()) {
-            fieldValueMapClean.put(entry.getKey(), replaceSpecialChars(entry.getValue()));
+            fieldValueMapClean.put(escapeQuotes(entry.getKey()), replaceSpecialChars(entry.getValue()));
         }
         String fieldsValuesString = String.join(" AND ", Streams.zip(fieldValueMapClean.keySet().stream(), fieldValueMapClean.values().stream(),
                 (v, f) -> f + " = '" + v + "'").collect(Collectors.toList()));
@@ -437,7 +449,7 @@ public class SqlQueries {
         List<String> fieldsClean = fields.stream().map(SqlQueries::replaceSpecialChars).collect(Collectors.toList());
         String fieldsString = String.join(", ", Streams.zip(fieldsClean.stream(), fields.stream(), (fClean, f) -> fClean + " AS `" + f + "`").collect(Collectors.toList()));
         String fieldClean = replaceSpecialChars(field);
-        String sqlQuery = "SELECT DISTINCT " + fieldsString + " FROM " + table + " WHERE " + fieldClean + " = '" + value + "'";
+        String sqlQuery = "SELECT DISTINCT " + fieldsString + " FROM " + table + " WHERE " + fieldClean + " = '" + escapeQuotes(value) + "'";
         if (!filters.isEmpty()) {
             sqlQuery += " AND " + String.join(" AND ", getFiltersAsSqlConditions());
         }
@@ -466,8 +478,8 @@ public class SqlQueries {
         String fieldsString = String.join(", ", Streams.zip(fieldsClean.stream(), fields.stream(), (fClean, f) -> fClean + " AS `" + f + "`").collect(Collectors.toList()));
         String field1Clean = replaceSpecialChars(field1);
         String field2Clean = replaceSpecialChars(field2);
-        String sqlQuery = "SELECT DISTINCT " + fieldsString + " FROM " + table + " WHERE " + field1Clean + " = '" + value1
-            + "' AND " + field2Clean + " = '" + value2 + "'";
+        String sqlQuery = "SELECT DISTINCT " + fieldsString + " FROM " + table + " WHERE " + field1Clean + " = '" + escapeQuotes(value1)
+            + "' AND " + field2Clean + " = '" + escapeQuotes(value2) + "'";
         if (!filters.isEmpty()) {
             sqlQuery += " AND " + String.join(" AND ", getFiltersAsSqlConditions());
         }
