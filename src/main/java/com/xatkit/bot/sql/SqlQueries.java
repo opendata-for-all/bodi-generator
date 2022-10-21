@@ -283,17 +283,31 @@ public class SqlQueries {
         return sqlQuery;
     }
 
+    private String numericFieldFunction(String field, String operator) {
+        return numericFieldFunction(field, operator, new HashMap<>());
+    }
+
     /**
      * Generates a SQL query for the {@link com.xatkit.bot.customQuery.CustomNumericFieldFunction} workflow.
      *
-     * @param field    the field
-     * @param operator the operator
+     * @param field         the field
+     * @param operator      the operator
+     * @param valueFieldMap the field-value conditions
      * @return the sql query
      */
-    public String numericFieldFunction(String field, String operator) {
+    public String numericFieldFunction(String field, String operator, Map<String, String> valueFieldMap) {
         String fieldClean = replaceSpecialChars(field);
+        Map<String, String> fieldValueMapClean = new HashMap<>();
+        for (Map.Entry<String, String> entry : valueFieldMap.entrySet()) {
+            fieldValueMapClean.put(entry.getKey(), replaceSpecialChars(entry.getValue()));
+        }
+        String fieldsValuesString = String.join(" AND ", Streams.zip(fieldValueMapClean.keySet().stream(), fieldValueMapClean.values().stream(),
+                (v, f) -> f + " = '" + v + "'").collect(Collectors.toList()));
         String sqlQuery = "SELECT " + operator + "(" + toDecimal(fieldClean) + ") AS `" + field + "` FROM "
                 + table + " WHERE " + fieldClean + " <> ''";
+        if (!fieldsValuesString.isEmpty()) {
+            sqlQuery += " AND " + fieldsValuesString;
+        }
         if (!filters.isEmpty()) {
             sqlQuery += " AND " + String.join(" AND ", getFiltersAsSqlConditions());
         }
