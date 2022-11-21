@@ -255,13 +255,19 @@ public class TabularDataSource implements Serializable {
         }
     }
 
+    /**
+     * Given a column with numeric values, replace all commas by dots.
+     * <p>
+     * For instance, the value {@code 3,5} would be converted to {@code 3.5}
+     *
+     * @param name the name of the numeric column
+     */
     public void replaceNumericColumnComma(String name) {
         int index = header.indexOf(name);
         for (Row row : table) {
             String value = row.getColumnValue(index);
             if (!isEmpty(value)) {
                 String newValue = value.replaceFirst(",", ".");
-                Float.parseFloat(newValue);
                 row.getValues().set(index, newValue);
             }
         }
