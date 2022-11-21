@@ -171,7 +171,7 @@ public class SchemaType implements Serializable {
         Set<String> mainValues = tds.getColumnUniqueValues(newSchemaField.getOriginalName());
         newSchemaField.setNumDifferentValues(mainValues.size());
         if (newSchemaField.isCategorical()) {
-            newSchemaField.addMainValues(tds.getColumnUniqueValues(newSchemaField.getOriginalName()));
+            newSchemaField.addMainValues(mainValues);
         }
         if (removeOriginalFields) {
             for (String originalField : fieldsToMerge) {
