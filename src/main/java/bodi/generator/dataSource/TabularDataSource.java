@@ -255,6 +255,18 @@ public class TabularDataSource implements Serializable {
         }
     }
 
+    public void replaceNumericColumnComma(String name) {
+        int index = header.indexOf(name);
+        for (Row row : table) {
+            String value = row.getColumnValue(index);
+            if (!isEmpty(value)) {
+                String newValue = value.replaceFirst(",", ".");
+                Float.parseFloat(newValue);
+                row.getValues().set(index, newValue);
+            }
+        }
+    }
+
     /**
      * Write the {@link TabularDataSource} as csv file.
      *

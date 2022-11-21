@@ -163,6 +163,7 @@ public final class BodiGenerator {
             } else if (dataTypes.get(DATE)) {
                 schemaField.setType(DATE);
             } else if (dataTypes.get(NUMBER)) {
+                tds.replaceNumericColumnComma(fieldName);
                 schemaField.setType(NUMBER);
             } else {
                 schemaField.setType(TEXT);
@@ -233,6 +234,7 @@ public final class BodiGenerator {
             } else if (dataTypes.get(DATE)) {
                 schemaField.setType(DATE);
             } else if (dataTypes.get(NUMBER)) {
+                tds.replaceNumericColumnComma(fieldName);
                 schemaField.setType(NUMBER);
             } else {
                 schemaField.setType(TEXT);
