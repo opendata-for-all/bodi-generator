@@ -83,7 +83,7 @@ public final class Utils {
      */
     public static boolean isNumeric(String text) {
         try {
-            //text = text.replaceFirst(",", ".");
+            text = text.replaceFirst(",", ".");
             Float.parseFloat(text);
         } catch (NumberFormatException e) {
             return false;
