@@ -348,7 +348,6 @@ public class Intents {
                 .trainingSentences(BUNDLE.getStringArray("CustomNumericFieldFunction"))
                 .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(entities.numericFieldEntity)
                 .parameter(ContextKeys.OPERATOR).fromFragment("OPERATOR").entity(entities.numericFunctionOperatorEntity)
-                .parameter(ContextKeys.OPERATOR).fromFragment("OPERATOR").entity(entities.numericFunctionOperatorEntity)
                 .parameter(ContextKeys.VALUE + "1").fromFragment("VALUE1").entity(entities.fieldValueEntity)
                 .parameter(ContextKeys.VALUE + "2").fromFragment("VALUE2").entity(entities.fieldValueEntity)
                 .parameter(ContextKeys.VALUE + "3").fromFragment("VALUE3").entity(entities.fieldValueEntity)
