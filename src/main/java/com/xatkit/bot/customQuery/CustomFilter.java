@@ -45,6 +45,8 @@ public class CustomFilter {
 
         saveCustomFilterState
                 .body(context -> {
+                    context.getSession().put(ContextKeys.ERROR, false);
+                    context.getSession().put(ContextKeys.RESULTSET_NUM_ROWS, 0);
                     String field = (String) context.getSession().get(ContextKeys.FIELD);
                     String operator = (String) context.getSession().get(ContextKeys.OPERATOR);
                     String value = (String) context.getSession().get(ContextKeys.VALUE);
@@ -59,12 +61,16 @@ public class CustomFilter {
                         bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("FilterAdded"),
                                 fieldRN, operator, value, resultSet.getNumRows()));
                     } else {
+                        context.getSession().put(ContextKeys.ERROR, true);
                         bot.reactPlatform.reply(context, bot.messages.getString("SomethingWentWrong"));
                     }
                 })
                 .next()
-                .when(context -> (int) context.getSession().get(ContextKeys.RESULTSET_NUM_ROWS) <= bot.maxEntriesToDisplay).moveTo(bot.getResult.getShowDataState())
-                .when(context -> (int) context.getSession().get(ContextKeys.RESULTSET_NUM_ROWS) > bot.maxEntriesToDisplay).moveTo(selectNextActionState);
+                .when(context -> (boolean) context.getSession().get(ContextKeys.ERROR)).moveTo(bot.getResult.getGenerateResultSetFromQueryState())
+                .when(context -> !(boolean) context.getSession().get(ContextKeys.ERROR)
+                    && (int) context.getSession().get(ContextKeys.RESULTSET_NUM_ROWS) <= bot.maxEntriesToDisplay).moveTo(bot.getResult.getShowDataState())
+                .when(context -> !(boolean) context.getSession().get(ContextKeys.ERROR)
+                    && (int) context.getSession().get(ContextKeys.RESULTSET_NUM_ROWS) > bot.maxEntriesToDisplay).moveTo(selectNextActionState);
 
         selectNextActionState
                 .body(context -> {
