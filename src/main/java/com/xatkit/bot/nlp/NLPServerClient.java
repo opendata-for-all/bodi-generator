@@ -145,7 +145,8 @@ public class NLPServerClient {
             //checkCorrectAnswer.setLastSqlQuery(sqlQuery);
             return new ResultSet(header, table);
         } catch (Exception e) {
-            Log.error(e, "An error occurred while getting the SQL result, see the attached exception");
+            Log.error("An error occurred while getting the SQL result, see the attached exception");
+            Log.error(e.getMessage());
         }
         return new ResultSet();
     }
