@@ -93,7 +93,8 @@ public class NLPServerClient {
             translations.put("sql", sqlQuery);
             translations.put("english", inputInEnglish);
         } catch (Exception e) {
-            Log.error(e, "An error occurred while getting the SQL result, see the attached exception");
+            Log.error("An error occurred while getting the SQL result, see the attached exception");
+            Log.error(e.getMessage());
             translations.put("sql", "");
             translations.put("english", "");
         }

@@ -49,7 +49,8 @@ public class SqlEngine {
             conn = DriverManager.getConnection(url);
             statement = conn.createStatement();
         } catch (SQLException | ClassNotFoundException e) {
-            Log.error(e, "An error occurred while connecting to {0}, see the attached exception", url);
+            Log.error("An error occurred while connecting to {0}, see the attached exception", url);
+            Log.error(e.getMessage());
         }
     }
 
@@ -99,7 +100,8 @@ public class SqlEngine {
                 Log.error("An error occurred while reconnecting to {0}, see the attached exception", url);
             }
         } catch (SQLException e) {
-            Log.error(e, "An error occurred while running the SQL query {0}, see the attached exception", sqlQuery);
+            Log.error("An error occurred while running the SQL query {0}, see the attached exception", sqlQuery);
+            Log.error(e.getMessage());
         }
         return new bodi.generator.dataSource.ResultSet();
     }
