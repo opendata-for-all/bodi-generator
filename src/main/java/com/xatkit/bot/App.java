@@ -53,11 +53,9 @@ public final class App {
     public static List<Bot> bots;
 
     /**
-     * The entry point of application.
-     *
-     * @param args the input arguments
+     * Initialize the application bots.
      */
-    public static void main(String[] args) {
+    public static void initialize() {
         Configurations configurations = new Configurations();
         PropertiesConfiguration botConfiguration;
         try {
@@ -68,7 +66,7 @@ public final class App {
             String[] languages = botConfiguration.getString(BotProperties.BOT_LANGUAGES).split(",");
             bots = new ArrayList<>();
             for (String language : languages) {
-                String configLangFile = MessageFormat.format(BOT_LANGUAGE_PROPERTIES_FILE, language);
+                String configLangFile = MessageFormat.format(BOT_LANGUAGE_PROPERTIES_FILE, language.replaceAll(" ", ""));
                 try {
                     PropertiesConfiguration botLangConfiguration = configurations.properties(Thread.currentThread().getContextClassLoader().getResource(configLangFile));
                     botLangConfiguration.copy(botConfiguration);
@@ -82,6 +80,15 @@ public final class App {
             Log.error("Configuration file {0} not found", BOT_PROPERTIES_FILE);
             e.printStackTrace();
         }
+    }
+
+    /**
+     * The entry point of application.
+     *
+     * @param args the input arguments
+     */
+    public static void main(String[] args) {
+        initialize();
         for (Bot bot : bots) {
             bot.run();
         }
