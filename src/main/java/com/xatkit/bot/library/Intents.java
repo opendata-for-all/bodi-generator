@@ -323,6 +323,7 @@ public class Intents {
         customLeastFrequentValueInFieldIntent = intent("CustomLeastFrequentValueInField")
                 .trainingSentences(BUNDLE.getStringArray("CustomLeastFrequentValueInField"))
                 .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(entities.fieldEntity)
+                .parameter(ContextKeys.ROW_NAME).fromFragment("ROW_NAME").entity(entities.rowNameEntity)
                 .getIntentDefinition();
 
 
