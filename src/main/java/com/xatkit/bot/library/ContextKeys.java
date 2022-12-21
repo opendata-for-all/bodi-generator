@@ -62,6 +62,18 @@ public final class ContextKeys {
      * The constant VALUE_FIELD_MAP.
      */
     public static final String VALUE_FIELD_MAP = "value_field_map";
+    /**
+     * The constant BAD_PARAMS.
+     */
+    public static final String BAD_PARAMS = "bad_params";
+    /**
+     * The constant BAD_RESULTSET.
+     */
+    public static final String BAD_RESULTSET = "bad_resultset";
+    /**
+     * The constant ALL_OK.
+     */
+    public static final String ALL_OK = "all_ok";
 
     // Intent Parameter Keys
 
@@ -85,7 +97,4 @@ public final class ContextKeys {
      * The constant number.
      */
     public static final String NUMBER = "number";
-
-
-
 }

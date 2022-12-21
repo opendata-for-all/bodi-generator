@@ -5,12 +5,9 @@ import com.xatkit.bot.Bot;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.sql.SqlQueries;
 import com.xatkit.execution.State;
-import lombok.Getter;
-import lombok.val;
+import com.xatkit.execution.StateContext;
 
-import static com.xatkit.bot.App.sql;
-import static com.xatkit.dsl.DSL.state;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.logging.log4j.util.Strings.isEmpty;
 
 /**
  * The Custom Show Field Distinct workflow of a chatbot.
@@ -21,40 +18,56 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
  *
  * @see CustomQuery
  */
-public class CustomShowFieldDistinct {
+public class CustomShowFieldDistinct extends AbstractCustomQuery {
 
-    /**
-     * The entry point for the Custom Show Field Distinct workflow.
-     */
-    @Getter
-    private final State processCustomShowFieldDistinctState;
-
-    /**
-     * Instantiates a new Custom Show Field Distinct workflow.
-     *
-     * @param bot         the chatbot that uses this workflow
-     * @param returnState the state where the chatbot ends up arriving once the workflow is finished
-     */
     public CustomShowFieldDistinct(Bot bot, State returnState) {
-        val processCustomShowFieldDistinctState = state("ProcessCustomShowFieldDistinct");
+        super(bot, returnState);
+    }
 
-        processCustomShowFieldDistinctState
-                .body(context -> {
-                    context.getSession().put(ContextKeys.ERROR, false);
-                    String field = (String) context.getSession().get(ContextKeys.FIELD);
-                    if (!isEmpty(field)) {
-                        SqlQueries sqlQueries = (SqlQueries) context.getSession().get(ContextKeys.SQL_QUERIES);
-                        String sqlQuery = sqlQueries.showFieldDistinct(field);
-                        ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
-                        context.getSession().put(ContextKeys.RESULTSET, resultSet);
-                    } else {
-                        context.getSession().put(ContextKeys.ERROR, true);
-                    }
-                })
-                .next()
-                .when(context -> (boolean) context.getSession().get(ContextKeys.ERROR)).moveTo(bot.getResult.getGenerateResultSetFromQueryState())
-                .when(context -> !(boolean) context.getSession().get(ContextKeys.ERROR)).moveTo(bot.getResult.getShowDataState());
+    @Override
+    protected boolean checkParamsOk(StateContext context) {
+        String field = (String) context.getSession().get(ContextKeys.FIELD);
+        return !isEmpty(field);
+    }
 
-        this.processCustomShowFieldDistinctState = processCustomShowFieldDistinctState.getState();
+    @Override
+    protected boolean continueWhenParamsNotOk(StateContext context) {
+        // When params are not ok, we stop the execution
+        return false;
+    }
+
+    @Override
+    protected State getNextStateWhenParamsNotOk() {
+        return bot.getResult.getGenerateResultSetFromQueryState();
+    }
+
+    @Override
+    protected String generateSqlStatement(StateContext context) {
+        String field = (String) context.getSession().get(ContextKeys.FIELD);
+        SqlQueries sqlQueries = (SqlQueries) context.getSession().get(ContextKeys.SQL_QUERIES);
+        return sqlQueries.showFieldDistinct(field);
+    }
+
+    @Override
+    protected boolean checkResultSetOk(StateContext context) {
+        ResultSet resultSet = (ResultSet) context.getSession().get(ContextKeys.RESULTSET);
+        return resultSet.getNumRows() > 0;
+    }
+
+    @Override
+    protected boolean continueWhenResultSetNotOk(StateContext context) {
+        // When result set is not ok, we stop the execution
+        return false;
+    }
+
+    @Override
+    protected String generateMessage(StateContext context) {
+        // This workflow doesn't print a message
+        return null;
+    }
+
+    @Override
+    protected State getNextStateWhenResultSetNotOk() {
+        return bot.getResult.getGenerateResultSetFromQueryState();
     }
 }

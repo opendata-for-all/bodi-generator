@@ -6,14 +6,11 @@ import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Entities;
 import com.xatkit.bot.sql.SqlQueries;
 import com.xatkit.execution.State;
-import lombok.Getter;
-import lombok.val;
+import com.xatkit.execution.StateContext;
 
 import java.text.MessageFormat;
 
-import static com.xatkit.bot.App.sql;
-import static com.xatkit.dsl.DSL.state;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.logging.log4j.util.Strings.isEmpty;
 
 /**
  * The Custom Value Frequency workflow of a chatbot.
@@ -27,44 +24,61 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
  *
  * @see CustomQuery
  */
-public class CustomValueFrequency {
+public class CustomValueFrequency extends AbstractCustomQuery {
 
-    /**
-     * The entry point for the Custom Value Frequency workflow.
-     */
-    @Getter
-    private final State processCustomValueFrequencyState;
-
-    /**
-     * Instantiates a new Custom Value Frequency workflow.
-     *
-     * @param bot         the chatbot that uses this workflow
-     * @param returnState the state where the chatbot ends up arriving once the workflow is finished
-     */
     public CustomValueFrequency(Bot bot, State returnState) {
-        val processCustomValueFrequencyState = state("ProcessCustomValueFrequency");
+        super(bot, returnState);
+    }
 
-        processCustomValueFrequencyState
-                .body(context -> {
-                    context.getSession().put(ContextKeys.ERROR, false);
-                    String value = (String) context.getSession().get(ContextKeys.VALUE);
-                    if (!isEmpty(value)) {
-                        String field = Entities.fieldValueMap.get(value);
-                        SqlQueries sqlQueries = (SqlQueries) context.getSession().get(ContextKeys.SQL_QUERIES);
-                        String sqlQuery = sqlQueries.valueFrequency(field, value);
-                        ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
-                        int valueFrequency = Integer.parseInt(resultSet.getRow(0).getColumnValue(0));
-                        String fieldRN = bot.entities.readableNames.get(field);
-                        bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("ShowValueFrequency"),
-                                valueFrequency, fieldRN, value));
-                    } else {
-                        context.getSession().put(ContextKeys.ERROR, true);
-                    }
-                })
-                .next()
-                .when(context -> (boolean) context.getSession().get(ContextKeys.ERROR)).moveTo(bot.getResult.getGenerateResultSetFromQueryState())
-                .when(context -> !(boolean) context.getSession().get(ContextKeys.ERROR)).moveTo(returnState);
+    @Override
+    protected boolean checkParamsOk(StateContext context) {
+        String value = (String) context.getSession().get(ContextKeys.VALUE);
+        return !isEmpty(value);
+    }
 
-        this.processCustomValueFrequencyState = processCustomValueFrequencyState.getState();
+    @Override
+    protected boolean continueWhenParamsNotOk(StateContext context) {
+        // when params are not ok, we stop the execution
+        return false;
+    }
+
+    @Override
+    protected State getNextStateWhenParamsNotOk() {
+        return bot.getResult.getGenerateResultSetFromQueryState();
+    }
+
+    @Override
+    protected String generateSqlStatement(StateContext context) {
+        String value = (String) context.getSession().get(ContextKeys.VALUE);
+        String field = Entities.fieldValueMap.get(value);
+        SqlQueries sqlQueries = (SqlQueries) context.getSession().get(ContextKeys.SQL_QUERIES);
+        return sqlQueries.valueFrequency(field, value);
+    }
+
+    @Override
+    protected boolean checkResultSetOk(StateContext context) {
+        ResultSet resultSet = (ResultSet) context.getSession().get(ContextKeys.RESULTSET);
+        return resultSet.getNumRows() > 0;
+    }
+
+    @Override
+    protected boolean continueWhenResultSetNotOk(StateContext context) {
+        // when result set is not ok, we stop the execution
+        return false;
+    }
+
+    @Override
+    protected String generateMessage(StateContext context) {
+        String value = (String) context.getSession().get(ContextKeys.VALUE);
+        String field = Entities.fieldValueMap.get(value);
+        String fieldRN = bot.entities.readableNames.get(field);
+        ResultSet resultSet = (ResultSet) context.getSession().get(ContextKeys.RESULTSET);
+        int valueFrequency = Integer.parseInt(resultSet.getRow(0).getColumnValue(0));
+        return MessageFormat.format(bot.messages.getString("ShowValueFrequency"), valueFrequency, fieldRN, value);
+    }
+
+    @Override
+    protected State getNextStateWhenResultSetNotOk() {
+        return bot.getResult.getGenerateResultSetFromQueryState();
     }
 }

@@ -162,15 +162,15 @@ public class Intents {
 
 
     /**
-     * The intent customNumericFieldFunctionIntent.
+     * The intent customFieldFunctionIntent.
      */
-    public final IntentDefinition customNumericFieldFunctionIntent;
+    public final IntentDefinition customFieldFunctionIntent;
 
 
     /**
-     * The intent customRowOfNumericFieldFunctionIntent.
+     * The intent customRowOfFieldFunctionIntent.
      */
-    public final IntentDefinition customRowOfNumericFieldFunctionIntent;
+    public final IntentDefinition customRowOfFieldFunctionIntent;
 
 
     /**
@@ -183,10 +183,6 @@ public class Intents {
      * The intent customFieldOfValueIntent.
      */
     public final IntentDefinition customFieldOfValueIntent;
-    /**
-     * The intent customFieldOfValueOperatorIntent.
-     */
-    public final IntentDefinition customFieldOfValueOperatorIntent;
 
     /**
      * The intent customRowOfValuesIntent.
@@ -194,9 +190,9 @@ public class Intents {
     public final IntentDefinition customRowOfValuesIntent;
 
     /**
-     * The intent customFieldOfNumericFieldFunctionIntent.
+     * The intent customFieldOfFieldFunctionIntent.
      */
-    public final IntentDefinition customFieldOfNumericFieldFunctionIntent;
+    public final IntentDefinition customFieldOfFieldFunctionIntent;
 
     /**
      * Instantiates a new {@link Intents} object.
@@ -345,18 +341,19 @@ public class Intents {
                 .getIntentDefinition();
 
 
-        customNumericFieldFunctionIntent = intent("CustomNumericFieldFunction")
-                .trainingSentences(BUNDLE.getStringArray("CustomNumericFieldFunction"))
+        customFieldFunctionIntent = intent("CustomFieldFunction")
+                .trainingSentences(BUNDLE.getStringArray("CustomFieldFunction"))
                 .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(entities.numericFieldEntity)
+                // TODO: Support date-time type operators
                 .parameter(ContextKeys.OPERATOR).fromFragment("OPERATOR").entity(entities.numericFunctionOperatorEntity)
                 .parameter(ContextKeys.VALUE + "1").fromFragment("VALUE1").entity(entities.fieldValueEntity)
                 .parameter(ContextKeys.VALUE + "2").fromFragment("VALUE2").entity(entities.fieldValueEntity)
-                .parameter(ContextKeys.VALUE + "3").fromFragment("VALUE3").entity(entities.fieldValueEntity)
                 .getIntentDefinition();
 
 
-        customRowOfNumericFieldFunctionIntent = intent("CustomRowOfNumericFieldFunction")
-                .trainingSentences(BUNDLE.getStringArray("CustomRowOfNumericFieldFunction"))
+        customRowOfFieldFunctionIntent = intent("CustomRowOfFieldFunction")
+                .trainingSentences(BUNDLE.getStringArray("CustomRowOfFieldFunction"))
+                // TODO: Support date-time type operators
                 .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(entities.numericFieldEntity)
                 .parameter(ContextKeys.OPERATOR).fromFragment("OPERATOR").entity(entities.numericFunctionOperatorEntity)
                 .parameter(ContextKeys.ROW_NAME).fromFragment("ROW_NAME").entity(entities.rowNameEntity)
@@ -374,16 +371,7 @@ public class Intents {
                 .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(entities.fieldEntity)
                 .parameter(ContextKeys.VALUE + "1").fromFragment("VALUE1").entity(entities.fieldValueEntity)
                 .parameter(ContextKeys.VALUE + "2").fromFragment("VALUE2").entity(entities.fieldValueEntity)
-                .parameter(ContextKeys.VALUE + "3").fromFragment("VALUE3").entity(entities.fieldValueEntity)
-                .parameter(ContextKeys.ROW_NAME).fromFragment("ROW_NAME").entity(entities.rowNameEntity)
-                .getIntentDefinition();
-        customFieldOfValueOperatorIntent = intent("CustomFieldOfValueOperator")
-                .trainingSentences(BUNDLE.getStringArray("CustomFieldOfValueOperator"))
-                .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(entities.fieldEntity)
                 .parameter(ContextKeys.OPERATOR).fromFragment("OPERATOR").entity(entities.functionOperatorEntity)
-                .parameter(ContextKeys.VALUE + "1").fromFragment("VALUE1").entity(entities.fieldValueEntity)
-                .parameter(ContextKeys.VALUE + "2").fromFragment("VALUE2").entity(entities.fieldValueEntity)
-                .parameter(ContextKeys.VALUE + "3").fromFragment("VALUE3").entity(entities.fieldValueEntity)
                 .parameter(ContextKeys.ROW_NAME).fromFragment("ROW_NAME").entity(entities.rowNameEntity)
                 .getIntentDefinition();
 
@@ -395,10 +383,11 @@ public class Intents {
                 .parameter(ContextKeys.VALUE + "3").fromFragment("VALUE3").entity(entities.fieldValueEntity)
                 .getIntentDefinition();
 
-        customFieldOfNumericFieldFunctionIntent = intent("CustomFieldOfNumericFieldFunction")
-                .trainingSentences(BUNDLE.getStringArray("CustomFieldOfNumericFieldFunction"))
+        customFieldOfFieldFunctionIntent = intent("CustomFieldOfFieldFunction")
+                .trainingSentences(BUNDLE.getStringArray("CustomFieldOfFieldFunction"))
                 .parameter(ContextKeys.NUMBER).fromFragment("NUMBER").entity(number())
                 .parameter(ContextKeys.FIELD + "1").fromFragment("FIELD1").entity(entities.fieldEntity)
+                // TODO: Support date-time type operators
                 .parameter(ContextKeys.OPERATOR).fromFragment("OPERATOR").entity(entities.numericFunctionOperatorEntity)
                 .parameter(ContextKeys.FIELD + "2").fromFragment("FIELD2").entity(entities.numericFieldEntity)
                 .getIntentDefinition();

@@ -6,14 +6,11 @@ import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Entities;
 import com.xatkit.bot.sql.SqlQueries;
 import com.xatkit.execution.State;
-import lombok.Getter;
-import lombok.val;
+import com.xatkit.execution.StateContext;
 
 import java.text.MessageFormat;
 
-import static com.xatkit.bot.App.sql;
-import static com.xatkit.dsl.DSL.state;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.logging.log4j.util.Strings.isEmpty;
 
 /**
  * The Custom Row Count workflow of a chatbot.
@@ -25,42 +22,57 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
  * @see CustomQuery
  * @see Entities#generateRowNameEntity()
  */
-public class CustomRowCount {
+public class CustomRowCount extends AbstractCustomQuery {
 
-    /**
-     * The entry point for the Custom Row Count workflow.
-     */
-    @Getter
-    private final State processCustomRowCountState;
-
-    /**
-     * Instantiates a new Custom Row Count workflow.
-     *
-     * @param bot         the chatbot that uses this workflow
-     * @param returnState the state where the chatbot ends up arriving once the workflow is finished
-     */
     public CustomRowCount(Bot bot, State returnState) {
-        val processCustomRowCountState = state("ProcessCustomRowCount");
+        super(bot, returnState);
+    }
 
-        processCustomRowCountState
-                .body(context -> {
-                    context.getSession().put(ContextKeys.ERROR, false);
-                    String rowName = (String) context.getSession().get(ContextKeys.ROW_NAME);
-                    if (!isEmpty(rowName)) {
-                        SqlQueries sqlQueries = (SqlQueries) context.getSession().get(ContextKeys.SQL_QUERIES);
-                        String sqlQuery = sqlQueries.rowCount();
-                        ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
-                        int rowCount = Integer.parseInt(resultSet.getRow(0).getColumnValue(0));
-                        bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString("ShowRowCount"),
-                                rowCount, rowName));
-                    } else {
-                        context.getSession().put(ContextKeys.ERROR, true);
-                    }
-                })
-                .next()
-                .when(context -> (boolean) context.getSession().get(ContextKeys.ERROR)).moveTo(bot.getResult.getGenerateResultSetFromQueryState())
-                .when(context -> !(boolean) context.getSession().get(ContextKeys.ERROR)).moveTo(returnState);
+    @Override
+    protected boolean checkParamsOk(StateContext context) {
+        String rowName = (String) context.getSession().get(ContextKeys.ROW_NAME);
+        return !isEmpty(rowName);
+    }
 
-        this.processCustomRowCountState = processCustomRowCountState.getState();
+    @Override
+    protected boolean continueWhenParamsNotOk(StateContext context) {
+        // When params are not ok, we stop the execution
+        return false;
+    }
+
+    @Override
+    protected State getNextStateWhenParamsNotOk() {
+        return bot.getResult.getGenerateResultSetFromQueryState();
+    }
+
+    @Override
+    protected String generateSqlStatement(StateContext context) {
+        SqlQueries sqlQueries = (SqlQueries) context.getSession().get(ContextKeys.SQL_QUERIES);
+        return sqlQueries.rowCount();
+    }
+
+    @Override
+    protected boolean checkResultSetOk(StateContext context) {
+        ResultSet resultSet = (ResultSet) context.getSession().get(ContextKeys.RESULTSET);
+        return resultSet.getNumRows() > 0;
+    }
+
+    @Override
+    protected boolean continueWhenResultSetNotOk(StateContext context) {
+        // When result set is not ok, we stop the execution
+        return false;
+    }
+
+    @Override
+    protected String generateMessage(StateContext context) {
+        String rowName = (String) context.getSession().get(ContextKeys.ROW_NAME);
+        ResultSet resultSet = (ResultSet) context.getSession().get(ContextKeys.RESULTSET);
+        int rowCount = Integer.parseInt(resultSet.getRow(0).getColumnValue(0));
+        return MessageFormat.format(bot.messages.getString("ShowRowCount"), rowCount, rowName);
+    }
+
+    @Override
+    protected State getNextStateWhenResultSetNotOk() {
+        return bot.getResult.getGenerateResultSetFromQueryState();
     }
 }

@@ -1,6 +1,8 @@
 package com.xatkit.bot.sql;
 
 import com.google.common.collect.Streams;
+import com.xatkit.bot.customQuery.CustomFieldFunction;
+import com.xatkit.bot.customQuery.CustomRowOfValue;
 import lombok.Getter;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 
@@ -238,9 +240,6 @@ public class SqlQueries {
 
     /**
      * Generates a SQL query for the {@link com.xatkit.bot.customQuery.CustomFrequentValueInField} workflow.
-     * <p>
-     * This is the first step of the workflow. This SQL query only gets the most frequent value (it does not take
-     * into account if there are more values with the maximum frequency).
      *
      * @param field        the field
      * @param mostFrequent indicates weather to get the highest (if true) or the lowest (if false) frequency
@@ -248,39 +247,50 @@ public class SqlQueries {
      */
     public String frequentValueInField(String field, boolean mostFrequent) {
         String fieldClean = replaceSpecialChars(field);
-        String order = (mostFrequent ? "DESC" : "ASC");
-        String sqlQuery = "SELECT " + fieldClean + " AS `" + field + "`, COUNT(" + fieldClean + ") AS freq FROM " + table;
+        String operator = (mostFrequent ? "max" : "min");
+        String sqlQuery =
+            "SELECT " + fieldClean + " AS `" + field + "`, COUNT(" + fieldClean + ") AS freq FROM " + table;
         if (!filters.isEmpty()) {
             sqlQuery += " WHERE " + String.join(" AND ", getFiltersAsSqlConditions());
         }
-        sqlQuery += " GROUP BY `" + field + "` ORDER BY freq " + order + " LIMIT 1";
+        sqlQuery += " GROUP BY `" + field + "` HAVING freq = ("
+            + "SELECT " + operator + "(freq2) FROM ("
+            + "SELECT " + fieldClean + " AS `" + field + "`, COUNT(" + fieldClean + ") AS freq2 FROM " + table
+            + " GROUP BY `" + field + "`))";
         return sqlQuery;
     }
 
     /**
-     * Generates a SQL query for the {@link com.xatkit.bot.customQuery.CustomFrequentValueInField} workflow.
+     * Generates a SQL query for the {@link com.xatkit.bot.customQuery.CustomValue1vsValue2} workflow.
      * <p>
-     * This is the second and final step of the workflow. It gets all the values of a field with a given frequency
-     * (which is expected to be the maximum frequency of any value in the field)
      *
-     * @param field     the field
-     * @param frequency the target frequency
+     * @param field1 the first field
+     * @param value1 the value of the first field
+     * @param field2 the second field
+     * @param value2 the value of the second field
      * @return the sql query
      */
-    public String frequentValueInFieldMatch(String field, int frequency) {
-        String fieldClean = replaceSpecialChars(field);
-        String sqlQuery = "SELECT " + fieldClean  + " AS `" + field + "`, COUNT(" + fieldClean + ") AS freq FROM " + table;
+    public String value1VSValue2(String field1, String value1, String field2, String value2) {
+        String field1Clean = replaceSpecialChars(field1);
+        String field2Clean = replaceSpecialChars(field2);
+
+        String sqlQuery1 = "SELECT 1 AS id, " + field1Clean + " AS `" + field1 + "`, COUNT(" + field1Clean + ") AS freq"
+                + " FROM " + table + " WHERE " + field1Clean + " = '" + escapeQuotes(value1) + "'";
+
+        String sqlQuery2 = "SELECT 1 AS id, " + field2Clean + " AS `" + field2 + "`, COUNT(" + field2Clean + ") AS freq"
+                + " FROM " + table + " WHERE " + field2Clean + " = '" + escapeQuotes(value2) + "'";
         if (!filters.isEmpty()) {
-            sqlQuery += " WHERE " + String.join(" AND ", getFiltersAsSqlConditions());
+            sqlQuery1 += " AND " + String.join(" AND ", getFiltersAsSqlConditions());
+            sqlQuery2 += " AND " + String.join(" AND ", getFiltersAsSqlConditions());
         }
-        sqlQuery += " GROUP BY `" + field + "` HAVING freq = " + frequency;
-        return sqlQuery;
+        sqlQuery1 += " GROUP BY `" + field1 + "`";
+        sqlQuery2 += " GROUP BY `" + field2 + "`";
+
+        return  "SELECT * FROM (" + sqlQuery1 + ") a FULL OUTER JOIN (" + sqlQuery2 + ") b ON a.id = b.id";
     }
 
     /**
      * Generates a SQL query for the {@link com.xatkit.bot.customQuery.CustomValueFrequency} workflow.
-     * <p>
-     * It is also used in {@link com.xatkit.bot.customQuery.CustomValue1vsValue2}
      *
      * @param field the field of the 'where' condition
      * @param value the value of the 'where' condition
@@ -300,7 +310,7 @@ public class SqlQueries {
     }
 
     /**
-     * Generates a SQL query for the {@link com.xatkit.bot.customQuery.CustomNumericFieldFunction} workflow.
+     * Generates a SQL query for the {@link CustomFieldFunction} workflow.
      *
      * @param field         the field
      * @param operator      the operator
@@ -327,7 +337,7 @@ public class SqlQueries {
     }
 
     /**
-     * Generates a SQL query for the {@link com.xatkit.bot.customQuery.CustomRowOfNumericFieldFunction} workflow.
+     * Generates a SQL query for the {@link com.xatkit.bot.customQuery.CustomRowOfFieldFunction} workflow.
      *
      * @param keyFields the fields to be selected. If empty, select {@link #allFields}
      * @param field     the field
@@ -434,22 +444,30 @@ public class SqlQueries {
     }
 
     /**
-     * Generates a SQL query for the {@link com.xatkit.bot.customQuery.CustomRowOfValues} workflow (with 1 condition).
+     * Generates a SQL query for the {@link CustomRowOfValue} workflow.
      *
-     * @param keyFields the fields to be selected. If empty, select {@link #allFields}
-     * @param field     the field of the 'where' condition
-     * @param value     the value of the 'where' condition
+     * @param keyFields     the fields to be selected. If empty, select {@link #allFields}
+     * @param valueFieldMap the field-value conditions
      * @return the sql query
      */
-    public String rowOfValues1(List<String> keyFields, String field, String value) {
+    public String rowOfValues(List<String> keyFields, Map<String, String> valueFieldMap) {
         List<String> fields = (keyFields.isEmpty() ? new ArrayList<>(allFields) : new ArrayList<>(keyFields));
-        if (!fields.contains(field)) {
-            fields.add(field);
+        for (String field : valueFieldMap.values()) {
+            if (!fields.contains(field)) {
+                fields.add(field);
+            }
         }
         List<String> fieldsClean = fields.stream().map(SqlQueries::replaceSpecialChars).collect(Collectors.toList());
         String fieldsString = String.join(", ", Streams.zip(fieldsClean.stream(), fields.stream(), (fClean, f) -> fClean + " AS `" + f + "`").collect(Collectors.toList()));
-        String fieldClean = replaceSpecialChars(field);
-        String sqlQuery = "SELECT DISTINCT " + fieldsString + " FROM " + table + " WHERE " + fieldClean + " = '" + escapeQuotes(value) + "'";
+
+        Map<String, String> fieldValueMapClean = new HashMap<>();
+        for (Map.Entry<String, String> entry : valueFieldMap.entrySet()) {
+            fieldValueMapClean.put(escapeQuotes(entry.getKey()), replaceSpecialChars(entry.getValue()));
+        }
+        String fieldsValuesString = String.join(" AND ", Streams.zip(fieldValueMapClean.keySet().stream(), fieldValueMapClean.values().stream(),
+                (v, f) -> f + " = '" + v + "'").collect(Collectors.toList()));
+
+        String sqlQuery = "SELECT DISTINCT " + fieldsString + " FROM " + table + " WHERE " + fieldsValuesString;
         if (!filters.isEmpty()) {
             sqlQuery += " AND " + String.join(" AND ", getFiltersAsSqlConditions());
         }
@@ -457,37 +475,7 @@ public class SqlQueries {
     }
 
     /**
-     * Generates a SQL query for the {@link com.xatkit.bot.customQuery.CustomRowOfValues} workflow (with 2 conditions).
-     *
-     * @param keyFields the fields to be selected. If empty, select {@link #allFields}
-     * @param field1    the first field of the 'where' condition
-     * @param value1    the first value of the 'where' condition
-     * @param field2    the second field of the 'where' condition
-     * @param value2    the second value of the 'where' condition
-     * @return the sql query
-     */
-    public String rowOfValues2(List<String> keyFields, String field1, String value1, String field2, String value2) {
-        List<String> fields = (keyFields.isEmpty() ? new ArrayList<>(allFields) : new ArrayList<>(keyFields));
-        if (!fields.contains(field1)) {
-            fields.add(field1);
-        }
-        if (!fields.contains(field2)) {
-            fields.add(field2);
-        }
-        List<String> fieldsClean = fields.stream().map(SqlQueries::replaceSpecialChars).collect(Collectors.toList());
-        String fieldsString = String.join(", ", Streams.zip(fieldsClean.stream(), fields.stream(), (fClean, f) -> fClean + " AS `" + f + "`").collect(Collectors.toList()));
-        String field1Clean = replaceSpecialChars(field1);
-        String field2Clean = replaceSpecialChars(field2);
-        String sqlQuery = "SELECT DISTINCT " + fieldsString + " FROM " + table + " WHERE " + field1Clean + " = '" + escapeQuotes(value1)
-            + "' AND " + field2Clean + " = '" + escapeQuotes(value2) + "'";
-        if (!filters.isEmpty()) {
-            sqlQuery += " AND " + String.join(" AND ", getFiltersAsSqlConditions());
-        }
-        return sqlQuery;
-    }
-
-    /**
-     * Generates a SQL query for the {@link com.xatkit.bot.customQuery.CustomFieldOfNumericFieldFunction} workflow.
+     * Generates a SQL query for the {@link com.xatkit.bot.customQuery.CustomFieldOfFieldFunction} workflow.
      *
      * @param keyFields    the key fields to be selected
      * @param field1       the target field to be selected

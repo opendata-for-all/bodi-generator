@@ -8,7 +8,7 @@ import com.xatkit.bot.library.Entities;
 import com.xatkit.bot.library.Utils;
 import com.xatkit.bot.sql.SqlQueries;
 import com.xatkit.execution.State;
-import lombok.Getter;
+import com.xatkit.execution.StateContext;
 import lombok.val;
 
 import java.text.MessageFormat;
@@ -36,161 +36,167 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
  *
  * @see CustomQuery
  */
-public class CustomFieldOfValue {
+public class CustomFieldOfValue extends AbstractCustomQuery {
 
-    /**
-     * The entry point for the Custom Field Of Value workflow.
-     */
-    @Getter
-    private final State processCustomFieldOfValueState;
-
-    /**
-     * Instantiates a new Custom Value Of Field workflow.
-     *
-     * @param bot           the chatbot
-     * @param returnState   the state where the chatbot ends up arriving once the workflow is finished
-     */
     public CustomFieldOfValue(Bot bot, State returnState) {
-        val processCustomFieldOfValueState = state("ProcessCustomFieldOfValue");
-        val processCustomFieldOfValueShowAllState = state("ProcessCustomFieldOfValueShowAll");
-        val processCustomFieldOfValueOperatorState = state("ProcessCustomFieldOfValueOperator");
+        super(bot, returnState);
+    }
 
-        processCustomFieldOfValueState
+    @Override
+    protected boolean checkParamsOk(StateContext context) {
+        String field = (String) context.getSession().get(ContextKeys.FIELD);
+        String value1 = (String) context.getSession().get(ContextKeys.VALUE + "1");
+        String value2 = (String) context.getSession().get(ContextKeys.VALUE + "2");
+        String operator = (String) context.getSession().get(ContextKeys.OPERATOR);
+        if (!isEmpty(operator) && !operator.equals("all") && !operator.equals("distinct")
+                && !(Utils.getEntityValues(bot.entities.numericFunctionOperatorEntity).contains(operator) && Utils.getEntityValues(bot.entities.numericFieldEntity).contains(field))
+                && !(Utils.getEntityValues(bot.entities.dateFunctionOperatorEntity).contains(operator) && Utils.getEntityValues(bot.entities.dateFieldEntity).contains(field))) {
+            // Check that operator type matches field type
+            return false;
+        }
+        return !isEmpty(field) && (!isEmpty(value1) || !isEmpty(value2));
+    }
+
+    @Override
+    protected boolean continueWhenParamsNotOk(StateContext context) {
+        // when params are not ok, we stop the execution
+        return false;
+    }
+
+    @Override
+    protected State getNextStateWhenParamsNotOk() {
+        return bot.getResult.getGenerateResultSetFromQueryState();
+    }
+
+    protected String generateSqlStatement(StateContext context) {
+        String field = (String) context.getSession().get(ContextKeys.FIELD);
+        String value1 = (String) context.getSession().get(ContextKeys.VALUE + "1");
+        String value2 = (String) context.getSession().get(ContextKeys.VALUE + "2");
+        String operator = (String) context.getSession().get(ContextKeys.OPERATOR);
+        String value1Field = Entities.fieldValueMap.get(value1);
+        String value2Field = Entities.fieldValueMap.get(value2);
+        Map<String, String> valueFieldMap = new HashMap<>();
+        if (!isEmpty(value1) && !isEmpty(value1Field)) {
+            valueFieldMap.put(value1, value1Field);
+        }
+        if (!isEmpty(value2) && !isEmpty(value2Field)) {
+            valueFieldMap.put(value2, value2Field);
+        }
+        context.getSession().put(ContextKeys.VALUE_FIELD_MAP, valueFieldMap);
+        List<String> keyFields = new ArrayList<>(bot.entities.keyFields);
+        SqlQueries sqlQueries = (SqlQueries) context.getSession().get(ContextKeys.SQL_QUERIES);
+        if (isEmpty(operator) || operator.equals("all")) {
+            return sqlQueries.fieldOfValue(keyFields, field, valueFieldMap, false);
+        } else if (operator.equals("distinct")) {
+            return sqlQueries.fieldOfValue(keyFields, field, valueFieldMap, true);
+        } else {
+            return sqlQueries.fieldOfValueOperator(keyFields, field, valueFieldMap, operator);
+        }
+    }
+
+    @Override
+    protected boolean checkResultSetOk(StateContext context) {
+        ResultSet resultSet = (ResultSet) context.getSession().get(ContextKeys.RESULTSET);
+        String operator = (String) context.getSession().get(ContextKeys.OPERATOR);
+        if (isEmpty(operator) && resultSet.getNumRows() > 1) {
+            // We should ask the user to apply an operator
+            return false;
+        }
+        if (!isEmpty(operator) && !operator.equals("all") && !operator.equals("distinct") && resultSet.getNumRows() > 1) {
+            // There should only be 1 row, but there are more
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    protected boolean continueWhenResultSetNotOk(StateContext context) {
+        ResultSet resultSet = (ResultSet) context.getSession().get(ContextKeys.RESULTSET);
+        String operator = (String) context.getSession().get(ContextKeys.OPERATOR);
+        if (isEmpty(operator) && resultSet.getNumRows() > 1) {
+            // We ask the operator to the user
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    protected String generateMessage(StateContext context) {
+        String operator = (String) context.getSession().get(ContextKeys.OPERATOR);
+        if (operator.equals("all") || operator.equals("distinct")) {
+            return null;
+        }
+        String field = (String) context.getSession().get(ContextKeys.FIELD);
+        String fieldRN = bot.entities.readableNames.get(field);
+        ResultSet resultSet = (ResultSet) context.getSession().get(ContextKeys.RESULTSET);
+        Map<String, String> valueFieldMap = (Map<String, String>) context.getSession().get(ContextKeys.VALUE_FIELD_MAP);
+        String conditions = String.join(", ", Streams.zip(valueFieldMap.keySet().stream(),
+                valueFieldMap.values().stream(), (v, f) -> bot.entities.readableNames.get(f) + " " + "= " + v).collect(Collectors.toList()));
+        if (resultSet.getNumRows() == 0 || (resultSet.getNumRows() == 1 && isEmpty(resultSet.getRow(0).getColumnValue(0)))) {
+            return MessageFormat.format(bot.messages.getString("FieldOfValue0"), fieldRN, conditions);
+        } else {
+            String result = resultSet.getRow(0).getColumnValue(resultSet.getHeader().indexOf(fieldRN));
+            if (!isEmpty(operator)) {
+                return MessageFormat.format(bot.messages.getString("FieldOfValueWithOperation"), operator, fieldRN, conditions, result);
+            } else if (resultSet.getNumRows() == 1) {
+                return MessageFormat.format(bot.messages.getString("FieldOfValue1"), fieldRN, conditions, result);
+            }
+        }
+        // When resultSet.getNumRows() > 1, there is no message
+        return null;
+    }
+
+    @Override
+    protected State getNextStateWhenResultSetNotOk() {
+        val askOperator = state(this.getClass().getSimpleName() + "AskOperator");
+        val saveOperator = state(this.getClass().getSimpleName() + "SaveOperator");
+        askOperator
                 .body(context -> {
-                    context.getSession().put(ContextKeys.ERROR, false);
-                    context.getSession().put(ContextKeys.STOP, false);
-                    context.getSession().put(ContextKeys.CONTINUE, false);
                     String field = (String) context.getSession().get(ContextKeys.FIELD);
-                    String operator = (String) context.getSession().get(ContextKeys.OPERATOR);
-                    String value1 = (String) context.getSession().get(ContextKeys.VALUE + "1");
-                    String value2 = (String) context.getSession().get(ContextKeys.VALUE + "2");
-                    String value3 = (String) context.getSession().get(ContextKeys.VALUE + "3");
-                    String value1Field = Entities.fieldValueMap.get(value1);
-                    String value2Field = Entities.fieldValueMap.get(value2);
-                    String value3Field = Entities.fieldValueMap.get(value3);
-                    if (context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customFieldOfValueIntent.getName())) {
-                        // operator may have a value from another previous intent
-                        operator = null;
-                        context.getSession().put(ContextKeys.OPERATOR, operator);
-                    }
-                    Map<String, String> valueFieldMap = new HashMap<>();
-                    if (!isEmpty(field)) {
-                        if (!isEmpty(value1) && !isEmpty(value1Field)) {
-                            valueFieldMap.put(value1, value1Field);
-                        }
-                        if (!isEmpty(value2) && !isEmpty(value2Field)) {
-                            valueFieldMap.put(value2, value2Field);
-                        }
-                        if (!isEmpty(value3) && !isEmpty(value3Field)) {
-                            valueFieldMap.put(value3, value3Field);
-                        }
-                        if (valueFieldMap.isEmpty()) {
-                            context.getSession().put(ContextKeys.ERROR, true);
-                        }
-                        context.getSession().put(ContextKeys.VALUE_FIELD_MAP, valueFieldMap);
-                    } else {
-                        context.getSession().put(ContextKeys.ERROR, true);
-                    }
-                    System.out.println(valueFieldMap);
-                    if (!(boolean) context.getSession().get(ContextKeys.ERROR)) {
-                        if (isEmpty(operator)) {
-                            List<String> keyFields = new ArrayList<>(bot.entities.keyFields);
-                            String fieldRN = bot.entities.readableNames.get(field);
-                            SqlQueries sqlQueries = (SqlQueries) context.getSession().get(ContextKeys.SQL_QUERIES);
-                            String sqlQuery = sqlQueries.fieldOfValue(keyFields, field, valueFieldMap, false);
-                            ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
-                            String conditions = String.join(", ", Streams.zip(valueFieldMap.keySet().stream(),
-                                    valueFieldMap.values().stream(), (v, f) -> bot.entities.readableNames.get(f) + " " + "= " + v).collect(Collectors.toList()));
-                            if (resultSet.getNumRows() == 0
-                                    || (resultSet.getNumRows() == 1 && isEmpty(resultSet.getRow(0).getColumnValue(0)))) {
-                                bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString(
-                                        "FieldOfValue0"), fieldRN, conditions));
-                                context.getSession().put(ContextKeys.STOP, true);
-                            } else if (resultSet.getNumRows() == 1) {
-                                String result = resultSet.getRow(0).getColumnValue(resultSet.getNumColumns() - 1);
-                                bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString(
-                                        "FieldOfValue1"), fieldRN, conditions, result));
-                                context.getSession().put(ContextKeys.STOP, true);
-                            } else if (resultSet.getNumRows() > 1) {
-                                List<String> buttons = new ArrayList<>();
-                                buttons.add(Utils.getFirstTrainingSentences(bot.intents.showAllIntent).get(0));
-                                buttons.add(Utils.getFirstTrainingSentences(bot.intents.showAllDistinctIntent).get(0));
-                                if (Utils.getEntityValues(bot.entities.numericFieldEntity).contains(field)) {
-                                    buttons.addAll(Utils.getEntityValues(bot.entities.numericFunctionOperatorEntity));
-                                } else if (Utils.getEntityValues(bot.entities.dateFieldEntity).contains(field)) {
-                                    buttons.addAll(Utils.getEntityValues(bot.entities.dateFunctionOperatorEntity));
-                                } else if (Utils.getEntityValues(bot.entities.textualFieldEntity).contains(field)) {
-                                    // textual operators here
-                                }
-                                sqlQuery = sqlQueries.fieldOfValue(keyFields, field, valueFieldMap, true);
-                                ResultSet resultSetDistinct = sql.runSqlQuery(bot, sqlQuery);
-                                buttons.add(Utils.getFirstTrainingSentences(bot.coreLibraryI18n.Quit).get(0));
-                                bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString(
-                                                "AskFieldOfValueOperation"), resultSet.getNumRows(), fieldRN,
-                                        resultSetDistinct.getNumRows(), conditions), buttons);
-                            }
-                        } else if (!isEmpty(operator)
-                                && !(Utils.getEntityValues(bot.entities.numericFunctionOperatorEntity).contains(operator) && Utils.getEntityValues(bot.entities.numericFieldEntity).contains(field))
-                                && !(Utils.getEntityValues(bot.entities.dateFunctionOperatorEntity).contains(operator) && Utils.getEntityValues(bot.entities.dateFieldEntity).contains(field))) {
-                            // Check that operator type matches field type
-                            context.getSession().put(ContextKeys.ERROR, true);
-                        } else if (!isEmpty(operator)) {
-                            context.getSession().put(ContextKeys.CONTINUE, true);
-                        }
-                    }
-                })
-                .next()
-                .when(context -> (boolean) context.getSession().get(ContextKeys.ERROR)).moveTo(bot.getResult.getGenerateResultSetFromQueryState())
-                .when(context -> (boolean) context.getSession().get(ContextKeys.STOP)).moveTo(returnState)
-                .when(context -> (boolean) context.getSession().get(ContextKeys.CONTINUE)).moveTo(processCustomFieldOfValueOperatorState)
-                .when(intentIs(bot.intents.showAllIntent)).moveTo(processCustomFieldOfValueShowAllState)
-                .when(intentIs(bot.intents.showAllDistinctIntent)).moveTo(processCustomFieldOfValueShowAllState)
-                .when(intentIs(bot.intents.numericFunctionOperatorIntent)).moveTo(processCustomFieldOfValueOperatorState)
-                .when(intentIs(bot.intents.dateFunctionOperatorIntent)).moveTo(processCustomFieldOfValueOperatorState)
-                .when(intentIs(bot.coreLibraryI18n.Quit)).moveTo(returnState);
-
-        this.processCustomFieldOfValueState = processCustomFieldOfValueState.getState();
-
-        processCustomFieldOfValueShowAllState
-                .body(context -> {
-                    boolean isDistinct = (context.getIntent().getDefinition().getName().equals(bot.intents.showAllDistinctIntent.getName()));
-                    String field = (String) context.getSession().get(ContextKeys.FIELD);
-                    Map<String, String> fieldValueMap = (Map<String, String>) context.getSession().get(ContextKeys.VALUE_FIELD_MAP);
+                    String fieldRN = bot.entities.readableNames.get(field);
                     SqlQueries sqlQueries = (SqlQueries) context.getSession().get(ContextKeys.SQL_QUERIES);
-                    List<String> keyFields = new ArrayList<>(bot.entities.keyFields);
-                    String sqlQuery = sqlQueries.fieldOfValue(keyFields, field, fieldValueMap, isDistinct);
-                    ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
-                    context.getSession().put(ContextKeys.RESULTSET, resultSet);
-                })
-                .next()
-                .moveTo(bot.getResult.getShowDataState());
-
-        processCustomFieldOfValueOperatorState
-                .body(context -> {
-                    String field = (String) context.getSession().get(ContextKeys.FIELD);
-                    String operator = (String) context.getSession().get(ContextKeys.OPERATOR);
+                    ResultSet resultSet = (ResultSet) context.getSession().get(ContextKeys.RESULTSET);
                     Map<String, String> valueFieldMap = (Map<String, String>) context.getSession().get(ContextKeys.VALUE_FIELD_MAP);
+                    List<String> keyFields = new ArrayList<>(bot.entities.keyFields);
                     String conditions = String.join(", ", Streams.zip(valueFieldMap.keySet().stream(),
                             valueFieldMap.values().stream(), (v, f) -> bot.entities.readableNames.get(f) + " " + "= " + v).collect(Collectors.toList()));
-                    if (context.getIntent().getDefinition().getName().equals(bot.intents.numericFunctionOperatorIntent.getName())
-                            || context.getIntent().getDefinition().getName().equals(bot.intents.dateFunctionOperatorIntent.getName())) {
-                        operator = (String) context.getIntent().getValue(ContextKeys.VALUE);
-                        context.getSession().put(ContextKeys.OPERATOR, operator);
+
+                    List<String> buttons = new ArrayList<>();
+                    buttons.add(Utils.getFirstTrainingSentences(bot.intents.showAllIntent).get(0));
+                    buttons.add(Utils.getFirstTrainingSentences(bot.intents.showAllDistinctIntent).get(0));
+                    if (Utils.getEntityValues(bot.entities.numericFieldEntity).contains(field)) {
+                        buttons.addAll(Utils.getEntityValues(bot.entities.numericFunctionOperatorEntity));
+                    } else if (Utils.getEntityValues(bot.entities.dateFieldEntity).contains(field)) {
+                        buttons.addAll(Utils.getEntityValues(bot.entities.dateFunctionOperatorEntity));
+                    } else if (Utils.getEntityValues(bot.entities.textualFieldEntity).contains(field)) {
+                        // TODO: textual operators here
                     }
-                    SqlQueries sqlQueries = (SqlQueries) context.getSession().get(ContextKeys.SQL_QUERIES);
-                    List<String> keyFields = new ArrayList<>(bot.entities.keyFields);
-                    String sqlQuery = sqlQueries.fieldOfValueOperator(keyFields, field, valueFieldMap, operator);
-                    ResultSet resultSet = sql.runSqlQuery(bot, sqlQuery);
-                    context.getSession().put(ContextKeys.RESULTSET, resultSet);
-                    String result = resultSet.getRow(0).getColumnValue(resultSet.getNumColumns() - 1);
-                    String fieldRN = bot.entities.readableNames.get(field);
+                    String sqlQuery = sqlQueries.fieldOfValue(keyFields, field, valueFieldMap, true);
+                    ResultSet resultSetDistinct = sql.runSqlQuery(bot, sqlQuery);
+                    buttons.add(Utils.getFirstTrainingSentences(bot.coreLibraryI18n.Quit).get(0));
                     bot.reactPlatform.reply(context, MessageFormat.format(bot.messages.getString(
-                                    "FieldOfValueWithOperation"), operator, fieldRN, conditions, result));
+                                    "AskFieldOfValueOperation"), resultSet.getNumRows(), fieldRN,
+                            resultSetDistinct.getNumRows(), conditions), buttons);
                 })
                 .next()
-                .when(context -> context.getSession().get(ContextKeys.OPERATOR).equals("min")
-                        || context.getSession().get(ContextKeys.OPERATOR).equals("max")).moveTo(bot.getResult.getShowDataState())
-                .when(context -> !(context.getSession().get(ContextKeys.OPERATOR).equals("min")
-                        || context.getSession().get(ContextKeys.OPERATOR).equals("max"))).moveTo(returnState);
+                .when(intentIs(bot.intents.showAllIntent)).moveTo(saveOperator)
+                .when(intentIs(bot.intents.showAllDistinctIntent)).moveTo(saveOperator)
+                .when(intentIs(bot.intents.numericFunctionOperatorIntent)).moveTo(saveOperator)
+                .when(intentIs(bot.intents.dateFunctionOperatorIntent)).moveTo(saveOperator)
+                .when(intentIs(bot.coreLibraryI18n.Quit)).moveTo(returnState);
+        saveOperator
+                .body(context -> {
+                    String operator = context.getIntent().getMatchedInput();
+                    if (operator.equals(Utils.getFirstTrainingSentences(bot.intents.showAllIntent).get(0))) {
+                        operator = "all";
+                    } else if (operator.equals(Utils.getFirstTrainingSentences(bot.intents.showAllDistinctIntent).get(0))) {
+                        operator = "distinct";
+                    }
+                    context.getSession().put(ContextKeys.OPERATOR, operator);
+                })
+                .next()
+                .moveTo(mainState);
+
+        return askOperator.getState();
     }
 }
