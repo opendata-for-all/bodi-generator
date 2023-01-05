@@ -21,12 +21,8 @@ import static com.xatkit.dsl.DSL.state;
  *     <li>{@link CustomFrequentValueInField}</li>
  *     <li>{@link CustomValueFrequency}</li>
  *     <li>{@link CustomValue1vsValue2}</li>
- *     <li>{@link CustomFieldFunction}</li>
- *     <li>{@link CustomRowOfFieldFunction}</li>
  *     <li>{@link CustomRowCount}</li>
- *     <li>{@link CustomFieldOfValue}</li>
- *     <li>{@link CustomRowOfValue}</li>
- *     <li>{@link CustomFieldOfFieldFunction}</li>
+ *     <li>{@link CustomSelectFieldsWithConditions}</li>
  * </ul>
  * When no pre-defined query is matched, it is executed {@link GetResult#getGenerateResultSetFromQueryState()}
  */
@@ -64,34 +60,14 @@ public class CustomQuery {
     public CustomValue1vsValue2 customValue1vsValue2;
 
     /**
-     * The Custom Field Function workflow.
-     */
-    public CustomFieldFunction customFieldFunction;
-
-    /**
-     * The Custom Row Of Field Function workflow.
-     */
-    public CustomRowOfFieldFunction customRowOfFieldFunction;
-
-    /**
      * The Custom Row Count workflow.
      */
     public CustomRowCount customRowCount;
 
     /**
-     * The Custom Field Of Value workflow.
+     * The Custom Select Fields With Conditions workflow.
      */
-    public CustomFieldOfValue customFieldOfValue;
-
-    /**
-     * The Custom Row Of Value workflow.
-     */
-    public CustomRowOfValue customRowOfValue;
-
-    /**
-     * The Custom Field Of Field Function workflow.
-     */
-    public CustomFieldOfFieldFunction customFieldOfFieldFunction;
+    public CustomSelectFieldsWithConditions customSelectFieldsWithConditions;
 
     /**
      * The Specify Entities workflow.
@@ -115,12 +91,8 @@ public class CustomQuery {
         customFrequentValueInField = new CustomFrequentValueInField(bot, returnState);
         customValueFrequency = new CustomValueFrequency(bot, returnState);
         customValue1vsValue2 = new CustomValue1vsValue2(bot, returnState);
-        customFieldFunction = new CustomFieldFunction(bot, returnState);
-        customRowOfFieldFunction = new CustomRowOfFieldFunction(bot, returnState);
         customRowCount = new CustomRowCount(bot, returnState);
-        customFieldOfValue = new CustomFieldOfValue(bot, returnState);
-        customRowOfValue = new CustomRowOfValue(bot, returnState);
-        customFieldOfFieldFunction = new CustomFieldOfFieldFunction(bot, returnState);
+        customSelectFieldsWithConditions = new CustomSelectFieldsWithConditions(bot, returnState);
 
         awaitingCustomQueryState
                 .body(context -> {
@@ -133,12 +105,8 @@ public class CustomQuery {
                 .when(intentIs(bot.intents.customValueFrequencyIntent)).moveTo(specifyEntities.getCheckEntitiesState())
                 .when(intentIs(bot.intents.customValue1MoreThanValue2Intent)).moveTo(specifyEntities.getCheckEntitiesState())
                 .when(intentIs(bot.intents.customValue1LessThanValue2Intent)).moveTo(specifyEntities.getCheckEntitiesState())
-                .when(intentIs(bot.intents.customFieldFunctionIntent)).moveTo(specifyEntities.getCheckEntitiesState())
-                .when(intentIs(bot.intents.customRowOfFieldFunctionIntent)).moveTo(specifyEntities.getCheckEntitiesState())
                 .when(intentIs(bot.intents.customRowCountIntent)).moveTo(specifyEntities.getCheckEntitiesState())
-                .when(intentIs(bot.intents.customFieldOfValueIntent)).moveTo(specifyEntities.getCheckEntitiesState())
-                .when(intentIs(bot.intents.customRowOfValuesIntent)).moveTo(specifyEntities.getCheckEntitiesState())
-                .when(intentIs(bot.intents.customFieldOfFieldFunctionIntent)).moveTo(specifyEntities.getCheckEntitiesState())
+                .when(intentIs(bot.intents.customSelectFieldsWithConditionsIntent)).moveTo(specifyEntities.getCheckEntitiesState())
 
                 .when(intentIs(bot.intents.customNumericFilterIntent)).moveTo(specifyEntities.getCheckEntitiesState())
                 .when(intentIs(bot.intents.customDateFilterIntent)).moveTo(specifyEntities.getCheckEntitiesState())
@@ -157,12 +125,8 @@ public class CustomQuery {
                 .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customValueFrequencyIntent.getName())).moveTo(customValueFrequency.getMainState())
                 .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customValue1MoreThanValue2Intent.getName())).moveTo(customValue1vsValue2.getMainState())
                 .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customValue1LessThanValue2Intent.getName())).moveTo(customValue1vsValue2.getMainState())
-                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customFieldFunctionIntent.getName())).moveTo(customFieldFunction.getMainState())
-                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customRowOfFieldFunctionIntent.getName())).moveTo(customRowOfFieldFunction.getMainState())
                 .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customRowCountIntent.getName())).moveTo(customRowCount.getMainState())
-                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customFieldOfValueIntent.getName())).moveTo(customFieldOfValue.getMainState())
-                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customRowOfValuesIntent.getName())).moveTo(customRowOfValue.getMainState())
-                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customFieldOfFieldFunctionIntent.getName())).moveTo(customFieldOfFieldFunction.getMainState())
+                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customSelectFieldsWithConditionsIntent.getName())).moveTo(customSelectFieldsWithConditions.getMainState())
 
                 .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customNumericFilterIntent.getName())).moveTo(customFilter.getSaveCustomFilterState())
                 .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customDateFilterIntent.getName())).moveTo(customFilter.getSaveCustomFilterState())

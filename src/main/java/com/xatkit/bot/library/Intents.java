@@ -162,37 +162,14 @@ public class Intents {
 
 
     /**
-     * The intent customFieldFunctionIntent.
-     */
-    public final IntentDefinition customFieldFunctionIntent;
-
-
-    /**
-     * The intent customRowOfFieldFunctionIntent.
-     */
-    public final IntentDefinition customRowOfFieldFunctionIntent;
-
-
-    /**
      * The intent customRowCountIntent.
      */
     public final IntentDefinition customRowCountIntent;
 
-
     /**
-     * The intent customFieldOfValueIntent.
+     * The intent customSelectFieldsWithConditionsIntent.
      */
-    public final IntentDefinition customFieldOfValueIntent;
-
-    /**
-     * The intent customRowOfValuesIntent.
-     */
-    public final IntentDefinition customRowOfValuesIntent;
-
-    /**
-     * The intent customFieldOfFieldFunctionIntent.
-     */
-    public final IntentDefinition customFieldOfFieldFunctionIntent;
+    public final IntentDefinition customSelectFieldsWithConditionsIntent;
 
     /**
      * Instantiates a new {@link Intents} object.
@@ -341,55 +318,21 @@ public class Intents {
                 .getIntentDefinition();
 
 
-        customFieldFunctionIntent = intent("CustomFieldFunction")
-                .trainingSentences(BUNDLE.getStringArray("CustomFieldFunction"))
-                .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(entities.numericFieldEntity)
-                // TODO: Support date-time type operators
-                .parameter(ContextKeys.OPERATOR).fromFragment("OPERATOR").entity(entities.numericFunctionOperatorEntity)
-                .parameter(ContextKeys.VALUE + "1").fromFragment("VALUE1").entity(entities.fieldValueEntity)
-                .parameter(ContextKeys.VALUE + "2").fromFragment("VALUE2").entity(entities.fieldValueEntity)
-                .getIntentDefinition();
-
-
-        customRowOfFieldFunctionIntent = intent("CustomRowOfFieldFunction")
-                .trainingSentences(BUNDLE.getStringArray("CustomRowOfFieldFunction"))
-                // TODO: Support date-time type operators
-                .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(entities.numericFieldEntity)
-                .parameter(ContextKeys.OPERATOR).fromFragment("OPERATOR").entity(entities.numericFunctionOperatorEntity)
-                .parameter(ContextKeys.ROW_NAME).fromFragment("ROW_NAME").entity(entities.rowNameEntity)
-                .getIntentDefinition();
-
-
         customRowCountIntent = intent("CustomRowCount")
                 .trainingSentences(BUNDLE.getStringArray("CustomRowCount"))
                 .parameter(ContextKeys.ROW_NAME).fromFragment("ROW_NAME").entity(entities.rowNameEntity)
                 .getIntentDefinition();
 
 
-        customFieldOfValueIntent = intent("CustomFieldOfValue")
-                .trainingSentences(BUNDLE.getStringArray("CustomFieldOfValue"))
-                .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(entities.fieldEntity)
-                .parameter(ContextKeys.VALUE + "1").fromFragment("VALUE1").entity(entities.fieldValueEntity)
-                .parameter(ContextKeys.VALUE + "2").fromFragment("VALUE2").entity(entities.fieldValueEntity)
-                .parameter(ContextKeys.OPERATOR).fromFragment("OPERATOR").entity(entities.functionOperatorEntity)
-                .parameter(ContextKeys.ROW_NAME).fromFragment("ROW_NAME").entity(entities.rowNameEntity)
-                .getIntentDefinition();
-
-        customRowOfValuesIntent = intent("CustomRowOfValues")
-                .trainingSentences(BUNDLE.getStringArray("CustomRowOfValues"))
-                .parameter(ContextKeys.ROW_NAME).fromFragment("ROW_NAME").entity(entities.rowNameEntity)
-                .parameter(ContextKeys.VALUE + "1").fromFragment("VALUE1").entity(entities.fieldValueEntity)
-                .parameter(ContextKeys.VALUE + "2").fromFragment("VALUE2").entity(entities.fieldValueEntity)
-                .parameter(ContextKeys.VALUE + "3").fromFragment("VALUE3").entity(entities.fieldValueEntity)
-                .getIntentDefinition();
-
-        customFieldOfFieldFunctionIntent = intent("CustomFieldOfFieldFunction")
-                .trainingSentences(BUNDLE.getStringArray("CustomFieldOfFieldFunction"))
+        customSelectFieldsWithConditionsIntent = intent("CustomSelectFieldsWithConditions")
+                .trainingSentences(BUNDLE.getStringArray("CustomSelectFieldsWithConditions"))
                 .parameter(ContextKeys.NUMBER).fromFragment("NUMBER").entity(number())
                 .parameter(ContextKeys.FIELD + "1").fromFragment("FIELD1").entity(entities.fieldEntity)
-                // TODO: Support date-time type operators
-                .parameter(ContextKeys.OPERATOR).fromFragment("OPERATOR").entity(entities.numericFunctionOperatorEntity)
-                .parameter(ContextKeys.FIELD + "2").fromFragment("FIELD2").entity(entities.numericFieldEntity)
+                .parameter(ContextKeys.ROW_NAME).fromFragment("ROW_NAME").entity(entities.rowNameEntity)
+                .parameter(ContextKeys.OPERATOR).fromFragment("OPERATOR").entity(entities.functionOperatorEntity)
+                .parameter(ContextKeys.FIELD + "2").fromFragment("FIELD2").entity(entities.fieldEntity)
+                .parameter(ContextKeys.VALUE + "1").fromFragment("VALUE1").entity(entities.fieldValueEntity)
+                .parameter(ContextKeys.VALUE + "2").fromFragment("VALUE2").entity(entities.fieldValueEntity)
                 .getIntentDefinition();
     }
 }
