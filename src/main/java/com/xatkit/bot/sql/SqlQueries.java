@@ -1,8 +1,6 @@
 package com.xatkit.bot.sql;
 
 import com.google.common.collect.Streams;
-import com.xatkit.bot.customQuery.CustomFieldFunction;
-import com.xatkit.bot.customQuery.CustomRowOfValue;
 import lombok.Getter;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 
@@ -13,6 +11,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static com.xatkit.bot.customQuery.CustomSelectFieldsWithConditions.DATETIME;
+import static com.xatkit.bot.customQuery.CustomSelectFieldsWithConditions.DECIMAL;
+import static com.xatkit.bot.customQuery.CustomSelectFieldsWithConditions.MIN;
 
 /**
  * The SQL queries generator.
@@ -59,6 +61,21 @@ public class SqlQueries {
      */
     private static String toDecimal(String field) {
         return "CAST(" + field + " AS DECIMAL(38," + SCALE + "))";
+    }
+
+    private static String toDateTime(String field) {
+        return "CAST(" + field + " AS TIMESTAMP)";
+    }
+
+    private static String cast(String field, String dataType) {
+        switch (dataType) {
+            case DECIMAL:
+                return toDecimal(field);
+            case DATETIME:
+                return toDateTime(field);
+            default:
+                return null;
+        }
     }
 
     /**
@@ -305,61 +322,6 @@ public class SqlQueries {
         return sqlQuery;
     }
 
-    private String numericFieldFunction(String field, String operator) {
-        return numericFieldFunction(field, operator, new HashMap<>());
-    }
-
-    /**
-     * Generates a SQL query for the {@link CustomFieldFunction} workflow.
-     *
-     * @param field         the field
-     * @param operator      the operator
-     * @param valueFieldMap the field-value conditions
-     * @return the sql query
-     */
-    public String numericFieldFunction(String field, String operator, Map<String, String> valueFieldMap) {
-        String fieldClean = replaceSpecialChars(field);
-        Map<String, String> fieldValueMapClean = new HashMap<>();
-        for (Map.Entry<String, String> entry : valueFieldMap.entrySet()) {
-            fieldValueMapClean.put(escapeQuotes(entry.getKey()), replaceSpecialChars(entry.getValue()));
-        }
-        String fieldsValuesString = String.join(" AND ", Streams.zip(fieldValueMapClean.keySet().stream(), fieldValueMapClean.values().stream(),
-                (v, f) -> f + " = '" + v + "'").collect(Collectors.toList()));
-        String sqlQuery = "SELECT " + operator + "(" + toDecimal(fieldClean) + ") AS `" + field + "` FROM "
-                + table + " WHERE " + fieldClean + " <> ''";
-        if (!fieldsValuesString.isEmpty()) {
-            sqlQuery += " AND " + fieldsValuesString;
-        }
-        if (!filters.isEmpty()) {
-            sqlQuery += " AND " + String.join(" AND ", getFiltersAsSqlConditions());
-        }
-        return sqlQuery;
-    }
-
-    /**
-     * Generates a SQL query for the {@link com.xatkit.bot.customQuery.CustomRowOfFieldFunction} workflow.
-     *
-     * @param keyFields the fields to be selected. If empty, select {@link #allFields}
-     * @param field     the field
-     * @param operator  the operator
-     * @return the sql query
-     */
-    public String rowOfNumericFieldFunction(List<String> keyFields, String field, String operator) {
-        List<String> fields = (keyFields.isEmpty() ? new ArrayList<>(allFields) : new ArrayList<>(keyFields));
-        if (!fields.contains(field)) {
-            fields.add(field);
-        }
-        List<String> fieldsClean = fields.stream().map(SqlQueries::replaceSpecialChars).collect(Collectors.toList());
-        String fieldsString = String.join(", ", Streams.zip(fieldsClean.stream(), fields.stream(), (fClean, f) -> fClean + " AS `" + f + "`").collect(Collectors.toList()));
-        String fieldClean = replaceSpecialChars(field);
-        String sqlQuery = "SELECT DISTINCT " + fieldsString + " FROM " + table + " WHERE " + fieldClean + " <> '' AND "
-                + toDecimal(fieldClean) + " = (" + numericFieldFunction(field, operator) + ")";
-        if (!filters.isEmpty()) {
-            sqlQuery += " AND " + String.join(" AND ", getFiltersAsSqlConditions());
-        }
-        return sqlQuery;
-    }
-
     /**
      * Generates a SQL query for the {@link com.xatkit.bot.customQuery.CustomRowCount} workflow.
      *
@@ -374,135 +336,105 @@ public class SqlQueries {
     }
 
     /**
-     * Generates a SQL query for the {@link com.xatkit.bot.customQuery.CustomFieldOfValue} workflow (without operator).
+     * Generates a SQL query for the {@link com.xatkit.bot.customQuery.CustomSelectFieldsWithConditions} workflow
+     * (max/min operators).
      *
-     * @param keyFields     the key fields to be selected
-     * @param targetField   the target field to be selected
-     * @param valueFieldMap the field-value conditions
-     * @param isDistinct    indicates weather to select distinct (if true) or not (if false)
+     * @param selectFields  the select fields
+     * @param opField       the field to which the operator is applied
+     * @param operator      the operator to apply to opField
+     * @param dataType      the data type of opField
+     * @param valueFieldMap the value field map storing the WHERE conditions (e.g. FIELD = 'value')
+     * @param number        the number of rows to select
      * @return the sql query
      */
-    public String fieldOfValue(List<String> keyFields, String targetField, Map<String, String> valueFieldMap,
-                               boolean isDistinct) {
+    public String selectFieldsWithConditionsMaxMinOperator(List<String> selectFields, String opField, String operator, String dataType, Map<String, String> valueFieldMap, String number) {
+        List<String> selectFieldsClean =
+                selectFields.stream().map(SqlQueries::replaceSpecialChars).collect(Collectors.toList());
+        String selectFieldsString = String.join(", ", Streams.zip(selectFieldsClean.stream(), selectFields.stream(),
+                (fClean, f) -> fClean + " AS `" + f + "`").collect(Collectors.toList()));
+        if (!selectFieldsString.isEmpty()) {
+            selectFieldsString += ", ";
+        }
+        String opFieldClean = replaceSpecialChars(opField);
+        Map<String, String> fieldValueMapClean = new HashMap<>();
+        for (Map.Entry<String, String> entry : valueFieldMap.entrySet()) {
+            fieldValueMapClean.put(escapeQuotes(entry.getKey()), replaceSpecialChars(entry.getValue()));
+        }
+        String fieldsValuesString = String.join(" AND ", Streams.zip(fieldValueMapClean.keySet().stream(), fieldValueMapClean.values().stream(),
+                (v, f) -> f + " = '" + v + "'").collect(Collectors.toList()));
+        if (!fieldsValuesString.isEmpty()) {
+            fieldsValuesString = " AND " + fieldsValuesString;
+        }
+        String order = (operator.equals(MIN) ? "ASC" : "DESC");
+
+        String sqlQuery = "SELECT " + selectFieldsString + cast(opFieldClean, dataType) + " AS `"
+                + opField + "` FROM " + table + " WHERE " + opFieldClean + " <> '' " + fieldsValuesString;
+        if (!filters.isEmpty()) {
+            sqlQuery += " AND " + String.join(" AND ", getFiltersAsSqlConditions());
+        }
+        sqlQuery += "  ORDER BY `" + opField + "` " + order + " LIMIT " + number;
+        return sqlQuery;
+    }
+
+    /**
+     * Generates a SQL query for the {@link com.xatkit.bot.customQuery.CustomSelectFieldsWithConditions} workflow
+     * (avg/sum operators).
+     *
+     * @param opField       the field to which the operator is applied
+     * @param operator      the operator to apply to opField
+     * @param valueFieldMap the value field map storing the WHERE conditions (e.g. FIELD = 'value')
+     * @return the sql query
+     */
+    public String selectFieldsWithConditionsAvgSumOperator(String opField, String operator, Map<String, String> valueFieldMap) {
+        String opFieldClean = replaceSpecialChars(opField);
+        Map<String, String> fieldValueMapClean = new HashMap<>();
+        for (Map.Entry<String, String> entry : valueFieldMap.entrySet()) {
+            fieldValueMapClean.put(escapeQuotes(entry.getKey()), replaceSpecialChars(entry.getValue()));
+        }
+        String fieldsValuesString = String.join(" AND ", Streams.zip(fieldValueMapClean.keySet().stream(), fieldValueMapClean.values().stream(),
+                (v, f) -> f + " = '" + v + "'").collect(Collectors.toList()));
+        if (!fieldsValuesString.isEmpty()) {
+            fieldsValuesString = " AND " + fieldsValuesString;
+        }
+
+        String sqlQuery = "SELECT " + operator + "(" + toDecimal(opFieldClean) + ") AS `"
+                + opField + "` FROM " + table + " WHERE " + opFieldClean + " <> '' " + fieldsValuesString;
+        if (!filters.isEmpty()) {
+            sqlQuery += " AND " + String.join(" AND ", getFiltersAsSqlConditions());
+        }
+        return sqlQuery;
+    }
+
+
+    /**
+     * Generates a SQL query for the {@link com.xatkit.bot.customQuery.CustomSelectFieldsWithConditions} workflow
+     * (no operator).
+     *
+     * @param selectFields  the select fields
+     * @param valueFieldMap the value field map storing the WHERE conditions (e.g. FIELD = 'value')
+     * @param isDistinct    the whether the selection should be distinct (true) or not (false)
+     * @return the sql query
+     */
+    public String selectFieldsWithConditionsNoOperator(List<String> selectFields, Map<String, String> valueFieldMap, boolean isDistinct) {
+        List<String> selectFieldsClean =
+                selectFields.stream().map(SqlQueries::replaceSpecialChars).collect(Collectors.toList());
+        String selectFieldsString = String.join(", ", Streams.zip(selectFieldsClean.stream(), selectFields.stream(),
+                (fClean, f) -> fClean + " AS `" + f + "`").collect(Collectors.toList()));
+        Map<String, String> fieldValueMapClean = new HashMap<>();
+        for (Map.Entry<String, String> entry : valueFieldMap.entrySet()) {
+            fieldValueMapClean.put(escapeQuotes(entry.getKey()), replaceSpecialChars(entry.getValue()));
+        }
+        String fieldsValuesString = String.join(" AND ", Streams.zip(fieldValueMapClean.keySet().stream(), fieldValueMapClean.values().stream(),
+                (v, f) -> f + " = '" + v + "'").collect(Collectors.toList()));
+        if (fieldsValuesString.isEmpty()) {
+            fieldsValuesString = "TRUE";
+        }
         String distinct = (isDistinct ? "DISTINCT " : "");
-        List<String> fields = (isDistinct ? new ArrayList<>() : new ArrayList<>(keyFields));
-        if (!fields.contains(targetField)) {
-            fields.add(targetField);
-        }
-        List<String> fieldsClean = fields.stream().map(SqlQueries::replaceSpecialChars).collect(Collectors.toList());
-        String fieldsString = String.join(", ", Streams.zip(fieldsClean.stream(), fields.stream(), (fClean, f) -> fClean + " AS `" + f + "`").collect(Collectors.toList()));
-
-        Map<String, String> fieldValueMapClean = new HashMap<>();
-        for (Map.Entry<String, String> entry : valueFieldMap.entrySet()) {
-            fieldValueMapClean.put(escapeQuotes(entry.getKey()), replaceSpecialChars(entry.getValue()));
-        }
-        String fieldsValuesString = String.join(" AND ", Streams.zip(fieldValueMapClean.keySet().stream(), fieldValueMapClean.values().stream(),
-                (v, f) -> f + " = '" + v + "'").collect(Collectors.toList()));
-        String sqlQuery = "SELECT " + distinct + fieldsString + " FROM " + table + " WHERE " + fieldsValuesString;
+        String sqlQuery = "SELECT " + distinct + selectFieldsString + " FROM " + table
+                + " WHERE " + fieldsValuesString;
         if (!filters.isEmpty()) {
             sqlQuery += " AND " + String.join(" AND ", getFiltersAsSqlConditions());
         }
-        return  sqlQuery;
-    }
-
-    /**
-     * Generates a SQL query for the {@link com.xatkit.bot.customQuery.CustomFieldOfValue} workflow (with operator).
-     *
-     * @param keyFields     the key fields to be selected
-     * @param targetField   the target field to be selected
-     * @param valueFieldMap the field-value conditions
-     * @param operator      the operator
-     * @return the sql query
-     */
-    public String fieldOfValueOperator(List<String> keyFields, String targetField, Map<String, String> valueFieldMap,
-                                       String operator) {
-        List<String> fields = (operator.equals("min") || operator.equals("max") ? new ArrayList<>(keyFields) : new ArrayList<>());
-        fields.remove(targetField);
-        List<String> fieldsClean = fields.stream().map(SqlQueries::replaceSpecialChars).collect(Collectors.toList());
-        String fieldsString = String.join(", ", Streams.zip(fieldsClean.stream(), fields.stream(), (fClean, f) -> fClean + " AS `" + f + "`").collect(Collectors.toList()));
-        if (!fieldsString.isEmpty()) {
-            fieldsString += ", ";
-        }
-        String targetFieldClean = replaceSpecialChars(targetField);
-        Map<String, String> fieldValueMapClean = new HashMap<>();
-        for (Map.Entry<String, String> entry : valueFieldMap.entrySet()) {
-            fieldValueMapClean.put(escapeQuotes(entry.getKey()), replaceSpecialChars(entry.getValue()));
-        }
-        String fieldsValuesString = String.join(" AND ", Streams.zip(fieldValueMapClean.keySet().stream(), fieldValueMapClean.values().stream(),
-                (v, f) -> f + " = '" + v + "'").collect(Collectors.toList()));
-        String sqlQuery = "SELECT " + fieldsString + operator + "(" + toDecimal(targetFieldClean) + ") AS `"
-                + targetField + "` FROM " + table + " WHERE " + targetFieldClean + " <> '' AND " + fieldsValuesString;
-        if (!filters.isEmpty()) {
-            sqlQuery += " AND " + String.join(" AND ", getFiltersAsSqlConditions());
-        }
-        if (!fieldsString.isEmpty()) {
-            String order = (operator.equals("min") ? "ASC" : "DESC");
-            String fieldsStringGroupBy = "`" + String.join("`, `", fields) + "`";
-            sqlQuery += " GROUP BY " + fieldsStringGroupBy + " ORDER BY `" + targetField + "` " + order + " LIMIT 1";
-        }
-        return sqlQuery;
-    }
-
-    /**
-     * Generates a SQL query for the {@link CustomRowOfValue} workflow.
-     *
-     * @param keyFields     the fields to be selected. If empty, select {@link #allFields}
-     * @param valueFieldMap the field-value conditions
-     * @return the sql query
-     */
-    public String rowOfValues(List<String> keyFields, Map<String, String> valueFieldMap) {
-        List<String> fields = (keyFields.isEmpty() ? new ArrayList<>(allFields) : new ArrayList<>(keyFields));
-        for (String field : valueFieldMap.values()) {
-            if (!fields.contains(field)) {
-                fields.add(field);
-            }
-        }
-        List<String> fieldsClean = fields.stream().map(SqlQueries::replaceSpecialChars).collect(Collectors.toList());
-        String fieldsString = String.join(", ", Streams.zip(fieldsClean.stream(), fields.stream(), (fClean, f) -> fClean + " AS `" + f + "`").collect(Collectors.toList()));
-
-        Map<String, String> fieldValueMapClean = new HashMap<>();
-        for (Map.Entry<String, String> entry : valueFieldMap.entrySet()) {
-            fieldValueMapClean.put(escapeQuotes(entry.getKey()), replaceSpecialChars(entry.getValue()));
-        }
-        String fieldsValuesString = String.join(" AND ", Streams.zip(fieldValueMapClean.keySet().stream(), fieldValueMapClean.values().stream(),
-                (v, f) -> f + " = '" + v + "'").collect(Collectors.toList()));
-
-        String sqlQuery = "SELECT DISTINCT " + fieldsString + " FROM " + table + " WHERE " + fieldsValuesString;
-        if (!filters.isEmpty()) {
-            sqlQuery += " AND " + String.join(" AND ", getFiltersAsSqlConditions());
-        }
-        return sqlQuery;
-    }
-
-    /**
-     * Generates a SQL query for the {@link com.xatkit.bot.customQuery.CustomFieldOfFieldFunction} workflow.
-     *
-     * @param keyFields    the key fields to be selected
-     * @param field1       the target field to be selected
-     * @param numericField the numeric field where the operator is applied
-     * @param operator     the operator
-     * @param number       the number of rows to get
-     * @return the sql query
-     */
-    public String fieldOfNumericFieldFunction(List<String> keyFields, String field1, String numericField,
-                                              String operator, String number) {
-        List<String> fields = new ArrayList<>(keyFields);
-        if (!fields.contains(field1)) {
-            fields.add(field1);
-        }
-        fields.remove(numericField);
-        List<String> fieldsClean = fields.stream().map(SqlQueries::replaceSpecialChars).collect(Collectors.toList());
-        String fieldsString = String.join(", ", Streams.zip(fieldsClean.stream(), fields.stream(), (fClean, f) -> fClean + " AS `" + f + "`").collect(Collectors.toList()));
-        String fieldsStringGroupBy = "`" + String.join("`, `", fields) + "`";
-        String order = (operator.equals("min") ? "ASC" : "DESC");
-        String numericFieldClean = replaceSpecialChars(numericField);
-        String sqlQuery = "SELECT " + fieldsString + ", "
-                + operator + "(" + toDecimal(numericFieldClean) + ") AS `" + numericField + "` FROM " + table
-                + " WHERE " + numericFieldClean + " <> ''";
-        if (!filters.isEmpty()) {
-            sqlQuery += " AND " + String.join(" AND ", getFiltersAsSqlConditions());
-        }
-        sqlQuery += " GROUP BY " + fieldsStringGroupBy + " ORDER BY `" + numericField + "` " + order + " LIMIT " + number;
         return sqlQuery;
     }
 }
