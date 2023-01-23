@@ -150,7 +150,7 @@ public class StructuredFilter {
                     bot.reactPlatform.reply(context, bot.messages.getString("WriteDateValue"));
                 })
                 .next()
-                .when(intentIs(bot.coreLibraryI18n.DateValue)).moveTo(saveStructuredFilterState);
+                .when(intentIs(bot.coreLibraryI18n.DateTimeValue)).moveTo(saveStructuredFilterState);
 
         // Finally, save the filter, composed by a FIELD, an OPERATOR, and a VALUE
 
@@ -198,9 +198,9 @@ public class StructuredFilter {
                     }
                 })
                 .next()
-                .when(intentIs(bot.intents.customNumericFilterIntent)).moveTo(removeFilterState)
-                .when(intentIs(bot.intents.customDateFilterIntent)).moveTo(removeFilterState)
-                .when(intentIs(bot.intents.customTextualFilterIntent)).moveTo(removeFilterState)
+                .when(intentIs(bot.intents.numericFieldOperatorValueIntent)).moveTo(removeFilterState)
+                .when(intentIs(bot.intents.datetimeFieldOperatorValue)).moveTo(removeFilterState)
+                .when(intentIs(bot.intents.textualFieldOperatorValue)).moveTo(removeFilterState)
                 .when(intentIs(bot.coreLibraryI18n.Quit)).moveTo(returnState);
 
         removeFilterState

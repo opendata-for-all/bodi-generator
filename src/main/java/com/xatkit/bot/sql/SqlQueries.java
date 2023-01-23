@@ -64,7 +64,8 @@ public class SqlQueries {
     }
 
     private static String toDateTime(String field) {
-        return "CAST(" + field + " AS TIMESTAMP)";
+        // TODO: The format depends on the dataset. We need to know it
+        return "TO_TIMESTAMP(" + field + ", 'yyyy/MM/dd')";
     }
 
     private static String cast(String field, String dataType) {
@@ -179,50 +180,56 @@ public class SqlQueries {
     public Set<String> getFiltersAsSqlConditions() {
         Set<String> sqlFilters = new HashSet<>();
         for (ImmutableTriple<String, String, String> f : filters) {
-            String field = replaceSpecialChars(f.left);
-            String value = escapeQuotes(f.right);
-            switch (f.middle) {
-                // Numeric Filters
-                case "=":
-                case "<":
-                case "<=":
-                case ">":
-                case ">=":
-                    sqlFilters.add(toDecimal(field) + " " + f.middle + " " + value);
-                    sqlFilters.add(field + " <> ''");
-                    break;
-                case "!=":
-                    sqlFilters.add(toDecimal(field) + " <> " + value);
-                    sqlFilters.add(field + " <> ''");
-                    break;
-                    // Textual Filters
-                case "equals": // Also a date filter
-                    sqlFilters.add("UPPER(" + field + ") = UPPER('" + value + "')");
-                    break;
-                case "different": // Also a date filter
-                    sqlFilters.add("UPPER(" + field + ") <> UPPER('" + value + "')");
-                    break;
-                case "contains":
-                    sqlFilters.add("UPPER(" + field + ") LIKE UPPER('%" + value + "%')");
-                    break;
-                case "starts with":
-                    sqlFilters.add("UPPER(" + field + ") LIKE UPPER('" + value + "%')");
-                    break;
-                case "ends with":
-                    sqlFilters.add("UPPER(" + field + ") LIKE UPPER('%" + value + "')");
-                    break;
-                // Date Filters
-                case "before":
-                    sqlFilters.add("date(" + field + ") < date('" + value + "')");
-                    break;
-                case "after":
-                    sqlFilters.add("date(" + field + ") > date('" + value + "')");
-                    break;
-                default:
-                    break;
-            }
+            sqlFilters.add(toSqlCondition(f.left, f.middle, f.right));
         }
         return sqlFilters;
+    }
+
+    /**
+     * Given a field, an operator and a value, returns the string that represents the SQL condition with that
+     * parameters.
+     *
+     * @param field    the field
+     * @param operator the operator
+     * @param value    the value
+     * @return the string
+     */
+    public String toSqlCondition(String field, String operator, String value) {
+        field = replaceSpecialChars(field);
+        value = escapeQuotes(value);
+        switch (operator) {
+            // Numeric Filters
+            case "=":
+            case "<":
+            case "<=":
+            case ">":
+            case ">=":
+                return field + " <> ''" + " AND " + toDecimal(field) + " " + operator + " " + value ;
+            case "!=":
+                return field + " <> ''" + " AND " + toDecimal(field) + " <> " + value;
+            // Textual Filters
+            case "equals":
+                return "UPPER(" + field + ") = UPPER('" + value + "')";
+            case "different":
+                return "UPPER(" + field + ") <> UPPER('" + value + "')";
+            case "contains":
+                return "UPPER(" + field + ") LIKE UPPER('%" + value + "%')";
+            case "starts with":
+                return "UPPER(" + field + ") LIKE UPPER('" + value + "%')";
+            case "ends with":
+                return "UPPER(" + field + ") LIKE UPPER('%" + value + "')";
+            // Date Filters
+            case "date_equals":
+                return field + " <> ''" + " AND " + toDateTime(field) + " =  TO_TIMESTAMP('" + value + "', 'yyyy-MM-dd''T''HH:mm:ssZ')";
+            case "date_different":
+                return field + " <> ''" + " AND " + toDateTime(field) + " <>  TO_TIMESTAMP('" + value + "', 'yyyy-MM-dd''T''HH:mm:ssZ')";
+            case "before":
+                return field + " <> ''" + " AND " + toDateTime(field) + " <  TO_TIMESTAMP('" + value + "', 'yyyy-MM-dd''T''HH:mm:ssZ')";
+            case "after":
+                return field + " <> ''" + " AND " + toDateTime(field) + " >  TO_TIMESTAMP('" + value + "', 'yyyy-MM-dd''T''HH:mm:ssZ')";
+            default:
+                return null;
+        }
     }
 
     /**
@@ -432,6 +439,32 @@ public class SqlQueries {
         String distinct = (isDistinct ? "DISTINCT " : "");
         String sqlQuery = "SELECT " + distinct + selectFieldsString + " FROM " + table
                 + " WHERE " + fieldsValuesString;
+        if (!filters.isEmpty()) {
+            sqlQuery += " AND " + String.join(" AND ", getFiltersAsSqlConditions());
+        }
+        return sqlQuery;
+    }
+
+    /**
+     * Generates a SQL query for the {@link com.xatkit.bot.customQuery.FieldOperatorValue} workflow.
+     *
+     * @param selectFields the select fields
+     * @param field        the field
+     * @param operator     the operator
+     * @param value        the value
+     * @return the string
+     */
+    public String fieldOperatorValue(List<String> selectFields, String field, String operator, String value) {
+        if (!selectFields.contains(field)) {
+            selectFields.add(field);
+        }
+        List<String> selectFieldsClean =
+                selectFields.stream().map(SqlQueries::replaceSpecialChars).collect(Collectors.toList());
+        String selectFieldsString = String.join(", ", Streams.zip(selectFieldsClean.stream(), selectFields.stream(),
+                (fClean, f) -> fClean + " AS `" + f + "`").collect(Collectors.toList()));
+
+        String sqlQuery = "SELECT " + selectFieldsString + " FROM " + table
+                + " WHERE " + toSqlCondition(field, operator, value);
         if (!filters.isEmpty()) {
             sqlQuery += " AND " + String.join(" AND ", getFiltersAsSqlConditions());
         }

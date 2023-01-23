@@ -145,9 +145,10 @@
     }
   },
   "dateOperatorEntity": {
-    "equals": {
+    "date_equals": {
       "en": {
        "synonyms": [
+         "equals"
         ]
       },
       "ca": {
@@ -165,9 +166,10 @@
         ]
       }
     },
-    "different": {
+    "date_different": {
       "en": {
        "synonyms": [
+          "different",
           "not equals"
         ]
       },

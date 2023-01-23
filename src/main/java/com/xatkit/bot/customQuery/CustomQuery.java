@@ -16,13 +16,13 @@ import static com.xatkit.dsl.DSL.state;
  * It allows the chatbot to recognize a "somehow free" query. The currently available kinds of query allowed through
  * this workflow are:
  * <ul>
- *     <li>{@link CustomFilter}</li>
  *     <li>{@link CustomShowFieldDistinct}</li>
  *     <li>{@link CustomFrequentValueInField}</li>
  *     <li>{@link CustomValueFrequency}</li>
  *     <li>{@link CustomValue1vsValue2}</li>
  *     <li>{@link CustomRowCount}</li>
  *     <li>{@link CustomSelectFieldsWithConditions}</li>
+ *     <li>{@link FieldOperatorValue}</li>
  * </ul>
  * When no pre-defined query is matched, it is executed {@link GetResult#getGenerateResultSetFromQueryState()}
  */
@@ -33,11 +33,6 @@ public class CustomQuery {
      */
     @Getter
     private final State awaitingCustomQueryState;
-
-    /**
-     * The Custom Filter workflow.
-     */
-    public CustomFilter customFilter;
 
     /**
      * The Custom Show Field Distinct workflow.
@@ -70,6 +65,11 @@ public class CustomQuery {
     public CustomSelectFieldsWithConditions customSelectFieldsWithConditions;
 
     /**
+     * The Field Operator Value workflow.
+     */
+    public FieldOperatorValue fieldOperatorValue;
+
+    /**
      * The Specify Entities workflow.
      */
     public SpecifyEntities specifyEntities;
@@ -86,13 +86,13 @@ public class CustomQuery {
 
         specifyEntities = new SpecifyEntities(bot, redirectCustomQueryState.getState());
 
-        customFilter = new CustomFilter(bot, returnState);
         customShowFieldDistinct = new CustomShowFieldDistinct(bot, returnState);
         customFrequentValueInField = new CustomFrequentValueInField(bot, returnState);
         customValueFrequency = new CustomValueFrequency(bot, returnState);
         customValue1vsValue2 = new CustomValue1vsValue2(bot, returnState);
         customRowCount = new CustomRowCount(bot, returnState);
         customSelectFieldsWithConditions = new CustomSelectFieldsWithConditions(bot, returnState);
+        fieldOperatorValue = new FieldOperatorValue(bot, returnState);
 
         awaitingCustomQueryState
                 .body(context -> {
@@ -107,10 +107,10 @@ public class CustomQuery {
                 .when(intentIs(bot.intents.customValue1LessThanValue2Intent)).moveTo(specifyEntities.getCheckEntitiesState())
                 .when(intentIs(bot.intents.customRowCountIntent)).moveTo(specifyEntities.getCheckEntitiesState())
                 .when(intentIs(bot.intents.customSelectFieldsWithConditionsIntent)).moveTo(specifyEntities.getCheckEntitiesState())
-
-                .when(intentIs(bot.intents.customNumericFilterIntent)).moveTo(specifyEntities.getCheckEntitiesState())
-                .when(intentIs(bot.intents.customDateFilterIntent)).moveTo(specifyEntities.getCheckEntitiesState())
-                .when(intentIs(bot.intents.customTextualFilterIntent)).moveTo(specifyEntities.getCheckEntitiesState())
+                .when(intentIs(bot.intents.numericFieldOperatorValueIntent)).moveTo(specifyEntities.getCheckEntitiesState())
+                .when(intentIs(bot.intents.datetimeFieldOperatorValue)).moveTo(specifyEntities.getCheckEntitiesState())
+                // TODO: FOR TEXTUAL VALUES WE NEED TO IMPLEMENT ANY SYSTEM ENTITY
+                //.when(intentIs(bot.intents.textualFieldOperatorValue)).moveTo(specifyEntities.getCheckEntitiesState())
 
                 .when(intentIs(bot.intents.showDataIntent)).moveTo(bot.getResult.getGenerateResultSetState())
                 .when(intentIs(bot.coreLibraryI18n.Quit)).moveTo(returnState)
@@ -127,10 +127,10 @@ public class CustomQuery {
                 .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customValue1LessThanValue2Intent.getName())).moveTo(customValue1vsValue2.getMainState())
                 .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customRowCountIntent.getName())).moveTo(customRowCount.getMainState())
                 .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customSelectFieldsWithConditionsIntent.getName())).moveTo(customSelectFieldsWithConditions.getMainState())
-
-                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customNumericFilterIntent.getName())).moveTo(customFilter.getSaveCustomFilterState())
-                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customDateFilterIntent.getName())).moveTo(customFilter.getSaveCustomFilterState())
-                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customTextualFilterIntent.getName())).moveTo(customFilter.getSaveCustomFilterState());
+                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.numericFieldOperatorValueIntent.getName())).moveTo(fieldOperatorValue.getMainState())
+                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.datetimeFieldOperatorValue.getName())).moveTo(fieldOperatorValue.getMainState());
+                // TODO: FOR TEXTUAL VALUES WE NEED TO IMPLEMENT ANY SYSTEM ENTITY
+                //.when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.textualFieldOperatorValue.getName())).moveTo(fieldOperatorValue.getMainState());
 
         this.awaitingCustomQueryState = awaitingCustomQueryState.getState();
     }

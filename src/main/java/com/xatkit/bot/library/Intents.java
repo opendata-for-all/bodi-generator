@@ -6,7 +6,7 @@ import com.xatkit.intent.IntentDefinition;
 import java.util.Locale;
 
 import static com.xatkit.dsl.DSL.any;
-import static com.xatkit.dsl.DSL.date;
+import static com.xatkit.dsl.DSL.dateTime;
 import static com.xatkit.dsl.DSL.intent;
 import static com.xatkit.dsl.DSL.number;
 
@@ -116,20 +116,6 @@ public class Intents {
 
 
     /**
-     * The intent customNumericFilterIntent.
-     */
-    public final IntentDefinition customNumericFilterIntent;
-    /**
-     * The intent customDateFilterIntent.
-     */
-    public final IntentDefinition customDateFilterIntent;
-    /**
-     * The intent customTextualFilterIntent.
-     */
-    public final IntentDefinition customTextualFilterIntent;
-
-
-    /**
      * The intent customShowFieldDistinctIntent.
      */
     public final IntentDefinition customShowFieldDistinctIntent;
@@ -166,10 +152,26 @@ public class Intents {
      */
     public final IntentDefinition customRowCountIntent;
 
+
     /**
      * The intent customSelectFieldsWithConditionsIntent.
      */
     public final IntentDefinition customSelectFieldsWithConditionsIntent;
+
+
+    /**
+     * The intent numericFieldOperatorValueIntent.
+     */
+    public final IntentDefinition numericFieldOperatorValueIntent;
+    /**
+     * The intent datetimeFieldOperatorValue.
+     */
+    public final IntentDefinition datetimeFieldOperatorValue;
+    /**
+     * The intent textualFieldOperatorValue.
+     */
+    public final IntentDefinition textualFieldOperatorValue;
+
 
     /**
      * Instantiates a new {@link Intents} object.
@@ -262,26 +264,6 @@ public class Intents {
                 .getIntentDefinition();
 
 
-        customNumericFilterIntent = intent("CustomNumericFilter")
-                .trainingSentences(BUNDLE.getStringArray("CustomFilter"))
-                .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(entities.numericFieldEntity)
-                .parameter(ContextKeys.OPERATOR).fromFragment("OPERATOR").entity(entities.numericOperatorEntity)
-                .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(number())
-                .getIntentDefinition();
-        customDateFilterIntent = intent("CustomDateFilter")
-                .trainingSentences(BUNDLE.getStringArray("CustomFilter"))
-                .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(entities.dateFieldEntity)
-                .parameter(ContextKeys.OPERATOR).fromFragment("OPERATOR").entity(entities.dateOperatorEntity)
-                .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(date())
-                .getIntentDefinition();
-        customTextualFilterIntent = intent("CustomTextualFilter")
-                .trainingSentences(BUNDLE.getStringArray("CustomFilter"))
-                .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(entities.textualFieldEntity)
-                .parameter(ContextKeys.OPERATOR).fromFragment("OPERATOR").entity(entities.textualOperatorEntity)
-                .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(any())
-                .getIntentDefinition();
-
-
         customShowFieldDistinctIntent = intent("CustomShowFieldDistinct")
                 .trainingSentences(BUNDLE.getStringArray("CustomShowFieldDistinct"))
                 .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(entities.fieldEntity)
@@ -333,6 +315,29 @@ public class Intents {
                 .parameter(ContextKeys.FIELD + "2").fromFragment("FIELD2").entity(entities.fieldEntity)
                 .parameter(ContextKeys.VALUE + "1").fromFragment("VALUE1").entity(entities.fieldValueEntity)
                 .parameter(ContextKeys.VALUE + "2").fromFragment("VALUE2").entity(entities.fieldValueEntity)
+                .getIntentDefinition();
+
+
+        numericFieldOperatorValueIntent = intent("NumericFieldOperatorValue")
+                .trainingSentences(BUNDLE.getStringArray("FieldOperatorValue"))
+                .parameter(ContextKeys.ROW_NAME).fromFragment("ROW_NAME").entity(entities.rowNameEntity)
+                .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(entities.numericFieldEntity)
+                .parameter(ContextKeys.OPERATOR).fromFragment("OPERATOR").entity(entities.numericOperatorEntity)
+                .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(number())
+                .getIntentDefinition();
+        datetimeFieldOperatorValue = intent("DatetimeFieldOperatorValue")
+                .trainingSentences(BUNDLE.getStringArray("FieldOperatorValue"))
+                .parameter(ContextKeys.ROW_NAME).fromFragment("ROW_NAME").entity(entities.rowNameEntity)
+                .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(entities.dateFieldEntity)
+                .parameter(ContextKeys.OPERATOR).fromFragment("OPERATOR").entity(entities.dateOperatorEntity)
+                .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(dateTime())
+                .getIntentDefinition();
+        textualFieldOperatorValue = intent("TextualFieldOperatorValue")
+                .trainingSentences(BUNDLE.getStringArray("FieldOperatorValue"))
+                .parameter(ContextKeys.ROW_NAME).fromFragment("ROW_NAME").entity(entities.rowNameEntity)
+                .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(entities.textualFieldEntity)
+                .parameter(ContextKeys.OPERATOR).fromFragment("OPERATOR").entity(entities.textualOperatorEntity)
+                .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(any())
                 .getIntentDefinition();
     }
 }
