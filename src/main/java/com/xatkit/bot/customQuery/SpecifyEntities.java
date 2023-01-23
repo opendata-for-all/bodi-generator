@@ -55,7 +55,7 @@ public class SpecifyEntities {
                         if ((parameter.getEntity().getReferredEntity().equals(bot.entities.fieldEntity.getEntityReference().getReferredEntity())
                                 || parameter.getEntity().getReferredEntity().equals(bot.entities.numericFieldEntity.getEntityReference().getReferredEntity())
                                 || parameter.getEntity().getReferredEntity().equals(bot.entities.textualFieldEntity.getEntityReference().getReferredEntity())
-                                || parameter.getEntity().getReferredEntity().equals(bot.entities.dateFieldEntity.getEntityReference().getReferredEntity()))
+                                || parameter.getEntity().getReferredEntity().equals(bot.entities.datetimeFieldEntity.getEntityReference().getReferredEntity()))
                                 && bot.entities.fieldGroups.containsKey((String) parameterValue.getValue())) {
                             entitiesToSpecify.put((String) parameterValue.getValue(), parameter.getName());
                         }

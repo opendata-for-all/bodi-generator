@@ -144,7 +144,7 @@
       }
     }
   },
-  "dateOperatorEntity": {
+  "datetimeOperatorEntity": {
     "date_equals": {
       "en": {
        "synonyms": [
@@ -436,7 +436,7 @@
       }
     }
   },
-  "dateFunctionOperatorEntity": {
+  "datetimeFunctionOperatorEntity": {
     "oldest": {
       "en": {
         "synonyms": [

@@ -83,9 +83,9 @@ public class Intents {
      */
     public final IntentDefinition textualFieldIntent;
     /**
-     * The intent dateFieldIntent.
+     * The intent datetimeFieldIntent.
      */
-    public final IntentDefinition dateFieldIntent;
+    public final IntentDefinition datetimeFieldIntent;
     /**
      * The intent fieldIntent.
      */
@@ -101,18 +101,18 @@ public class Intents {
      */
     public final IntentDefinition textualOperatorIntent;
     /**
-     * The intent dateOperatorIntent.
+     * The intent datetimeOperatorIntent.
      */
-    public final IntentDefinition dateOperatorIntent;
+    public final IntentDefinition datetimeOperatorIntent;
 
     /**
      * The intent numericFunctionOperatorIntent.
      */
     public final IntentDefinition numericFunctionOperatorIntent;
     /**
-     * The intent dateFunctionOperatorIntent.
+     * The intent datetimeFunctionOperatorIntent.
      */
-    public final IntentDefinition dateFunctionOperatorIntent;
+    public final IntentDefinition datetimeFunctionOperatorIntent;
 
 
     /**
@@ -231,9 +231,9 @@ public class Intents {
                 .trainingSentences(BUNDLE.getStringArray("Value"))
                 .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(entities.textualFieldEntity)
                 .getIntentDefinition();
-        dateFieldIntent = intent("DateField")
+        datetimeFieldIntent = intent("DatetimeField")
                 .trainingSentences(BUNDLE.getStringArray("Value"))
-                .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(entities.dateFieldEntity)
+                .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(entities.datetimeFieldEntity)
                 .getIntentDefinition();
         fieldIntent = intent("Field")
                 .trainingSentences(BUNDLE.getStringArray("Value"))
@@ -249,18 +249,18 @@ public class Intents {
                 .trainingSentences(BUNDLE.getStringArray("Value"))
                 .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(entities.textualOperatorEntity)
                 .getIntentDefinition();
-        dateOperatorIntent = intent("DateOperator")
+        datetimeOperatorIntent = intent("DatetimeOperator")
                 .trainingSentences(BUNDLE.getStringArray("Value"))
-                .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(entities.dateOperatorEntity)
+                .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(entities.datetimeOperatorEntity)
                 .getIntentDefinition();
 
         numericFunctionOperatorIntent = intent("NumericFunctionOperator")
                 .trainingSentences(BUNDLE.getStringArray("Value"))
                 .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(entities.numericFunctionOperatorEntity)
                 .getIntentDefinition();
-        dateFunctionOperatorIntent = intent("DateFunctionOperator")
+        datetimeFunctionOperatorIntent = intent("DatetimeFunctionOperator")
                 .trainingSentences(BUNDLE.getStringArray("Value"))
-                .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(entities.dateFunctionOperatorEntity)
+                .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(entities.datetimeFunctionOperatorEntity)
                 .getIntentDefinition();
 
 
@@ -328,8 +328,8 @@ public class Intents {
         datetimeFieldOperatorValue = intent("DatetimeFieldOperatorValue")
                 .trainingSentences(BUNDLE.getStringArray("FieldOperatorValue"))
                 .parameter(ContextKeys.ROW_NAME).fromFragment("ROW_NAME").entity(entities.rowNameEntity)
-                .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(entities.dateFieldEntity)
-                .parameter(ContextKeys.OPERATOR).fromFragment("OPERATOR").entity(entities.dateOperatorEntity)
+                .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(entities.datetimeFieldEntity)
+                .parameter(ContextKeys.OPERATOR).fromFragment("OPERATOR").entity(entities.datetimeOperatorEntity)
                 .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(dateTime())
                 .getIntentDefinition();
         textualFieldOperatorValue = intent("TextualFieldOperatorValue")

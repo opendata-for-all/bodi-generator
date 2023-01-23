@@ -11,7 +11,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.xatkit.bot.library.Utils.isDate;
+import static com.xatkit.bot.library.Utils.isDatetime;
 import static com.xatkit.bot.library.Utils.isNumeric;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -54,10 +54,10 @@ public class FieldOperatorValue extends AbstractCustomQuery {
             return true;
         }
 
-        if (Utils.getEntityValues(bot.entities.dateFieldEntity).contains(field)
-                && Utils.getEntityValues(bot.entities.dateOperatorEntity).contains(operator)
-                && isDate(value)) {
-            // Date-time filter
+        if (Utils.getEntityValues(bot.entities.datetimeFieldEntity).contains(field)
+                && Utils.getEntityValues(bot.entities.datetimeOperatorEntity).contains(operator)
+                && isDatetime(value)) {
+            // Datetime filter
             return true;
         }
 

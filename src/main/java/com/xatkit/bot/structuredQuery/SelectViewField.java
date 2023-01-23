@@ -44,7 +44,7 @@ public class SelectViewField {
                 .next()
                 .when(intentIs(bot.intents.textualFieldIntent)).moveTo(saveViewFieldState)
                 .when(intentIs(bot.intents.numericFieldIntent)).moveTo(saveViewFieldState)
-                .when(intentIs(bot.intents.dateFieldIntent)).moveTo(saveViewFieldState);
+                .when(intentIs(bot.intents.datetimeFieldIntent)).moveTo(saveViewFieldState);
 
         saveViewFieldState
                 .body(context -> {

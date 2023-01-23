@@ -131,12 +131,12 @@ public class Entities {
      */
     public EntityDefinitionReferenceProvider textualFieldEntity;
     /**
-     * The entity dateFieldEntity.
+     * The entity datetimeFieldEntity.
      */
-    public EntityDefinitionReferenceProvider dateFieldEntity;
+    public EntityDefinitionReferenceProvider datetimeFieldEntity;
     /**
      * The entity fieldEntity (combines {@link #numericFieldEntity}, {@link #textualFieldEntity} and
-     * {@link #dateFieldEntity}).
+     * {@link #datetimeFieldEntity}).
      */
     public final EntityDefinitionReferenceProvider fieldEntity;
 
@@ -149,21 +149,21 @@ public class Entities {
      */
     public final EntityDefinitionReferenceProvider textualOperatorEntity;
     /**
-     * The entity dateOperatorEntity.
+     * The entity datetimeOperatorEntity.
      */
-    public final EntityDefinitionReferenceProvider dateOperatorEntity;
+    public final EntityDefinitionReferenceProvider datetimeOperatorEntity;
 
     /**
      * The entity numericFunctionOperatorEntity.
      */
     public final EntityDefinitionReferenceProvider numericFunctionOperatorEntity;
     /**
-     * The entity dateFunctionOperatorEntity.
+     * The entity datetimeFunctionOperatorEntity.
      */
-    public final EntityDefinitionReferenceProvider dateFunctionOperatorEntity;
+    public final EntityDefinitionReferenceProvider datetimeFunctionOperatorEntity;
     /**
      * The entity functionOperatorEntity (combines {@link #numericFunctionOperatorEntity} and
-     * {@link #dateFunctionOperatorEntity}).
+     * {@link #datetimeFunctionOperatorEntity}).
      */
     public final EntityDefinitionReferenceProvider functionOperatorEntity;
 
@@ -187,17 +187,17 @@ public class Entities {
 
         numericFieldEntity = generateEntity("numericFieldEntity");
         textualFieldEntity = generateEntity("textualFieldEntity");
-        dateFieldEntity = generateEntity("dateFieldEntity");
+        datetimeFieldEntity = generateEntity("datetimeFieldEntity");
         readFieldGroups();
-        fieldEntity = mergeEntities("fieldEntity", numericFieldEntity, textualFieldEntity, dateFieldEntity);
+        fieldEntity = mergeEntities("fieldEntity", numericFieldEntity, textualFieldEntity, datetimeFieldEntity);
 
         numericOperatorEntity = generateEntity("numericOperatorEntity");
         textualOperatorEntity = generateEntity("textualOperatorEntity");
-        dateOperatorEntity = generateEntity("dateOperatorEntity");
+        datetimeOperatorEntity = generateEntity("datetimeOperatorEntity");
 
         numericFunctionOperatorEntity = generateEntity("numericFunctionOperatorEntity");
-        dateFunctionOperatorEntity = generateEntity("dateFunctionOperatorEntity");
-        functionOperatorEntity = mergeEntities("functionOperator", numericFunctionOperatorEntity, dateFunctionOperatorEntity);
+        datetimeFunctionOperatorEntity = generateEntity("datetimeFunctionOperatorEntity");
+        functionOperatorEntity = mergeEntities("functionOperator", numericFunctionOperatorEntity, datetimeFunctionOperatorEntity);
 
         fieldValueEntity = generateFieldValueEntity();
 
@@ -324,7 +324,7 @@ public class Entities {
             JSONObject fieldGroupsJson = entitiesJson.getJSONObject(entityName);
             MappingEntryStep numericFieldGroupsEntity = mapping("numericFieldGroupsEntity");
             MappingEntryStep textualFieldGroupsEntity = mapping("textualFieldGroupsEntity");
-            MappingEntryStep dateFieldGroupsEntity = mapping("dateFieldGroupsEntity");
+            MappingEntryStep datetimeFieldGroupsEntity = mapping("datetimeFieldGroupsEntity");
             for (String entry : fieldGroupsJson.keySet()) {
                 JSONObject fieldGroupJson = fieldGroupsJson.getJSONObject(entry);
                 String type = fieldGroupJson.getString("type");
@@ -341,8 +341,8 @@ public class Entities {
                     case "TEXT":
                         realFields = Utils.getEntityValues(textualFieldEntity);
                         break;
-                    case "DATE":
-                        realFields = Utils.getEntityValues(dateFieldEntity);
+                    case "DATETIME":
+                        realFields = Utils.getEntityValues(datetimeFieldEntity);
                         break;
                     default:
                         realFields = new ArrayList<>();
@@ -363,8 +363,8 @@ public class Entities {
                             case "TEXT":
                                 textualFieldGroupsEntity.entry().value(fieldGroupNameString);
                                 break;
-                            case "DATE":
-                                dateFieldGroupsEntity.entry().value(fieldGroupNameString);
+                            case "DATETIME":
+                                datetimeFieldGroupsEntity.entry().value(fieldGroupNameString);
                                 break;
                             default:
                                 break;
@@ -374,7 +374,7 @@ public class Entities {
             }
             numericFieldEntity = mergeEntities("numericFieldEntity", numericFieldEntity, (EntityDefinitionReferenceProvider) numericFieldGroupsEntity);
             textualFieldEntity = mergeEntities("textualFieldEntity", textualFieldEntity, (EntityDefinitionReferenceProvider) textualFieldGroupsEntity);
-            dateFieldEntity = mergeEntities("dateFieldEntity", dateFieldEntity, (EntityDefinitionReferenceProvider) dateFieldGroupsEntity);
+            datetimeFieldEntity = mergeEntities("datetimeFieldEntity", datetimeFieldEntity, (EntityDefinitionReferenceProvider) datetimeFieldGroupsEntity);
         } catch (JSONException e) {
             Log.warn(e.getMessage());
         }

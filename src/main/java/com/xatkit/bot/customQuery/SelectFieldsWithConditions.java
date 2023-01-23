@@ -293,7 +293,7 @@ public class SelectFieldsWithConditions extends AbstractCustomQuery {
         }
         if (!isEmpty(operator)
                 && !(Utils.getEntityValues(bot.entities.numericFunctionOperatorEntity).contains(operator) && Utils.getEntityValues(bot.entities.numericFieldEntity).contains(operatorField))
-                && !(Utils.getEntityValues(bot.entities.dateFunctionOperatorEntity).contains(operator) && Utils.getEntityValues(bot.entities.dateFieldEntity).contains(operatorField))) {
+                && !(Utils.getEntityValues(bot.entities.datetimeFunctionOperatorEntity).contains(operator) && Utils.getEntityValues(bot.entities.datetimeFieldEntity).contains(operatorField))) {
             // Check that operator type matches operatorField type
             return false;
         }
@@ -498,8 +498,8 @@ public class SelectFieldsWithConditions extends AbstractCustomQuery {
                     buttons.add(Utils.getFirstTrainingSentences(bot.intents.showAllDistinctIntent).get(0));
                     if (Utils.getEntityValues(bot.entities.numericFieldEntity).contains(field1)) {
                         buttons.addAll(Utils.getEntityValues(bot.entities.numericFunctionOperatorEntity));
-                    } else if (Utils.getEntityValues(bot.entities.dateFieldEntity).contains(field1)) {
-                        buttons.addAll(Utils.getEntityValues(bot.entities.dateFunctionOperatorEntity));
+                    } else if (Utils.getEntityValues(bot.entities.datetimeFieldEntity).contains(field1)) {
+                        buttons.addAll(Utils.getEntityValues(bot.entities.datetimeFunctionOperatorEntity));
                     } else if (Utils.getEntityValues(bot.entities.textualFieldEntity).contains(field1)) {
                         // TODO: textual operators here
                     }
@@ -516,7 +516,7 @@ public class SelectFieldsWithConditions extends AbstractCustomQuery {
                 .when(intentIs(bot.intents.showAllIntent)).moveTo(saveOperator)
                 .when(intentIs(bot.intents.showAllDistinctIntent)).moveTo(saveOperator)
                 .when(intentIs(bot.intents.numericFunctionOperatorIntent)).moveTo(saveOperator)
-                .when(intentIs(bot.intents.dateFunctionOperatorIntent)).moveTo(saveOperator)
+                .when(intentIs(bot.intents.datetimeFunctionOperatorIntent)).moveTo(saveOperator)
                 .when(intentIs(bot.coreLibraryI18n.Quit)).moveTo(returnState);
         saveOperator
                 .body(context -> {

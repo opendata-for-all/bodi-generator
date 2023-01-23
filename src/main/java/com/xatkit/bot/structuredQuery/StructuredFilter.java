@@ -67,7 +67,7 @@ public class StructuredFilter {
         val selectOperatorState = state("SelectOperator");
         val saveOperatorState = state("SaveOperator");
 
-        val writeDateValueState = state("WriteDateValue");
+        val writeDatetimeValueState = state("WriteDatetimeValue");
         val writeTextualValueState = state("WriteTextualValue");
         val writeNumericValueState = state("WriteNumericValue");
 
@@ -85,7 +85,7 @@ public class StructuredFilter {
                 .next()
                 .when(intentIs(bot.intents.numericFieldIntent)).moveTo(saveFieldState)
                 .when(intentIs(bot.intents.textualFieldIntent)).moveTo(saveFieldState)
-                .when(intentIs(bot.intents.dateFieldIntent)).moveTo(saveFieldState);
+                .when(intentIs(bot.intents.datetimeFieldIntent)).moveTo(saveFieldState);
 
         // Save the FIELD name
 
@@ -107,15 +107,15 @@ public class StructuredFilter {
                         operators = Utils.getEntityValues(bot.entities.textualOperatorEntity);
                     } else if (fieldIntentName.equals(bot.intents.numericFieldIntent.getName())) {
                         operators = Utils.getEntityValues(bot.entities.numericOperatorEntity);
-                    } else if (fieldIntentName.equals(bot.intents.dateFieldIntent.getName())) {
-                        operators = Utils.getEntityValues(bot.entities.dateOperatorEntity);
+                    } else if (fieldIntentName.equals(bot.intents.datetimeFieldIntent.getName())) {
+                        operators = Utils.getEntityValues(bot.entities.datetimeOperatorEntity);
                     }
                     bot.reactPlatform.reply(context, bot.messages.getString("SelectOperator"), operators);
                 })
                 .next()
                 .when(intentIs(bot.intents.textualOperatorIntent)).moveTo(saveOperatorState)
                 .when(intentIs(bot.intents.numericOperatorIntent)).moveTo(saveOperatorState)
-                .when(intentIs(bot.intents.dateOperatorIntent)).moveTo(saveOperatorState);
+                .when(intentIs(bot.intents.datetimeOperatorIntent)).moveTo(saveOperatorState);
 
         // Save the OPERATOR name
 
@@ -126,7 +126,7 @@ public class StructuredFilter {
                 .next()
                 .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.textualFieldIntent.getName())).moveTo(writeTextualValueState)
                 .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.numericFieldIntent.getName())).moveTo(writeNumericValueState)
-                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.dateFieldIntent.getName())).moveTo(writeDateValueState);
+                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.datetimeFieldIntent.getName())).moveTo(writeDatetimeValueState);
 
         // Input the VALUE
         // Divided by data types for safety (e.g. a date may be recognized as a text if we don't separate data types)
@@ -145,9 +145,9 @@ public class StructuredFilter {
                 .next()
                 .when(intentIs(bot.coreLibraryI18n.NumberValue)).moveTo(saveStructuredFilterState);
 
-        writeDateValueState
+        writeDatetimeValueState
                 .body(context -> {
-                    bot.reactPlatform.reply(context, bot.messages.getString("WriteDateValue"));
+                    bot.reactPlatform.reply(context, bot.messages.getString("WriteDatetimeValue"));
                 })
                 .next()
                 .when(intentIs(bot.coreLibraryI18n.DateTimeValue)).moveTo(saveStructuredFilterState);

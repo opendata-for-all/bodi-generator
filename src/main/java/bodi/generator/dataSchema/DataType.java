@@ -16,9 +16,9 @@ public enum DataType {
     NUMBER,
 
     /**
-     * Date data type.
+     * Datetime data type.
      */
-    DATE,
+    DATETIME,
 
     /**
      * Text data type.

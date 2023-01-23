@@ -38,11 +38,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static bodi.generator.dataSchema.BotToGraph.generateGraph;
-import static bodi.generator.dataSchema.DataType.DATE;
+import static bodi.generator.dataSchema.DataType.DATETIME;
 import static bodi.generator.dataSchema.DataType.EMPTY;
 import static bodi.generator.dataSchema.DataType.NUMBER;
 import static bodi.generator.dataSchema.DataType.TEXT;
-import static com.xatkit.bot.library.Utils.isDate;
+import static com.xatkit.bot.library.Utils.isDatetime;
 import static com.xatkit.bot.library.Utils.isNumeric;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -139,7 +139,7 @@ public final class BodiGenerator {
             Set<String> fieldValuesSet = new HashSet<>();
             Map<DataType, Boolean> dataTypes = new HashMap<>();
             dataTypes.put(NUMBER, true);
-            dataTypes.put(DATE, true);
+            dataTypes.put(DATETIME, true);
             dataTypes.put(TEXT, true);
             dataTypes.put(EMPTY, true);
             int columnIndex = tds.getHeaderCopy().indexOf(fieldName);
@@ -149,8 +149,8 @@ public final class BodiGenerator {
                 if (dataTypes.get(NUMBER) && !isNumeric(value) && !isEmpty(value)) {
                     dataTypes.put(NUMBER, false);
                 }
-                if (dataTypes.get(DATE) && !isDate(value) && !isEmpty(value)) {
-                    dataTypes.put(DATE, false);
+                if (dataTypes.get(DATETIME) && !isDatetime(value) && !isEmpty(value)) {
+                    dataTypes.put(DATETIME, false);
                 }
                 if (dataTypes.get(EMPTY) && !isEmpty(value)) {
                     dataTypes.put(EMPTY, false);
@@ -160,8 +160,8 @@ public final class BodiGenerator {
             if (dataTypes.get(EMPTY)) {
                 // TODO: Consider empty (unknown) type?
                 schemaField.setType(TEXT);
-            } else if (dataTypes.get(DATE)) {
-                schemaField.setType(DATE);
+            } else if (dataTypes.get(DATETIME)) {
+                schemaField.setType(DATETIME);
             } else if (dataTypes.get(NUMBER)) {
                 tds.replaceNumericColumnComma(fieldName);
                 schemaField.setType(NUMBER);
@@ -210,7 +210,7 @@ public final class BodiGenerator {
             Set<String> fieldValuesSet = new HashSet<>();
             Map<DataType, Boolean> dataTypes = new HashMap<>();
             dataTypes.put(NUMBER, true);
-            dataTypes.put(DATE, true);
+            dataTypes.put(DATETIME, true);
             dataTypes.put(TEXT, true);
             dataTypes.put(EMPTY, true);
             int columnIndex = tds.getHeaderCopy().indexOf(fieldName);
@@ -220,8 +220,8 @@ public final class BodiGenerator {
                 if (dataTypes.get(NUMBER) && !isNumeric(value) && !isEmpty(value)) {
                     dataTypes.put(NUMBER, false);
                 }
-                if (dataTypes.get(DATE) && !isDate(value) && !isEmpty(value)) {
-                    dataTypes.put(DATE, false);
+                if (dataTypes.get(DATETIME) && !isDatetime(value) && !isEmpty(value)) {
+                    dataTypes.put(DATETIME, false);
                 }
                 if (dataTypes.get(EMPTY) && !isEmpty(value)) {
                     dataTypes.put(EMPTY, false);
@@ -231,8 +231,8 @@ public final class BodiGenerator {
             if (dataTypes.get(EMPTY)) {
                 // TODO: Consider empty (unknown) type?
                 schemaField.setType(TEXT);
-            } else if (dataTypes.get(DATE)) {
-                schemaField.setType(DATE);
+            } else if (dataTypes.get(DATETIME)) {
+                schemaField.setType(DATETIME);
             } else if (dataTypes.get(NUMBER)) {
                 tds.replaceNumericColumnComma(fieldName);
                 schemaField.setType(NUMBER);

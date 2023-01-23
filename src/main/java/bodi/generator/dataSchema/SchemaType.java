@@ -247,7 +247,7 @@ public class SchemaType implements Serializable {
     public JSONObject generateFieldsJson() {
         JSONObject entities = new JSONObject();
         entities.put("numericFieldEntity", new JSONObject());
-        entities.put("dateFieldEntity", new JSONObject());
+        entities.put("datetimeFieldEntity", new JSONObject());
         entities.put("textualFieldEntity", new JSONObject());
         entities.put("fieldGroups", new JSONObject());
         for (SchemaField schemaField : schemaFields) {
@@ -256,8 +256,8 @@ public class SchemaType implements Serializable {
                 case NUMBER:
                     entities.getJSONObject("numericFieldEntity").put(schemaField.getOriginalName(), entity);
                     break;
-                case DATE:
-                    entities.getJSONObject("dateFieldEntity").put(schemaField.getOriginalName(), entity);
+                case DATETIME:
+                    entities.getJSONObject("datetimeFieldEntity").put(schemaField.getOriginalName(), entity);
                     break;
                 case TEXT:
                 case EMPTY:

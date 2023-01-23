@@ -224,7 +224,7 @@ public class SqlQueries {
                 return "UPPER(" + field + ") LIKE UPPER('" + value + "%')";
             case "ends with":
                 return "UPPER(" + field + ") LIKE UPPER('%" + value + "')";
-            // Date Filters
+            // Datetime Filters
             case "date_equals":
                 return field + " <> ''" + " AND " + toDateTime(field) + " =  TO_TIMESTAMP('" + value + "', 'yyyy-MM-dd''T''HH:mm:ssZ')";
             case "date_different":
