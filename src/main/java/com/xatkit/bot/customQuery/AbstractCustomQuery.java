@@ -5,6 +5,7 @@ import com.xatkit.bot.Bot;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.execution.State;
 import com.xatkit.execution.StateContext;
+import fr.inria.atlanmod.commons.log.Log;
 import lombok.Getter;
 import lombok.val;
 
@@ -64,12 +65,14 @@ public abstract class AbstractCustomQuery {
                     context.getSession().put(ContextKeys.ALL_OK, false);
                     if (!checkParamsOk(context)) {
                         context.getSession().put(ContextKeys.BAD_PARAMS, true);
+                        Log.error("Intent parameters are not OK");
                         return;
                     }
                     String sqlStatement = generateSqlStatement(context);
                     executeSqlAndStoreResultSet(sqlStatement, context);
                     if (!checkResultSetOk(context)) {
                         context.getSession().put(ContextKeys.BAD_RESULTSET, true);
+                        Log.error("The obtained result set is not OK");
                         return;
                     }
                     String message = generateMessage(context);
