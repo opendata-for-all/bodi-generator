@@ -25,7 +25,7 @@ import static com.xatkit.dsl.DSL.state;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
- * The Custom Select Fields With Conditions workflow of a chatbot.
+ * The Select Fields With Conditions workflow of a chatbot.
  * <p>
  * It performs a SELECT SQL query with some optional value equality conditions. Additionally, it allows to apply an
  * operator to a specific field (e.g. max, min, avg, sum).
@@ -36,9 +36,9 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
  *
  * @see CustomQuery
  */
-public class CustomSelectFieldsWithConditions extends AbstractCustomQuery {
+public class SelectFieldsWithConditions extends AbstractCustomQuery {
 
-    public CustomSelectFieldsWithConditions(Bot bot, State returnState) {
+    public SelectFieldsWithConditions(Bot bot, State returnState) {
         super(bot, returnState);
     }
 

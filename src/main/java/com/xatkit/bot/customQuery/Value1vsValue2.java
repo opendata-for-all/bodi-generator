@@ -13,7 +13,7 @@ import java.text.MessageFormat;
 import static org.apache.logging.log4j.util.Strings.isEmpty;
 
 /**
- * The Custom Value1 vs Value2 workflow of a chatbot.
+ * The Value1 vs Value2 workflow of a chatbot.
  * <p>
  * Given two field values, this workflow tells to the user which value is more/less frequent than the other.
  * <p>
@@ -21,9 +21,9 @@ import static org.apache.logging.log4j.util.Strings.isEmpty;
  *
  * @see CustomQuery
  */
-public class CustomValue1vsValue2 extends AbstractCustomQuery {
+public class Value1vsValue2 extends AbstractCustomQuery {
 
-    public CustomValue1vsValue2(Bot bot, State returnState) {
+    public Value1vsValue2(Bot bot, State returnState) {
         super(bot, returnState);
     }
 
@@ -80,21 +80,21 @@ public class CustomValue1vsValue2 extends AbstractCustomQuery {
         int value1Freq = Integer.parseInt(resultSet.getRow(0).getColumnValue(2));
         int value2Freq = Integer.parseInt(resultSet.getRow(0).getColumnValue(5));
 
-        if (context.getIntent().getDefinition().getName().equals(bot.intents.customValue1MoreThanValue2Intent.getName())) {
+        if (context.getIntent().getDefinition().getName().equals(bot.intents.value1MoreThanValue2Intent.getName())) {
             if (value1Freq > value2Freq) {
-                return MessageFormat.format(bot.messages.getString("CustomValue1MoreThanValue2"), value1, value1Freq, field1RN, value2, value2Freq, field2RN);
+                return MessageFormat.format(bot.messages.getString("Value1MoreThanValue2"), value1, value1Freq, field1RN, value2, value2Freq, field2RN);
             } else if (value2Freq > value1Freq) {
-                return MessageFormat.format(bot.messages.getString("CustomValue1MoreThanValue2"), value2, value2Freq, field2RN, value1, value1Freq, field1RN);
+                return MessageFormat.format(bot.messages.getString("Value1MoreThanValue2"), value2, value2Freq, field2RN, value1, value1Freq, field1RN);
             } else {
-                return MessageFormat.format(bot.messages.getString("CustomValue1EqualToValue2"), value1, field1RN, value2, field2RN, value1Freq);
+                return MessageFormat.format(bot.messages.getString("Value1EqualToValue2"), value1, field1RN, value2, field2RN, value1Freq);
             }
         } else {
             if (value1Freq < value2Freq) {
-                return MessageFormat.format(bot.messages.getString("CustomValue1LessThanValue2"), value1, value1Freq, field1RN, value2, value2Freq, field2RN);
+                return MessageFormat.format(bot.messages.getString("Value1LessThanValue2"), value1, value1Freq, field1RN, value2, value2Freq, field2RN);
             } else if (value2Freq < value1Freq) {
-                return MessageFormat.format(bot.messages.getString("CustomValue1LessThanValue2"), value2, value2Freq, field2RN, value1, value1Freq, field1RN);
+                return MessageFormat.format(bot.messages.getString("Value1LessThanValue2"), value2, value2Freq, field2RN, value1, value1Freq, field1RN);
             } else {
-                return MessageFormat.format(bot.messages.getString("CustomValue1EqualToValue2"), value1, field1RN, value2, field2RN, value1Freq);
+                return MessageFormat.format(bot.messages.getString("Value1EqualToValue2"), value1, field1RN, value2, field2RN, value1Freq);
             }
         }
     }

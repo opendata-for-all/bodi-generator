@@ -1,6 +1,12 @@
 package com.xatkit.bot.sql;
 
 import com.google.common.collect.Streams;
+import com.xatkit.bot.customQuery.FrequentValueInField;
+import com.xatkit.bot.customQuery.RowCount;
+import com.xatkit.bot.customQuery.SelectFieldsWithConditions;
+import com.xatkit.bot.customQuery.ShowFieldDistinct;
+import com.xatkit.bot.customQuery.Value1vsValue2;
+import com.xatkit.bot.customQuery.ValueFrequency;
 import lombok.Getter;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 
@@ -12,9 +18,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.xatkit.bot.customQuery.CustomSelectFieldsWithConditions.DATETIME;
-import static com.xatkit.bot.customQuery.CustomSelectFieldsWithConditions.DECIMAL;
-import static com.xatkit.bot.customQuery.CustomSelectFieldsWithConditions.MIN;
+import static com.xatkit.bot.customQuery.SelectFieldsWithConditions.DATETIME;
+import static com.xatkit.bot.customQuery.SelectFieldsWithConditions.DECIMAL;
+import static com.xatkit.bot.customQuery.SelectFieldsWithConditions.MIN;
 
 /**
  * The SQL queries generator.
@@ -248,7 +254,7 @@ public class SqlQueries {
     }
 
     /**
-     * Generates a SQL query for the {@link com.xatkit.bot.customQuery.CustomShowFieldDistinct} workflow.
+     * Generates a SQL query for the {@link ShowFieldDistinct} workflow.
      *
      * @param field the field
      * @return the sql query
@@ -263,7 +269,7 @@ public class SqlQueries {
     }
 
     /**
-     * Generates a SQL query for the {@link com.xatkit.bot.customQuery.CustomFrequentValueInField} workflow.
+     * Generates a SQL query for the {@link FrequentValueInField} workflow.
      *
      * @param field        the field
      * @param mostFrequent indicates weather to get the highest (if true) or the lowest (if false) frequency
@@ -285,7 +291,7 @@ public class SqlQueries {
     }
 
     /**
-     * Generates a SQL query for the {@link com.xatkit.bot.customQuery.CustomValue1vsValue2} workflow.
+     * Generates a SQL query for the {@link Value1vsValue2} workflow.
      * <p>
      *
      * @param field1 the first field
@@ -314,7 +320,7 @@ public class SqlQueries {
     }
 
     /**
-     * Generates a SQL query for the {@link com.xatkit.bot.customQuery.CustomValueFrequency} workflow.
+     * Generates a SQL query for the {@link ValueFrequency} workflow.
      *
      * @param field the field of the 'where' condition
      * @param value the value of the 'where' condition
@@ -330,7 +336,7 @@ public class SqlQueries {
     }
 
     /**
-     * Generates a SQL query for the {@link com.xatkit.bot.customQuery.CustomRowCount} workflow.
+     * Generates a SQL query for the {@link RowCount} workflow.
      *
      * @return the sql query
      */
@@ -343,7 +349,7 @@ public class SqlQueries {
     }
 
     /**
-     * Generates a SQL query for the {@link com.xatkit.bot.customQuery.CustomSelectFieldsWithConditions} workflow
+     * Generates a SQL query for the {@link SelectFieldsWithConditions} workflow
      * (max/min operators).
      *
      * @param selectFields  the select fields
@@ -384,7 +390,7 @@ public class SqlQueries {
     }
 
     /**
-     * Generates a SQL query for the {@link com.xatkit.bot.customQuery.CustomSelectFieldsWithConditions} workflow
+     * Generates a SQL query for the {@link SelectFieldsWithConditions} workflow
      * (avg/sum operators).
      *
      * @param opField       the field to which the operator is applied
@@ -414,7 +420,7 @@ public class SqlQueries {
 
 
     /**
-     * Generates a SQL query for the {@link com.xatkit.bot.customQuery.CustomSelectFieldsWithConditions} workflow
+     * Generates a SQL query for the {@link SelectFieldsWithConditions} workflow
      * (no operator).
      *
      * @param selectFields  the select fields

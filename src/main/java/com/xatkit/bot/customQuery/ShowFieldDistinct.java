@@ -3,42 +3,36 @@ package com.xatkit.bot.customQuery;
 import bodi.generator.dataSource.ResultSet;
 import com.xatkit.bot.Bot;
 import com.xatkit.bot.library.ContextKeys;
-import com.xatkit.bot.library.Entities;
 import com.xatkit.bot.sql.SqlQueries;
 import com.xatkit.execution.State;
 import com.xatkit.execution.StateContext;
 
-import java.text.MessageFormat;
-
 import static org.apache.logging.log4j.util.Strings.isEmpty;
 
 /**
- * The Custom Value Frequency workflow of a chatbot.
+ * The Show Field Distinct workflow of a chatbot.
  * <p>
- * Given a value of a field, this workflow gets its frequency (i.e. the number of occurrences) within the field and
- * shows it to the user.
- * <p>
- * Note that only the values present in {@link Entities#fieldValueMap} can be recognized.
+ * Given a field name, this workflow gets the unique values (i.e. a set) of that field and shows it to the user.
  * <p>
  * This workflow is run within a {@link CustomQuery} workflow.
  *
  * @see CustomQuery
  */
-public class CustomValueFrequency extends AbstractCustomQuery {
+public class ShowFieldDistinct extends AbstractCustomQuery {
 
-    public CustomValueFrequency(Bot bot, State returnState) {
+    public ShowFieldDistinct(Bot bot, State returnState) {
         super(bot, returnState);
     }
 
     @Override
     protected boolean checkParamsOk(StateContext context) {
-        String value = (String) context.getSession().get(ContextKeys.VALUE);
-        return !isEmpty(value);
+        String field = (String) context.getSession().get(ContextKeys.FIELD);
+        return !isEmpty(field);
     }
 
     @Override
     protected boolean continueWhenParamsNotOk(StateContext context) {
-        // when params are not ok, we stop the execution
+        // When params are not ok, we stop the execution
         return false;
     }
 
@@ -49,10 +43,9 @@ public class CustomValueFrequency extends AbstractCustomQuery {
 
     @Override
     protected String generateSqlStatement(StateContext context) {
-        String value = (String) context.getSession().get(ContextKeys.VALUE);
-        String field = Entities.fieldValueMap.get(value);
+        String field = (String) context.getSession().get(ContextKeys.FIELD);
         SqlQueries sqlQueries = (SqlQueries) context.getSession().get(ContextKeys.SQL_QUERIES);
-        return sqlQueries.valueFrequency(field, value);
+        return sqlQueries.showFieldDistinct(field);
     }
 
     @Override
@@ -63,18 +56,14 @@ public class CustomValueFrequency extends AbstractCustomQuery {
 
     @Override
     protected boolean continueWhenResultSetNotOk(StateContext context) {
-        // when result set is not ok, we stop the execution
+        // When result set is not ok, we stop the execution
         return false;
     }
 
     @Override
     protected String generateMessage(StateContext context) {
-        String value = (String) context.getSession().get(ContextKeys.VALUE);
-        String field = Entities.fieldValueMap.get(value);
-        String fieldRN = bot.entities.readableNames.get(field);
-        ResultSet resultSet = (ResultSet) context.getSession().get(ContextKeys.RESULTSET);
-        int valueFrequency = Integer.parseInt(resultSet.getRow(0).getColumnValue(0));
-        return MessageFormat.format(bot.messages.getString("ShowValueFrequency"), valueFrequency, fieldRN, value);
+        // This workflow doesn't print a message
+        return null;
     }
 
     @Override

@@ -116,47 +116,47 @@ public class Intents {
 
 
     /**
-     * The intent customShowFieldDistinctIntent.
+     * The intent showFieldDistinctIntent.
      */
-    public final IntentDefinition customShowFieldDistinctIntent;
+    public final IntentDefinition showFieldDistinctIntent;
 
 
     /**
-     * The intent customMostFrequentValueInFieldIntent.
+     * The intent mostFrequentValueInFieldIntent.
      */
-    public final IntentDefinition customMostFrequentValueInFieldIntent;
+    public final IntentDefinition mostFrequentValueInFieldIntent;
     /**
-     * The intent customLeastFrequentValueInFieldIntent.
+     * The intent leastFrequentValueInFieldIntent.
      */
-    public final IntentDefinition customLeastFrequentValueInFieldIntent;
-
-
-    /**
-     * The intent customValueFrequencyIntent.
-     */
-    public final IntentDefinition customValueFrequencyIntent;
+    public final IntentDefinition leastFrequentValueInFieldIntent;
 
 
     /**
-     * The intent customValue1MoreThanValue2Intent.
+     * The intent valueFrequencyIntent.
      */
-    public final IntentDefinition customValue1MoreThanValue2Intent;
-    /**
-     * The intent customValue1LessThanValue2Intent.
-     */
-    public final IntentDefinition customValue1LessThanValue2Intent;
+    public final IntentDefinition valueFrequencyIntent;
 
 
     /**
-     * The intent customRowCountIntent.
+     * The intent value1MoreThanValue2Intent.
      */
-    public final IntentDefinition customRowCountIntent;
+    public final IntentDefinition value1MoreThanValue2Intent;
+    /**
+     * The intent value1LessThanValue2Intent.
+     */
+    public final IntentDefinition value1LessThanValue2Intent;
 
 
     /**
-     * The intent customSelectFieldsWithConditionsIntent.
+     * The intent rowCountIntent.
      */
-    public final IntentDefinition customSelectFieldsWithConditionsIntent;
+    public final IntentDefinition rowCountIntent;
+
+
+    /**
+     * The intent selectFieldsWithConditionsIntent.
+     */
+    public final IntentDefinition selectFieldsWithConditionsIntent;
 
 
     /**
@@ -264,50 +264,50 @@ public class Intents {
                 .getIntentDefinition();
 
 
-        customShowFieldDistinctIntent = intent("CustomShowFieldDistinct")
-                .trainingSentences(BUNDLE.getStringArray("CustomShowFieldDistinct"))
+        showFieldDistinctIntent = intent("ShowFieldDistinct")
+                .trainingSentences(BUNDLE.getStringArray("ShowFieldDistinct"))
                 .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(entities.fieldEntity)
                 .getIntentDefinition();
 
 
-        customMostFrequentValueInFieldIntent = intent("CustomMostFrequentValueInField")
-                .trainingSentences(BUNDLE.getStringArray("CustomMostFrequentValueInField"))
-                .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(entities.fieldEntity)
-                .parameter(ContextKeys.ROW_NAME).fromFragment("ROW_NAME").entity(entities.rowNameEntity)
-                .getIntentDefinition();
-        customLeastFrequentValueInFieldIntent = intent("CustomLeastFrequentValueInField")
-                .trainingSentences(BUNDLE.getStringArray("CustomLeastFrequentValueInField"))
+        mostFrequentValueInFieldIntent = intent("MostFrequentValueInField")
+                .trainingSentences(BUNDLE.getStringArray("MostFrequentValueInField"))
                 .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(entities.fieldEntity)
                 .parameter(ContextKeys.ROW_NAME).fromFragment("ROW_NAME").entity(entities.rowNameEntity)
                 .getIntentDefinition();
+        leastFrequentValueInFieldIntent = intent("LeastFrequentValueInField")
+                .trainingSentences(BUNDLE.getStringArray("LeastFrequentValueInField"))
+                .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(entities.fieldEntity)
+                .parameter(ContextKeys.ROW_NAME).fromFragment("ROW_NAME").entity(entities.rowNameEntity)
+                .getIntentDefinition();
 
 
-        customValueFrequencyIntent = intent("CustomValueFrequency")
-                .trainingSentences(BUNDLE.getStringArray("CustomValueFrequency"))
+        valueFrequencyIntent = intent("ValueFrequency")
+                .trainingSentences(BUNDLE.getStringArray("ValueFrequency"))
                 .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(entities.fieldValueEntity)
                 .getIntentDefinition();
 
 
-        customValue1MoreThanValue2Intent = intent("CustomValue1MoreThanValue2")
-                .trainingSentences(BUNDLE.getStringArray("CustomValue1MoreThanValue2"))
+        value1MoreThanValue2Intent = intent("Value1MoreThanValue2")
+                .trainingSentences(BUNDLE.getStringArray("Value1MoreThanValue2"))
                 .parameter(ContextKeys.VALUE + "1").fromFragment("VALUE1").entity(entities.fieldValueEntity)
                 .parameter(ContextKeys.VALUE + "2").fromFragment("VALUE2").entity(entities.fieldValueEntity)
                 .getIntentDefinition();
-        customValue1LessThanValue2Intent = intent("CustomValue1LessThanValue2")
-                .trainingSentences(BUNDLE.getStringArray("CustomValue1LessThanValue2"))
+        value1LessThanValue2Intent = intent("Value1LessThanValue2")
+                .trainingSentences(BUNDLE.getStringArray("Value1LessThanValue2"))
                 .parameter(ContextKeys.VALUE + "1").fromFragment("VALUE1").entity(entities.fieldValueEntity)
                 .parameter(ContextKeys.VALUE + "2").fromFragment("VALUE2").entity(entities.fieldValueEntity)
                 .getIntentDefinition();
 
 
-        customRowCountIntent = intent("CustomRowCount")
-                .trainingSentences(BUNDLE.getStringArray("CustomRowCount"))
+        rowCountIntent = intent("RowCount")
+                .trainingSentences(BUNDLE.getStringArray("RowCount"))
                 .parameter(ContextKeys.ROW_NAME).fromFragment("ROW_NAME").entity(entities.rowNameEntity)
                 .getIntentDefinition();
 
 
-        customSelectFieldsWithConditionsIntent = intent("CustomSelectFieldsWithConditions")
-                .trainingSentences(BUNDLE.getStringArray("CustomSelectFieldsWithConditions"))
+        selectFieldsWithConditionsIntent = intent("SelectFieldsWithConditions")
+                .trainingSentences(BUNDLE.getStringArray("SelectFieldsWithConditions"))
                 .parameter(ContextKeys.NUMBER).fromFragment("NUMBER").entity(number())
                 .parameter(ContextKeys.FIELD + "1").fromFragment("FIELD1").entity(entities.fieldEntity)
                 .parameter(ContextKeys.ROW_NAME).fromFragment("ROW_NAME").entity(entities.rowNameEntity)

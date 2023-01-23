@@ -16,12 +16,12 @@ import static com.xatkit.dsl.DSL.state;
  * It allows the chatbot to recognize a "somehow free" query. The currently available kinds of query allowed through
  * this workflow are:
  * <ul>
- *     <li>{@link CustomShowFieldDistinct}</li>
- *     <li>{@link CustomFrequentValueInField}</li>
- *     <li>{@link CustomValueFrequency}</li>
- *     <li>{@link CustomValue1vsValue2}</li>
- *     <li>{@link CustomRowCount}</li>
- *     <li>{@link CustomSelectFieldsWithConditions}</li>
+ *     <li>{@link ShowFieldDistinct}</li>
+ *     <li>{@link FrequentValueInField}</li>
+ *     <li>{@link ValueFrequency}</li>
+ *     <li>{@link Value1vsValue2}</li>
+ *     <li>{@link RowCount}</li>
+ *     <li>{@link SelectFieldsWithConditions}</li>
  *     <li>{@link FieldOperatorValue}</li>
  * </ul>
  * When no pre-defined query is matched, it is executed {@link GetResult#getGenerateResultSetFromQueryState()}
@@ -35,34 +35,34 @@ public class CustomQuery {
     private final State awaitingCustomQueryState;
 
     /**
-     * The Custom Show Field Distinct workflow.
+     * The Show Field Distinct workflow.
      */
-    public CustomShowFieldDistinct customShowFieldDistinct;
+    public ShowFieldDistinct showFieldDistinct;
 
     /**
-     * The Custom Frequent Value In Field workflow.
+     * The Frequent Value In Field workflow.
      */
-    public CustomFrequentValueInField customFrequentValueInField;
+    public FrequentValueInField frequentValueInField;
 
     /**
-     * The Custom Value Frequency workflow.
+     * The Value Frequency workflow.
      */
-    public CustomValueFrequency customValueFrequency;
+    public ValueFrequency valueFrequency;
 
     /**
-     * The Custom Value1 vs Value2 workflow.
+     * The Value1 vs Value2 workflow.
      */
-    public CustomValue1vsValue2 customValue1vsValue2;
+    public Value1vsValue2 value1VsValue2;
 
     /**
-     * The Custom Row Count workflow.
+     * The Row Count workflow.
      */
-    public CustomRowCount customRowCount;
+    public RowCount rowCount;
 
     /**
-     * The Custom Select Fields With Conditions workflow.
+     * The Select Fields With Conditions workflow.
      */
-    public CustomSelectFieldsWithConditions customSelectFieldsWithConditions;
+    public SelectFieldsWithConditions selectFieldsWithConditions;
 
     /**
      * The Field Operator Value workflow.
@@ -86,12 +86,12 @@ public class CustomQuery {
 
         specifyEntities = new SpecifyEntities(bot, redirectCustomQueryState.getState());
 
-        customShowFieldDistinct = new CustomShowFieldDistinct(bot, returnState);
-        customFrequentValueInField = new CustomFrequentValueInField(bot, returnState);
-        customValueFrequency = new CustomValueFrequency(bot, returnState);
-        customValue1vsValue2 = new CustomValue1vsValue2(bot, returnState);
-        customRowCount = new CustomRowCount(bot, returnState);
-        customSelectFieldsWithConditions = new CustomSelectFieldsWithConditions(bot, returnState);
+        showFieldDistinct = new ShowFieldDistinct(bot, returnState);
+        frequentValueInField = new FrequentValueInField(bot, returnState);
+        valueFrequency = new ValueFrequency(bot, returnState);
+        value1VsValue2 = new Value1vsValue2(bot, returnState);
+        rowCount = new RowCount(bot, returnState);
+        selectFieldsWithConditions = new SelectFieldsWithConditions(bot, returnState);
         fieldOperatorValue = new FieldOperatorValue(bot, returnState);
 
         awaitingCustomQueryState
@@ -99,14 +99,14 @@ public class CustomQuery {
                     bot.reactPlatform.reply(context, bot.messages.getString("WriteYourQuery"));
                 })
                 .next()
-                .when(intentIs(bot.intents.customShowFieldDistinctIntent)).moveTo(specifyEntities.getCheckEntitiesState())
-                .when(intentIs(bot.intents.customMostFrequentValueInFieldIntent)).moveTo(specifyEntities.getCheckEntitiesState())
-                .when(intentIs(bot.intents.customLeastFrequentValueInFieldIntent)).moveTo(specifyEntities.getCheckEntitiesState())
-                .when(intentIs(bot.intents.customValueFrequencyIntent)).moveTo(specifyEntities.getCheckEntitiesState())
-                .when(intentIs(bot.intents.customValue1MoreThanValue2Intent)).moveTo(specifyEntities.getCheckEntitiesState())
-                .when(intentIs(bot.intents.customValue1LessThanValue2Intent)).moveTo(specifyEntities.getCheckEntitiesState())
-                .when(intentIs(bot.intents.customRowCountIntent)).moveTo(specifyEntities.getCheckEntitiesState())
-                .when(intentIs(bot.intents.customSelectFieldsWithConditionsIntent)).moveTo(specifyEntities.getCheckEntitiesState())
+                .when(intentIs(bot.intents.showFieldDistinctIntent)).moveTo(specifyEntities.getCheckEntitiesState())
+                .when(intentIs(bot.intents.mostFrequentValueInFieldIntent)).moveTo(specifyEntities.getCheckEntitiesState())
+                .when(intentIs(bot.intents.leastFrequentValueInFieldIntent)).moveTo(specifyEntities.getCheckEntitiesState())
+                .when(intentIs(bot.intents.valueFrequencyIntent)).moveTo(specifyEntities.getCheckEntitiesState())
+                .when(intentIs(bot.intents.value1MoreThanValue2Intent)).moveTo(specifyEntities.getCheckEntitiesState())
+                .when(intentIs(bot.intents.value1LessThanValue2Intent)).moveTo(specifyEntities.getCheckEntitiesState())
+                .when(intentIs(bot.intents.rowCountIntent)).moveTo(specifyEntities.getCheckEntitiesState())
+                .when(intentIs(bot.intents.selectFieldsWithConditionsIntent)).moveTo(specifyEntities.getCheckEntitiesState())
                 .when(intentIs(bot.intents.numericFieldOperatorValueIntent)).moveTo(specifyEntities.getCheckEntitiesState())
                 .when(intentIs(bot.intents.datetimeFieldOperatorValue)).moveTo(specifyEntities.getCheckEntitiesState())
                 // TODO: FOR TEXTUAL VALUES WE NEED TO IMPLEMENT ANY SYSTEM ENTITY
@@ -119,14 +119,14 @@ public class CustomQuery {
         redirectCustomQueryState
                 .body(context -> { })
                 .next()
-                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customShowFieldDistinctIntent.getName())).moveTo(customShowFieldDistinct.getMainState())
-                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customMostFrequentValueInFieldIntent.getName())).moveTo(customFrequentValueInField.getMainState())
-                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customLeastFrequentValueInFieldIntent.getName())).moveTo(customFrequentValueInField.getMainState())
-                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customValueFrequencyIntent.getName())).moveTo(customValueFrequency.getMainState())
-                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customValue1MoreThanValue2Intent.getName())).moveTo(customValue1vsValue2.getMainState())
-                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customValue1LessThanValue2Intent.getName())).moveTo(customValue1vsValue2.getMainState())
-                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customRowCountIntent.getName())).moveTo(customRowCount.getMainState())
-                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customSelectFieldsWithConditionsIntent.getName())).moveTo(customSelectFieldsWithConditions.getMainState())
+                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.showFieldDistinctIntent.getName())).moveTo(showFieldDistinct.getMainState())
+                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.mostFrequentValueInFieldIntent.getName())).moveTo(frequentValueInField.getMainState())
+                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.leastFrequentValueInFieldIntent.getName())).moveTo(frequentValueInField.getMainState())
+                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.valueFrequencyIntent.getName())).moveTo(valueFrequency.getMainState())
+                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.value1MoreThanValue2Intent.getName())).moveTo(value1VsValue2.getMainState())
+                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.value1LessThanValue2Intent.getName())).moveTo(value1VsValue2.getMainState())
+                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.rowCountIntent.getName())).moveTo(rowCount.getMainState())
+                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.selectFieldsWithConditionsIntent.getName())).moveTo(selectFieldsWithConditions.getMainState())
                 .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.numericFieldOperatorValueIntent.getName())).moveTo(fieldOperatorValue.getMainState())
                 .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.datetimeFieldOperatorValue.getName())).moveTo(fieldOperatorValue.getMainState());
                 // TODO: FOR TEXTUAL VALUES WE NEED TO IMPLEMENT ANY SYSTEM ENTITY

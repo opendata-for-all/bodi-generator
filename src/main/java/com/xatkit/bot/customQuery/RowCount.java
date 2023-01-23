@@ -3,35 +3,35 @@ package com.xatkit.bot.customQuery;
 import bodi.generator.dataSource.ResultSet;
 import com.xatkit.bot.Bot;
 import com.xatkit.bot.library.ContextKeys;
+import com.xatkit.bot.library.Entities;
 import com.xatkit.bot.sql.SqlQueries;
 import com.xatkit.execution.State;
 import com.xatkit.execution.StateContext;
 
 import java.text.MessageFormat;
-import java.util.List;
 
-import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.logging.log4j.util.Strings.isEmpty;
 
 /**
- * The Custom Frequent Value In Field workflow of a chatbot.
+ * The Row Count workflow of a chatbot.
  * <p>
- * Given a field name, this workflow gets the most or least frequent values of that field and shows them to the user.
+ * It is used to tell the user how many rows or entries are stored in the chatbot's tabular data source.
  * <p>
  * This workflow is run within a {@link CustomQuery} workflow.
  *
  * @see CustomQuery
+ * @see Entities#generateRowNameEntity()
  */
-public class CustomFrequentValueInField extends AbstractCustomQuery {
+public class RowCount extends AbstractCustomQuery {
 
-    public CustomFrequentValueInField(Bot bot, State returnState) {
+    public RowCount(Bot bot, State returnState) {
         super(bot, returnState);
     }
 
     @Override
     protected boolean checkParamsOk(StateContext context) {
-        String field = (String) context.getSession().get(ContextKeys.FIELD);
         String rowName = (String) context.getSession().get(ContextKeys.ROW_NAME);
-        return !isEmpty(field) && !isEmpty(rowName);
+        return !isEmpty(rowName);
     }
 
     @Override
@@ -45,23 +45,16 @@ public class CustomFrequentValueInField extends AbstractCustomQuery {
         return bot.getResult.getGenerateResultSetFromQueryState();
     }
 
+    @Override
     protected String generateSqlStatement(StateContext context) {
-        boolean mostFrequent = false;
-        if (context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customMostFrequentValueInFieldIntent.getName())) {
-            mostFrequent = true;
-        }
-        String field = (String) context.getSession().get(ContextKeys.FIELD);
         SqlQueries sqlQueries = (SqlQueries) context.getSession().get(ContextKeys.SQL_QUERIES);
-        return sqlQueries.frequentValueInField(field, mostFrequent);
+        return sqlQueries.rowCount();
     }
 
     @Override
     protected boolean checkResultSetOk(StateContext context) {
-        String field = (String) context.getSession().get(ContextKeys.FIELD);
-        String fieldRN = bot.entities.readableNames.get(field);
         ResultSet resultSet = (ResultSet) context.getSession().get(ContextKeys.RESULTSET);
-        List<String> header = resultSet.getHeader();
-        return header.get(0).equals(fieldRN) && header.get(1).equals("freq") && resultSet.getNumRows() > 0;
+        return resultSet.getNumRows() > 0;
     }
 
     @Override
@@ -72,15 +65,10 @@ public class CustomFrequentValueInField extends AbstractCustomQuery {
 
     @Override
     protected String generateMessage(StateContext context) {
-        String field = (String) context.getSession().get(ContextKeys.FIELD);
-        String fieldRN = bot.entities.readableNames.get(field);
+        String rowName = (String) context.getSession().get(ContextKeys.ROW_NAME);
         ResultSet resultSet = (ResultSet) context.getSession().get(ContextKeys.RESULTSET);
-        String frequency = resultSet.getRow(0).getColumnValue(1);
-        String messageName = "CustomLeastFrequentValueInField";
-        if (context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.customMostFrequentValueInFieldIntent.getName())) {
-            messageName = "CustomMostFrequentValueInField";
-        }
-        return MessageFormat.format(bot.messages.getString(messageName), fieldRN, frequency);
+        int rowCount = Integer.parseInt(resultSet.getRow(0).getColumnValue(0));
+        return MessageFormat.format(bot.messages.getString("ShowRowCount"), rowCount, rowName);
     }
 
     @Override
