@@ -18,8 +18,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.xatkit.bot.customQuery.SelectFieldsWithConditions.DATETIME;
-import static com.xatkit.bot.customQuery.SelectFieldsWithConditions.DECIMAL;
+import static com.xatkit.bot.customQuery.AbstractCustomQuery.DATETIME;
+import static com.xatkit.bot.customQuery.AbstractCustomQuery.DECIMAL;
 import static com.xatkit.bot.customQuery.SelectFieldsWithConditions.MIN;
 
 /**
@@ -470,7 +470,50 @@ public class SqlQueries {
                 (fClean, f) -> fClean + " AS `" + f + "`").collect(Collectors.toList()));
 
         String sqlQuery = "SELECT " + selectFieldsString + " FROM " + table
-                + " WHERE " + toSqlCondition(field, operator, value);
+                + " WHERE " + toSqlCondition(field, operator, escapeQuotes(value));
+        if (!filters.isEmpty()) {
+            sqlQuery += " AND " + String.join(" AND ", getFiltersAsSqlConditions());
+        }
+        return sqlQuery;
+    }
+
+
+    /**
+     * Generates a SQL query for the {@link com.xatkit.bot.customQuery.FieldBetweenValues} workflow.
+     *
+     * @param selectFields the select fields
+     * @param field        the field to apply the between operator
+     * @param value1       the first value of the interval
+     * @param value2       the second value of the interval
+     * @param dataType     the data type of the field
+     * @return the string
+     */
+    public String fieldBetweenValues(List<String> selectFields, String field, String value1, String value2, String dataType) {
+        if (!selectFields.contains(field)) {
+            selectFields.add(field);
+        }
+        List<String> selectFieldsClean =
+                selectFields.stream().map(SqlQueries::replaceSpecialChars).collect(Collectors.toList());
+        String selectFieldsString = String.join(", ", Streams.zip(selectFieldsClean.stream(), selectFields.stream(),
+                (fClean, f) -> fClean + " AS `" + f + "`").collect(Collectors.toList()));
+
+        String fieldClean = replaceSpecialChars(field);
+        String castedField = null;
+        String castedValue1 = null;
+        String castedValue2 = null;
+        if (dataType.equals(DATETIME)) {
+            castedField = toDateTime(fieldClean);
+            castedValue1 = toDateTime("'" + escapeQuotes(value1) + "'");
+            castedValue2 = toDateTime("'" + escapeQuotes(value2) + "'");
+        } else if (dataType.equals(DECIMAL)) {
+            castedField = toDecimal(fieldClean);
+            castedValue1 = toDecimal(escapeQuotes(value1));
+            castedValue2 = toDecimal(escapeQuotes(value2));
+        }
+
+        String sqlQuery = "SELECT " + selectFieldsString + " FROM " + table
+                + " WHERE " + fieldClean + " <> '' AND "
+                + castedField + " BETWEEN " + castedValue1 + " AND " + castedValue2;
         if (!filters.isEmpty()) {
             sqlQuery += " AND " + String.join(" AND ", getFiltersAsSqlConditions());
         }

@@ -45,6 +45,16 @@ public abstract class AbstractCustomQuery {
     protected final State returnState;
 
     /**
+     * The constant DECIMAL (it is a data type).
+     */
+    public static final String DECIMAL = "decimal";
+
+    /**
+     * The constant DATETIME (it is a data type).
+     */
+    public static final String DATETIME = "datetime";
+
+    /**
      * Instantiates a new custom query workflow.
      *
      * @param bot         the chatbot that uses this workflow

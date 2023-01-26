@@ -23,6 +23,7 @@ import static com.xatkit.dsl.DSL.state;
  *     <li>{@link RowCount}</li>
  *     <li>{@link SelectFieldsWithConditions}</li>
  *     <li>{@link FieldOperatorValue}</li>
+ *     <li>{@link FieldBetweenValues}</li>
  * </ul>
  * When no pre-defined query is matched, it is executed {@link GetResult#getGenerateResultSetFromQueryState()}
  */
@@ -70,6 +71,11 @@ public class CustomQuery {
     public FieldOperatorValue fieldOperatorValue;
 
     /**
+     * The Field Between Values workflow.
+     */
+    public FieldBetweenValues fieldBetweenValues;
+
+    /**
      * The Specify Entities workflow.
      */
     public SpecifyEntities specifyEntities;
@@ -93,6 +99,7 @@ public class CustomQuery {
         rowCount = new RowCount(bot, returnState);
         selectFieldsWithConditions = new SelectFieldsWithConditions(bot, returnState);
         fieldOperatorValue = new FieldOperatorValue(bot, returnState);
+        fieldBetweenValues = new FieldBetweenValues(bot, returnState);
 
         awaitingCustomQueryState
                 .body(context -> {
@@ -108,9 +115,11 @@ public class CustomQuery {
                 .when(intentIs(bot.intents.rowCountIntent)).moveTo(specifyEntities.getCheckEntitiesState())
                 .when(intentIs(bot.intents.selectFieldsWithConditionsIntent)).moveTo(specifyEntities.getCheckEntitiesState())
                 .when(intentIs(bot.intents.numericFieldOperatorValueIntent)).moveTo(specifyEntities.getCheckEntitiesState())
-                .when(intentIs(bot.intents.datetimeFieldOperatorValue)).moveTo(specifyEntities.getCheckEntitiesState())
+                .when(intentIs(bot.intents.datetimeFieldOperatorValueIntent)).moveTo(specifyEntities.getCheckEntitiesState())
                 // TODO: FOR TEXTUAL VALUES WE NEED TO IMPLEMENT ANY SYSTEM ENTITY
-                //.when(intentIs(bot.intents.textualFieldOperatorValue)).moveTo(specifyEntities.getCheckEntitiesState())
+                //.when(intentIs(bot.intents.textualFieldOperatorValueIntent)).moveTo(specifyEntities.getCheckEntitiesState())
+                .when(intentIs(bot.intents.numericFieldBetweenValuesIntent)).moveTo(specifyEntities.getCheckEntitiesState())
+                .when(intentIs(bot.intents.datetimeFieldBetweenValuesIntent)).moveTo(specifyEntities.getCheckEntitiesState())
 
                 .when(intentIs(bot.intents.showDataIntent)).moveTo(bot.getResult.getGenerateResultSetState())
                 .when(intentIs(bot.coreLibraryI18n.Quit)).moveTo(returnState)
@@ -128,9 +137,11 @@ public class CustomQuery {
                 .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.rowCountIntent.getName())).moveTo(rowCount.getMainState())
                 .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.selectFieldsWithConditionsIntent.getName())).moveTo(selectFieldsWithConditions.getMainState())
                 .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.numericFieldOperatorValueIntent.getName())).moveTo(fieldOperatorValue.getMainState())
-                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.datetimeFieldOperatorValue.getName())).moveTo(fieldOperatorValue.getMainState());
+                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.datetimeFieldOperatorValueIntent.getName())).moveTo(fieldOperatorValue.getMainState())
                 // TODO: FOR TEXTUAL VALUES WE NEED TO IMPLEMENT ANY SYSTEM ENTITY
-                //.when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.textualFieldOperatorValue.getName())).moveTo(fieldOperatorValue.getMainState());
+                //.when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.textualFieldOperatorValueIntent.getName())).moveTo(fieldOperatorValue.getMainState())
+                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.numericFieldBetweenValuesIntent.getName())).moveTo(fieldBetweenValues.getMainState())
+                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.datetimeFieldBetweenValuesIntent.getName())).moveTo(fieldBetweenValues.getMainState());
 
         this.awaitingCustomQueryState = awaitingCustomQueryState.getState();
     }

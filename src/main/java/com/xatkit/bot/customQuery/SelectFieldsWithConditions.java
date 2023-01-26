@@ -48,8 +48,6 @@ public class SelectFieldsWithConditions extends AbstractCustomQuery {
     public static final String NEWEST = "newest";
     public static final String ALL = "all";
     public static final String DISTINCT = "distinct";
-    public static final String DECIMAL = "decimal";
-    public static final String DATETIME = "datetime";
     public static final String DEFAULT_NUMBER = "1";
 
     /*

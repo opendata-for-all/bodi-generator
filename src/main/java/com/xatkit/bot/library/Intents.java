@@ -164,13 +164,17 @@ public class Intents {
      */
     public final IntentDefinition numericFieldOperatorValueIntent;
     /**
-     * The intent datetimeFieldOperatorValue.
+     * The intent datetimeFieldOperatorValueIntent.
      */
-    public final IntentDefinition datetimeFieldOperatorValue;
+    public final IntentDefinition datetimeFieldOperatorValueIntent;
     /**
-     * The intent textualFieldOperatorValue.
+     * The intent textualFieldOperatorValueIntent.
      */
-    public final IntentDefinition textualFieldOperatorValue;
+    public final IntentDefinition textualFieldOperatorValueIntent;
+
+
+    public final IntentDefinition numericFieldBetweenValuesIntent;
+    public final IntentDefinition datetimeFieldBetweenValuesIntent;
 
 
     /**
@@ -325,19 +329,35 @@ public class Intents {
                 .parameter(ContextKeys.OPERATOR).fromFragment("OPERATOR").entity(entities.numericOperatorEntity)
                 .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(number())
                 .getIntentDefinition();
-        datetimeFieldOperatorValue = intent("DatetimeFieldOperatorValue")
+        datetimeFieldOperatorValueIntent = intent("DatetimeFieldOperatorValue")
                 .trainingSentences(BUNDLE.getStringArray("FieldOperatorValue"))
                 .parameter(ContextKeys.ROW_NAME).fromFragment("ROW_NAME").entity(entities.rowNameEntity)
                 .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(entities.datetimeFieldEntity)
                 .parameter(ContextKeys.OPERATOR).fromFragment("OPERATOR").entity(entities.datetimeOperatorEntity)
                 .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(dateTime())
                 .getIntentDefinition();
-        textualFieldOperatorValue = intent("TextualFieldOperatorValue")
+        textualFieldOperatorValueIntent = intent("TextualFieldOperatorValue")
                 .trainingSentences(BUNDLE.getStringArray("FieldOperatorValue"))
                 .parameter(ContextKeys.ROW_NAME).fromFragment("ROW_NAME").entity(entities.rowNameEntity)
                 .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(entities.textualFieldEntity)
                 .parameter(ContextKeys.OPERATOR).fromFragment("OPERATOR").entity(entities.textualOperatorEntity)
                 .parameter(ContextKeys.VALUE).fromFragment("VALUE").entity(any())
+                .getIntentDefinition();
+
+
+        numericFieldBetweenValuesIntent = intent("NumericFieldBetweenValues")
+                .trainingSentences(BUNDLE.getStringArray("FieldBetweenValues"))
+                .parameter(ContextKeys.ROW_NAME).fromFragment("ROW_NAME").entity(entities.rowNameEntity)
+                .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(entities.numericFieldEntity)
+                .parameter(ContextKeys.VALUE + "1").fromFragment("VALUE1").entity(number())
+                .parameter(ContextKeys.VALUE + "2").fromFragment("VALUE2").entity(number())
+                .getIntentDefinition();
+        datetimeFieldBetweenValuesIntent = intent("DatetimeFieldBetweenValues")
+                .trainingSentences(BUNDLE.getStringArray("FieldBetweenValues"))
+                .parameter(ContextKeys.ROW_NAME).fromFragment("ROW_NAME").entity(entities.rowNameEntity)
+                .parameter(ContextKeys.FIELD).fromFragment("FIELD").entity(entities.datetimeFieldEntity)
+                .parameter(ContextKeys.VALUE + "1").fromFragment("VALUE1").entity(dateTime())
+                .parameter(ContextKeys.VALUE + "2").fromFragment("VALUE2").entity(dateTime())
                 .getIntentDefinition();
     }
 }

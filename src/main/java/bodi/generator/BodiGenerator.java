@@ -377,6 +377,7 @@ public final class BodiGenerator {
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/structuredQuery/StructuredFilter.java");
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/structuredQuery/StructuredQuery.java");
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/FieldOperatorValue.java");
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/FieldBetweenValues.java");
 
             System.out.println("Creating transitionGraph.dot test file");
             Path dotFile = Paths.get(outputFolder + "/src/test/resources/transitionGraph.dot");
@@ -599,6 +600,7 @@ public final class BodiGenerator {
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/structuredQuery/StructuredFilter.java");
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/structuredQuery/StructuredQuery.java");
             botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/FieldOperatorValue.java");
+            botFiles.add(outputFolder + "/src/main/java/com/xatkit/bot/customQuery/FieldBetweenValues.java");
 
             System.out.println("Creating transitionGraph.dot test file");
             Path dotFile = Paths.get(outputFolder + "/src/test/resources/transitionGraph.dot");
