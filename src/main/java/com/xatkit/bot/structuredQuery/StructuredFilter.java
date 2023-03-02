@@ -199,8 +199,8 @@ public class StructuredFilter {
                 })
                 .next()
                 .when(intentIs(bot.intents.numericFieldOperatorValueIntent)).moveTo(removeFilterState)
-                .when(intentIs(bot.intents.datetimeFieldOperatorValue)).moveTo(removeFilterState)
-                .when(intentIs(bot.intents.textualFieldOperatorValue)).moveTo(removeFilterState)
+                .when(intentIs(bot.intents.datetimeFieldOperatorValueIntent)).moveTo(removeFilterState)
+                .when(intentIs(bot.intents.textualFieldOperatorValueIntent)).moveTo(removeFilterState)
                 .when(intentIs(bot.coreLibraryI18n.Quit)).moveTo(returnState);
 
         removeFilterState

@@ -83,6 +83,11 @@ public final class CodeGenerator {
                         </dependency>
                         <dependency>
                             <groupId>com.xatkit</groupId>
+                            <artifactId>xatkit-nlu-client</artifactId>
+                            <version>0.0.1-SNAPSHOT</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>com.xatkit</groupId>
                             <artifactId>xatkit-logs-postgres</artifactId>
                             <version>0.0.1-SNAPSHOT</version>
                         </dependency>

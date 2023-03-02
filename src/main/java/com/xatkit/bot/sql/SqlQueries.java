@@ -37,6 +37,8 @@ public class SqlQueries {
      */
     private static final int SCALE = 4;
 
+    private static final String isoDatetimeFormat = "yyyy-MM-dd''T''HH:mm:ssZ";
+
     /**
      * A set of filters that are intended to be added to the generated SQL queries.
      */
@@ -71,7 +73,7 @@ public class SqlQueries {
 
     private static String toDateTime(String field) {
         // TODO: The format depends on the dataset. We need to know it
-        return "TO_TIMESTAMP(" + field + ", 'yyyy/MM/dd')";
+        return "TO_TIMESTAMP(" + field + ", '" + isoDatetimeFormat + "')";
     }
 
     private static String cast(String field, String dataType) {
@@ -226,13 +228,13 @@ public class SqlQueries {
                 return "UPPER(" + field + ") LIKE UPPER('%" + value + "')";
             // Datetime Filters
             case "date_equals":
-                return field + " <> ''" + " AND " + toDateTime(field) + " =  TO_TIMESTAMP('" + value + "', 'yyyy-MM-dd''T''HH:mm:ssZ')";
+                return field + " <> ''" + " AND " + toDateTime(field) + " = " + toDateTime("'" + value + "'");
             case "date_different":
-                return field + " <> ''" + " AND " + toDateTime(field) + " <>  TO_TIMESTAMP('" + value + "', 'yyyy-MM-dd''T''HH:mm:ssZ')";
+                return field + " <> ''" + " AND " + toDateTime(field) + " <> " + toDateTime("'" + value + "'");
             case "before":
-                return field + " <> ''" + " AND " + toDateTime(field) + " <  TO_TIMESTAMP('" + value + "', 'yyyy-MM-dd''T''HH:mm:ssZ')";
+                return field + " <> ''" + " AND " + toDateTime(field) + " < " + toDateTime("'" + value + "'");
             case "after":
-                return field + " <> ''" + " AND " + toDateTime(field) + " >  TO_TIMESTAMP('" + value + "', 'yyyy-MM-dd''T''HH:mm:ssZ')";
+                return field + " <> ''" + " AND " + toDateTime(field) + " > " + toDateTime("'" + value + "'");
             default:
                 return null;
         }
@@ -476,7 +478,6 @@ public class SqlQueries {
         }
         return sqlQuery;
     }
-
 
     /**
      * Generates a SQL query for the {@link com.xatkit.bot.customQuery.FieldBetweenValues} workflow.

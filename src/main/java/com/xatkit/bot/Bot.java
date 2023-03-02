@@ -209,12 +209,12 @@ public class Bot {
                 .body(context -> {
                     reactPlatform.reply(context, messages.getString("SelectAction"),
                             Utils.getFirstTrainingSentences(
-                                    intents.structuredQueryIntent,
-                                    intents.customQueryIntent));
+                                    intents.customQueryIntent,
+                                    intents.structuredQueryIntent));
                 })
                 .next()
-                .when(intentIs(intents.structuredQueryIntent)).moveTo(structuredQuery.getAwaitingStructuredQueryState())
-                .when(intentIs(intents.customQueryIntent)).moveTo(customQuery.getAwaitingCustomQueryState());
+                .when(intentIs(intents.customQueryIntent)).moveTo(customQuery.getAwaitingCustomQueryState())
+                .when(intentIs(intents.structuredQueryIntent)).moveTo(structuredQuery.getAwaitingStructuredQueryState());
 
         /*
          * The state that is executed if the engine doesn't find any navigable transition in a state and the state
