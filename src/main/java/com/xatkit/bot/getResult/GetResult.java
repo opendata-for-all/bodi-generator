@@ -89,7 +89,11 @@ public class GetResult {
         generateResultSetFromQueryState
                 .body(context -> {
                     String query = context.getIntent().getMatchedInput();
-                    context.getSession().put(ContextKeys.RESULTSET, nlpServerClient.runQuery(bot, query));
+                    ResultSet resultSet = nlpServerClient.runQuery(bot, query);
+                    if (resultSet.getNumRows() > 0) {
+                        bot.reactPlatform.reply(context, bot.messages.getString("NLPServerMessage"));
+                    }
+                    context.getSession().put(ContextKeys.RESULTSET, resultSet);
                 })
                 .next()
                 .moveTo(showDataState);
