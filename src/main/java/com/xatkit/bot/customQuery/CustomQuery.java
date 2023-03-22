@@ -61,6 +61,11 @@ public class CustomQuery {
     public RowCount rowCount;
 
     /**
+     * The Field Count workflow.
+     */
+    public FieldCount fieldCount;
+
+    /**
      * The Select Fields With Conditions workflow.
      */
     public SelectFieldsWithConditions selectFieldsWithConditions;
@@ -97,6 +102,7 @@ public class CustomQuery {
         valueFrequency = new ValueFrequency(bot, returnState);
         value1VsValue2 = new Value1vsValue2(bot, returnState);
         rowCount = new RowCount(bot, returnState);
+        fieldCount = new FieldCount(bot, returnState);
         selectFieldsWithConditions = new SelectFieldsWithConditions(bot, returnState);
         fieldOperatorValue = new FieldOperatorValue(bot, returnState);
         fieldBetweenValues = new FieldBetweenValues(bot, returnState);
@@ -113,6 +119,7 @@ public class CustomQuery {
                 .when(intentIs(bot.intents.value1MoreThanValue2Intent)).moveTo(specifyEntities.getCheckEntitiesState())
                 .when(intentIs(bot.intents.value1LessThanValue2Intent)).moveTo(specifyEntities.getCheckEntitiesState())
                 .when(intentIs(bot.intents.rowCountIntent)).moveTo(specifyEntities.getCheckEntitiesState())
+                .when(intentIs(bot.intents.fieldCountIntent)).moveTo(specifyEntities.getCheckEntitiesState())
                 .when(intentIs(bot.intents.selectFieldsWithConditionsIntent)).moveTo(specifyEntities.getCheckEntitiesState())
                 .when(intentIs(bot.intents.numericFieldOperatorValueIntent)).moveTo(specifyEntities.getCheckEntitiesState())
                 .when(intentIs(bot.intents.datetimeFieldOperatorValueIntent)).moveTo(specifyEntities.getCheckEntitiesState())
@@ -135,10 +142,11 @@ public class CustomQuery {
                 .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.value1MoreThanValue2Intent.getName())).moveTo(value1VsValue2.getMainState())
                 .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.value1LessThanValue2Intent.getName())).moveTo(value1VsValue2.getMainState())
                 .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.rowCountIntent.getName())).moveTo(rowCount.getMainState())
+                .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.fieldCountIntent.getName())).moveTo(fieldCount.getMainState())
                 .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.selectFieldsWithConditionsIntent.getName())).moveTo(selectFieldsWithConditions.getMainState())
                 .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.numericFieldOperatorValueIntent.getName())).moveTo(fieldOperatorValue.getMainState())
                 .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.datetimeFieldOperatorValueIntent.getName())).moveTo(fieldOperatorValue.getMainState())
-                // TODO: FOR TEXTUAL VALUES WE NEED TO IMPLEMENT ANY SYSTEM ENTITY
+                // TODO: FOR TEXTUAL VALUES WE NEED TO IMPLEMENT ANY SYSTEM ENTITY IN XATKIT-NLU-SERVER
                 //.when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.textualFieldOperatorValueIntent.getName())).moveTo(fieldOperatorValue.getMainState())
                 .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.numericFieldBetweenValuesIntent.getName())).moveTo(fieldBetweenValues.getMainState())
                 .when(context -> context.getSession().get(ContextKeys.INTENT_NAME).equals(bot.intents.datetimeFieldBetweenValuesIntent.getName())).moveTo(fieldBetweenValues.getMainState());

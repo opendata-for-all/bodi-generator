@@ -154,6 +154,12 @@ public class Intents {
 
 
     /**
+     * The intent fieldCountIntent.
+     */
+    public final IntentDefinition fieldCountIntent;
+
+
+    /**
      * The intent selectFieldsWithConditionsIntent.
      */
     public final IntentDefinition selectFieldsWithConditionsIntent;
@@ -306,6 +312,12 @@ public class Intents {
 
         rowCountIntent = intent("RowCount")
                 .trainingSentences(BUNDLE.getStringArray("RowCount"))
+                .parameter(ContextKeys.ROW_NAME).fromFragment("ROW_NAME").entity(entities.rowNameEntity)
+                .getIntentDefinition();
+
+
+        fieldCountIntent = intent("FieldCount")
+                .trainingSentences(BUNDLE.getStringArray("FieldCount"))
                 .parameter(ContextKeys.ROW_NAME).fromFragment("ROW_NAME").entity(entities.rowNameEntity)
                 .getIntentDefinition();
 

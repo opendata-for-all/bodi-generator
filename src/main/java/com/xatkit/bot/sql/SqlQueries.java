@@ -1,6 +1,7 @@
 package com.xatkit.bot.sql;
 
 import com.google.common.collect.Streams;
+import com.xatkit.bot.customQuery.FieldCount;
 import com.xatkit.bot.customQuery.FrequentValueInField;
 import com.xatkit.bot.customQuery.RowCount;
 import com.xatkit.bot.customQuery.SelectFieldsWithConditions;
@@ -348,6 +349,15 @@ public class SqlQueries {
             sqlQuery += " WHERE " + String.join(" AND ", getFiltersAsSqlConditions());
         }
         return  sqlQuery;
+    }
+
+    /**
+     * Generates a SQL query for the {@link FieldCount} workflow.
+     *
+     * @return the sql query
+     */
+    public String fieldCount() {
+        return "SELECT * FROM " + table + " LIMIT 0";
     }
 
     /**
