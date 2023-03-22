@@ -179,7 +179,13 @@ public class Intents {
     public final IntentDefinition textualFieldOperatorValueIntent;
 
 
+    /**
+     * The intent numericFieldBetweenValuesIntent.
+     */
     public final IntentDefinition numericFieldBetweenValuesIntent;
+    /**
+     * The intent datetimeFieldBetweenValuesIntent.
+     */
     public final IntentDefinition datetimeFieldBetweenValuesIntent;
 
 
