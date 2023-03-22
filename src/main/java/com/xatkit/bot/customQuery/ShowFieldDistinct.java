@@ -67,6 +67,11 @@ public class ShowFieldDistinct extends AbstractCustomQuery {
     }
 
     @Override
+    protected boolean showResultSet(StateContext context) {
+        return true;
+    }
+
+    @Override
     protected State getNextStateWhenResultSetNotOk() {
         return bot.getResult.getGenerateResultSetFromQueryState();
     }

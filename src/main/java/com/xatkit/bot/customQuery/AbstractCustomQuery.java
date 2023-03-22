@@ -97,7 +97,8 @@ public abstract class AbstractCustomQuery {
                 .when(context -> (boolean) context.getSession().get(ContextKeys.BAD_PARAMS) && continueWhenParamsNotOk(context)).moveTo(getNextStateWhenParamsNotOk())
                 .when(context -> (boolean) context.getSession().get(ContextKeys.BAD_RESULTSET) && !continueWhenResultSetNotOk(context)).moveTo(bot.getResult.getGenerateResultSetFromQueryState())
                 .when(context -> (boolean) context.getSession().get(ContextKeys.BAD_RESULTSET) && continueWhenResultSetNotOk(context)).moveTo(getNextStateWhenResultSetNotOk())
-                .when(context -> (boolean) context.getSession().get(ContextKeys.ALL_OK)).moveTo(bot.getResult.getShowDataState());
+                .when(context -> (boolean) context.getSession().get(ContextKeys.ALL_OK) && showResultSet(context)).moveTo(bot.getResult.getShowDataState())
+                .when(context -> (boolean) context.getSession().get(ContextKeys.ALL_OK) && !showResultSet(context)).moveTo(returnState);
 
     }
 
@@ -175,4 +176,12 @@ public abstract class AbstractCustomQuery {
      * @return the string
      */
     protected abstract String generateMessage(StateContext context);
+
+    /**
+     * Returns true if the result set must be shown to the user, and false otherwise.
+     *
+     * @param context the current context
+     * @return the boolean
+     */
+    protected abstract boolean showResultSet(StateContext context);
 }

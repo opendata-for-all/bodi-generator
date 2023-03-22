@@ -65,6 +65,11 @@ public class FieldCount extends AbstractCustomQuery {
     }
 
     @Override
+    protected boolean showResultSet(StateContext context) {
+        return false;
+    }
+
+    @Override
     protected State getNextStateWhenResultSetNotOk() {
         return bot.getResult.getGenerateResultSetFromQueryState();
     }

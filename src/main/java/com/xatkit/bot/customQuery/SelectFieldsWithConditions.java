@@ -472,6 +472,11 @@ public class SelectFieldsWithConditions extends AbstractCustomQuery {
     }
 
     @Override
+    protected boolean showResultSet(StateContext context) {
+        return true;
+    }
+
+    @Override
     protected State getNextStateWhenResultSetNotOk() {
         // At this point, we ask the user an operator since we obtained 2 or more rows. Available options are:
         // Show all
