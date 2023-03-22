@@ -7,6 +7,8 @@ import com.xatkit.bot.sql.SqlQueries;
 import com.xatkit.execution.State;
 import com.xatkit.execution.StateContext;
 
+import java.text.MessageFormat;
+
 import static org.apache.logging.log4j.util.Strings.isEmpty;
 
 /**
@@ -62,8 +64,9 @@ public class ShowFieldDistinct extends AbstractCustomQuery {
 
     @Override
     protected String generateMessage(StateContext context) {
-        // This workflow doesn't print a message
-        return null;
+        String field = (String) context.getSession().get(ContextKeys.FIELD);
+        String fieldRN = bot.entities.readableNames.get(field);
+        return MessageFormat.format(bot.messages.getString("ShowFieldDistinct"), fieldRN);
     }
 
     @Override
