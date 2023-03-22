@@ -118,21 +118,33 @@ public class ImportDataController {
             botPropertiesLang.put(BotProperties.XATKIT_SERVER_PORT, portCount++);
             botPropertiesLang.put(BotProperties.XATKIT_REACT_PORT, portCount++);
             botPropertiesLang.put(BotProperties.BOT_LANGUAGE, language);
-            botPropertiesLang.put(BotProperties.XATKIT_INTENT_PROVIDER, "com.xatkit.core.recognition.dialogflow.DialogFlowIntentRecognitionProvider");
+
+            botPropertiesLang.put(BotProperties.XATKIT_INTENT_PROVIDER, "com.xatkit.core.recognition.nluserver.NLUServerIntentRecognitionProvider");
+
             botPropertiesLang.put(BotProperties.XATKIT_DIALOGFLOW_PROJECT_ID, "<your project id>");
             botPropertiesLang.put(BotProperties.XATKIT_DIALOGFLOW_CREDENTIALS_PATH, "<path to your credentials file>");
             botPropertiesLang.put(BotProperties.XATKIT_DIALOGFLOW_LANGUAGE, language);
             botPropertiesLang.put(BotProperties.XATKIT_DIALOGFLOW_CLEAN_ON_STARTUP, false);
+
             botPropertiesLang.put(BotProperties.XATKIT_NLPJS_AGENTID, "default");
             botPropertiesLang.put(BotProperties.XATKIT_NLPJS_LANGUAGE, language);
             botPropertiesLang.put(BotProperties.XATKIT_NLPJS_SERVER, "http://localhost:8080");
+
+            botPropertiesLang.put(BotProperties.XATKIT_NLUSERVER_BOTNAME, "bot-name");
+            botPropertiesLang.put(BotProperties.XATKIT_NLUSERVER_LANGUAGE, language);
+            botPropertiesLang.put(BotProperties.XATKIT_NLUSERVER_URL, "http://127.0.0.1:8000");
+            botPropertiesLang.put(BotProperties.XATKIT_NLUSERVER_FORCE_OVERWRITE, true);
+            botPropertiesLang.put(BotProperties.XATKIT_NLUSERVER_CONFIDENCE_THRESHOLD, 0.0);
+
             botPropertiesLang.put(BotProperties.XATKIT_LOGS_DATABASE, "com.xatkit.core.recognition.RecognitionMonitorPostgreSQL");
+
             botPropertiesLang.put(BotProperties.XATKIT_DATABASE_MODEL, "postgresql");
             botPropertiesLang.put(BotProperties.XATKIT_RECOGNITION_ENABLE_MONITORING, true);
             botPropertiesLang.put(BotProperties.XATKIT_POSTGRESQL_URL, "jdbc:postgresql://your-url");
             botPropertiesLang.put(BotProperties.XATKIT_POSTGRESQL_USER, "username");
             botPropertiesLang.put(BotProperties.XATKIT_POSTGRESQL_PASSWORD, "password");
             botPropertiesLang.put(BotProperties.XATKIT_POSTGRESQL_BOT_ID, 1);
+
             botPropertiesLang.put(BotProperties.BOT_ODATA_TITLE, "title");
             botPropertiesLang.put(BotProperties.BOT_ODATA_URL, "url");
         }

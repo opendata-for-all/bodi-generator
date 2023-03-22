@@ -37,6 +37,14 @@ public final class BotProperties {
     public static final String XATKIT_NLPJS_LANGUAGE = "xatkit.nlpjs.language";
     public static final String XATKIT_NLPJS_SERVER = "xatkit.nlpjs.server";
 
+    // Intent provider: xatkit-nlu-server
+
+    public static final String XATKIT_NLUSERVER_BOTNAME = "xatkit.nluserver.botname";
+    public static final String XATKIT_NLUSERVER_LANGUAGE = "xatkit.nluserver.language";
+    public static final String XATKIT_NLUSERVER_URL = "xatkit.nluserver.url";
+    public static final String XATKIT_NLUSERVER_FORCE_OVERWRITE = "xatkit.nluserver.force_overwrite";
+    public static final String XATKIT_NLUSERVER_CONFIDENCE_THRESHOLD = "xatkit.nluserver.confidence.threshold";
+
     // Database
 
     public static final String XATKIT_LOGS_DATABASE = "xatkit.logs.database";

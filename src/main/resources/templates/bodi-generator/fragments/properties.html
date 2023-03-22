@@ -70,11 +70,11 @@
                             <!-- BOT.PROPERTIES -->
                             <label th:for="${BotProperties.BOT_PAGE_LIMIT}"
                                    th:text="${BotProperties.BOT_PAGE_LIMIT}"></label>
-                            <input th:id="${BotProperties.BOT_PAGE_LIMIT}" type="number"
+                            <input th:id="${BotProperties.BOT_PAGE_LIMIT}" type="number" min="0"
                                    th:field="*{botProperties['__${BotProperties.BOT_PAGE_LIMIT}__']}">
                             <label th:for="${BotProperties.BOT_MAX_ENTRIES_TO_DISPLAY}"
                                    th:text="${BotProperties.BOT_MAX_ENTRIES_TO_DISPLAY}"></label>
-                            <input th:id="${BotProperties.BOT_MAX_ENTRIES_TO_DISPLAY}" type="number"
+                            <input th:id="${BotProperties.BOT_MAX_ENTRIES_TO_DISPLAY}" type="number" min="0"
                                    th:field="*{botProperties['__${BotProperties.BOT_MAX_ENTRIES_TO_DISPLAY}__']}">
                             <label th:for="${BotProperties.BOT_ENABLE_CHECK_CORRECT_ANSWER}"
                                    th:text="${BotProperties.BOT_ENABLE_CHECK_CORRECT_ANSWER}"></label>
@@ -119,11 +119,11 @@
                             <h4>Xatkit ports</h4>
                             <label th:for="${BotProperties.XATKIT_SERVER_PORT}"
                                    th:text="${BotProperties.XATKIT_SERVER_PORT}"></label>
-                            <input th:id="${BotProperties.XATKIT_SERVER_PORT}" type="number"
+                            <input th:id="${BotProperties.XATKIT_SERVER_PORT}" type="number" min="0"
                                    th:field="*{botPropertiesLang['__${selectedLanguage}__']['__${BotProperties.XATKIT_SERVER_PORT}__']}">
                             <label th:for="${BotProperties.XATKIT_REACT_PORT}"
                                    th:text="${BotProperties.XATKIT_REACT_PORT}"></label>
-                            <input th:id="${BotProperties.XATKIT_REACT_PORT}" type="number"
+                            <input th:id="${BotProperties.XATKIT_REACT_PORT}" type="number" min="0"
                                    th:field="*{botPropertiesLang['__${selectedLanguage}__']['__${BotProperties.XATKIT_REACT_PORT}__']}">
                         </div>
                     </div>
@@ -162,6 +162,7 @@
                             <select th:id="${BotProperties.XATKIT_INTENT_PROVIDER}"
                                     th:field="*{botPropertiesLang['__${selectedLanguage}__']['__${BotProperties.XATKIT_INTENT_PROVIDER}__']}">
                                 <option th:value="''">-</option>
+                                <option th:value="'com.xatkit.core.recognition.nluserver.NLUServerIntentRecognitionProvider'">xatkit-nlu-server</option>
                                 <option th:value="'com.xatkit.core.recognition.dialogflow.DialogFlowIntentRecognitionProvider'">DialogFlow</option>
                                 <option th:value="'com.xatkit.core.recognition.nlpjs.NlpjsIntentRecognitionProvider'">NLP.js</option>
                             </select>
@@ -235,6 +236,37 @@
                                    th:text="${BotProperties.XATKIT_NLPJS_SERVER}"></label>
                             <input th:id="${BotProperties.XATKIT_NLPJS_SERVER}" type="text"
                                    th:field="*{botPropertiesLang['__${selectedLanguage}__']['__${BotProperties.XATKIT_NLPJS_SERVER}__']}">
+                        </div>
+                        <div class="cell small-8"
+                             th:if="${properties.botPropertiesLang['__${selectedLanguage}__']['__${BotProperties.XATKIT_INTENT_PROVIDER}__']} == 'com.xatkit.core.recognition.nluserver.NLUServerIntentRecognitionProvider'">
+                            <h2>xatkit-nlu-server</h2>
+                            <label th:for="${BotProperties.XATKIT_NLUSERVER_BOTNAME}"
+                                   th:text="${BotProperties.XATKIT_NLUSERVER_BOTNAME}"></label>
+                            <input th:id="${BotProperties.XATKIT_NLUSERVER_BOTNAME}" type="text"
+                                   th:field="*{botPropertiesLang['__${selectedLanguage}__']['__${BotProperties.XATKIT_NLUSERVER_BOTNAME}__']}">
+                            <label th:for="${BotProperties.XATKIT_NLUSERVER_LANGUAGE}"
+                                   th:text="${BotProperties.XATKIT_NLUSERVER_LANGUAGE}"></label>
+                            <select th:id="${BotProperties.XATKIT_NLUSERVER_LANGUAGE}"
+                                    th:field="*{botPropertiesLang['__${selectedLanguage}__']['__${BotProperties.XATKIT_NLUSERVER_LANGUAGE}__']}">
+                                <option th:value="'en'">English</option>
+                                <option th:value="'ca'">Catalan</option>
+                                <option th:value="'es'">Spanish</option>
+                            </select>
+                            <label th:for="${BotProperties.XATKIT_NLUSERVER_URL}"
+                                   th:text="${BotProperties.XATKIT_NLUSERVER_URL}"></label>
+                            <input th:id="${BotProperties.XATKIT_NLUSERVER_URL}" type="text"
+                                   th:field="*{botPropertiesLang['__${selectedLanguage}__']['__${BotProperties.XATKIT_NLUSERVER_URL}__']}">
+                            <label th:for="${BotProperties.XATKIT_NLUSERVER_FORCE_OVERWRITE}"
+                                   th:text="${BotProperties.XATKIT_NLUSERVER_FORCE_OVERWRITE}"></label>
+                            <select th:id="${BotProperties.XATKIT_NLUSERVER_FORCE_OVERWRITE}"
+                                    th:field="*{botPropertiesLang['__${selectedLanguage}__']['__${BotProperties.XATKIT_NLUSERVER_FORCE_OVERWRITE}__']}">
+                                <option th:value="true">Yes</option>
+                                <option th:value="false">No</option>
+                            </select>
+                            <label th:for="${BotProperties.XATKIT_NLUSERVER_CONFIDENCE_THRESHOLD}"
+                                   th:text="${BotProperties.XATKIT_NLUSERVER_CONFIDENCE_THRESHOLD}"></label>
+                            <input th:id="${BotProperties.XATKIT_NLUSERVER_CONFIDENCE_THRESHOLD}" type="number" min="0" max="1" step="0.05"
+                                   th:field="*{botPropertiesLang['__${selectedLanguage}__']['__${BotProperties.XATKIT_NLUSERVER_CONFIDENCE_THRESHOLD}__']}">
                         </div>
                     </div>
                     <button type="submit" class="button" onclick="return confirm('Are you sure you want to save the changes?')">Save changes</button>

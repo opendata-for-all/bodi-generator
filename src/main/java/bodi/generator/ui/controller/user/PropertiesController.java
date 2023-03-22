@@ -186,6 +186,12 @@ public class PropertiesController {
             botPropertiesLang.put(BotProperties.XATKIT_NLPJS_AGENTID, updatedBotPropertiesLang.get(BotProperties.XATKIT_NLPJS_AGENTID));
             botPropertiesLang.put(BotProperties.XATKIT_NLPJS_LANGUAGE, updatedBotPropertiesLang.get(BotProperties.XATKIT_NLPJS_LANGUAGE));
             botPropertiesLang.put(BotProperties.XATKIT_NLPJS_SERVER, updatedBotPropertiesLang.get(BotProperties.XATKIT_NLPJS_SERVER));
+        } else if (botPropertiesLang.get(BotProperties.XATKIT_INTENT_PROVIDER).equals("com.xatkit.core.recognition.nluserver.NLUServerIntentRecognitionProvider")) {
+            botPropertiesLang.put(BotProperties.XATKIT_NLUSERVER_BOTNAME, updatedBotPropertiesLang.get(BotProperties.XATKIT_NLUSERVER_BOTNAME));
+            botPropertiesLang.put(BotProperties.XATKIT_NLUSERVER_LANGUAGE, updatedBotPropertiesLang.get(BotProperties.XATKIT_NLUSERVER_LANGUAGE));
+            botPropertiesLang.put(BotProperties.XATKIT_NLUSERVER_URL, updatedBotPropertiesLang.get(BotProperties.XATKIT_NLUSERVER_URL));
+            botPropertiesLang.put(BotProperties.XATKIT_NLUSERVER_FORCE_OVERWRITE, updatedBotPropertiesLang.get(BotProperties.XATKIT_NLUSERVER_FORCE_OVERWRITE));
+            botPropertiesLang.put(BotProperties.XATKIT_NLUSERVER_CONFIDENCE_THRESHOLD, updatedBotPropertiesLang.get(BotProperties.XATKIT_NLUSERVER_CONFIDENCE_THRESHOLD));
         }
         tab = PropertiesTab.INTENT_PROVIDER;
         return dashboard.redirect(DashboardView.PROPERTIES);

@@ -447,6 +447,14 @@ public final class BodiGenerator {
                 fw.write(BotProperties.XATKIT_NLPJS_LANGUAGE + " = " + language + "\n");
                 fw.write(BotProperties.XATKIT_NLPJS_SERVER + " = " + "http://localhost:8080" + "\n");
 
+            }  else if (conf.getString(BotProperties.XATKIT_INTENT_PROVIDER)
+                    .equals("com.xatkit.core.recognition.nluserver.NLUServerIntentRecognitionProvider")) {
+                fw.write(BotProperties.XATKIT_INTENT_PROVIDER + " = " + conf.getString(BotProperties.XATKIT_INTENT_PROVIDER) + "\n");
+                fw.write(BotProperties.XATKIT_NLUSERVER_BOTNAME + " = " + "bot-name" + "\n");
+                fw.write(BotProperties.XATKIT_NLUSERVER_LANGUAGE + " = " + language + "\n");
+                fw.write(BotProperties.XATKIT_NLUSERVER_URL + " = " + "http://127.0.0.1:8000" + "\n");
+                fw.write(BotProperties.XATKIT_NLUSERVER_FORCE_OVERWRITE + " = " + "true" + "\n");
+                fw.write(BotProperties.XATKIT_NLUSERVER_CONFIDENCE_THRESHOLD + " = " + "0.0" + "\n");
             }
 
             if (conf.getString(BotProperties.XATKIT_LOGS_DATABASE)
@@ -678,6 +686,14 @@ public final class BodiGenerator {
                 fw.write(BotProperties.XATKIT_NLPJS_AGENTID + " = " + botPropertiesLang.get(BotProperties.XATKIT_NLPJS_AGENTID) + "\n");
                 fw.write(BotProperties.XATKIT_NLPJS_LANGUAGE + " = " + botPropertiesLang.get(BotProperties.XATKIT_NLPJS_LANGUAGE) + "\n");
                 fw.write(BotProperties.XATKIT_NLPJS_SERVER + " = " + botPropertiesLang.get(BotProperties.XATKIT_NLPJS_SERVER) + "\n");
+            } else if (botPropertiesLang.get(BotProperties.XATKIT_INTENT_PROVIDER).equals("com.xatkit.core.recognition.nluserver.NLUServerIntentRecognitionProvider")) {
+                fw.write(BotProperties.XATKIT_INTENT_PROVIDER + " = " + botPropertiesLang.get(BotProperties.XATKIT_INTENT_PROVIDER) + "\n");
+                fw.write(BotProperties.XATKIT_NLUSERVER_BOTNAME + " = " + botPropertiesLang.get(BotProperties.XATKIT_NLUSERVER_BOTNAME) + "\n");
+                fw.write(BotProperties.XATKIT_NLUSERVER_LANGUAGE + " = " + botPropertiesLang.get(BotProperties.XATKIT_NLUSERVER_LANGUAGE) + "\n");
+                fw.write(BotProperties.XATKIT_NLUSERVER_URL + " = " + botPropertiesLang.get(BotProperties.XATKIT_NLUSERVER_URL) + "\n");
+                fw.write(BotProperties.XATKIT_NLUSERVER_FORCE_OVERWRITE + " = " + botPropertiesLang.get(BotProperties.XATKIT_NLUSERVER_FORCE_OVERWRITE) + "\n");
+                fw.write(BotProperties.XATKIT_NLUSERVER_CONFIDENCE_THRESHOLD + " = " + botPropertiesLang.get(BotProperties.XATKIT_NLUSERVER_CONFIDENCE_THRESHOLD) + "\n");
+
             }
 
             if (botPropertiesLang.get(BotProperties.XATKIT_LOGS_DATABASE).equals("com.xatkit.core.recognition.RecognitionMonitorPostgreSQL")) {
