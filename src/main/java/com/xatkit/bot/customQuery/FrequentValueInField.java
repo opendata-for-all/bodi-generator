@@ -30,8 +30,7 @@ public class FrequentValueInField extends AbstractCustomQuery {
     @Override
     protected boolean checkParamsOk(StateContext context) {
         String field = (String) context.getSession().get(ContextKeys.FIELD);
-        String rowName = (String) context.getSession().get(ContextKeys.ROW_NAME);
-        return !isEmpty(field) && !isEmpty(rowName);
+        return !isEmpty(field);
     }
 
     @Override
