@@ -1,7 +1,6 @@
 package bodi.generator.library;
 
 import org.apache.commons.configuration2.Configuration;
-import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;

@@ -315,7 +315,7 @@ public final class CodeGenerator {
      *
      * @param conf the bodi-generator configuration properties
      */
-    private static void createBotPropertiesFile(Configuration conf) {
+    protected static void createBotPropertiesFile(Configuration conf) {
         String outputFolder = conf.getString(BodiGeneratorProperties.OUTPUT_DIRECTORY);
         try {
             FileWriter fw = new FileWriter(outputFolder + "/src/main/resources/config.properties");
@@ -344,7 +344,7 @@ public final class CodeGenerator {
      * @param language the language that the properties belong to
      * @param conf     the bodi-generator configuration properties
      */
-    private static void createBotLanguagePropertiesFile(String language, Configuration conf) {
+    protected static void createBotLanguagePropertiesFile(String language, Configuration conf) {
         String outputFolder = conf.getString(BodiGeneratorProperties.OUTPUT_DIRECTORY);
         try {
             FileWriter fw = new FileWriter(outputFolder + "/src/main/resources/config_" + language + ".properties");
