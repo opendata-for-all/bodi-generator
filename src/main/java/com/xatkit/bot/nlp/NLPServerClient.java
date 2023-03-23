@@ -1,7 +1,7 @@
 package com.xatkit.bot.nlp;
 
-import bodi.generator.dataSource.ResultSet;
-import bodi.generator.dataSource.Row;
+import com.xatkit.bot.library.ResultSet;
+import com.xatkit.bot.library.Row;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.xatkit.bot.Bot;

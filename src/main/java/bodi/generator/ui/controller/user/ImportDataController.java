@@ -1,6 +1,6 @@
 package bodi.generator.ui.controller.user;
 
-import bodi.generator.dataSchema.BodiGeneratorProperties;
+import bodi.generator.library.BodiGeneratorProperties;
 import bodi.generator.dataSchema.DataSchema;
 import bodi.generator.dataSource.TabularDataSource;
 import bodi.generator.ui.model.BodiGeneratorObjects;
@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import static bodi.generator.BodiGenerator.tabularDataSourceToDataSchema;
+import static bodi.generator.library.BodiGeneratorProperties.MAIN_SCHEMA_TYPE;
 
 /**
  * The controller for the {@code import_data} functionalities of the bodi-generator UI.
@@ -81,8 +81,8 @@ public class ImportDataController {
         // TODO: check csv.getContentType().equals("text/csv")
         objects.setDataName(file.getOriginalFilename());
         objects.setTds(new TabularDataSource(new ByteArrayInputStream(file.getInputStream().readAllBytes()), csvDelimiter)); // TODO: HANDLE DELIMITER ERROR
-        objects.setDs(tabularDataSourceToDataSchema(objects.getTds()));
-        objects.setSchemaType(objects.getDs().getSchemaType("mainSchemaType"));
+        objects.setDs(objects.getTds().toDataSchema());
+        objects.setSchemaType(objects.getDs().getSchemaType(MAIN_SCHEMA_TYPE));
 
         objects.setProperties(new Properties());
 

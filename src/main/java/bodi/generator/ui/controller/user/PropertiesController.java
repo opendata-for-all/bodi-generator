@@ -1,6 +1,6 @@
 package bodi.generator.ui.controller.user;
 
-import bodi.generator.dataSchema.BodiGeneratorProperties;
+import bodi.generator.library.BodiGeneratorProperties;
 import bodi.generator.dataSchema.DataSchema;
 import bodi.generator.ui.model.BodiGeneratorObjects;
 import bodi.generator.ui.model.Properties;

@@ -43,7 +43,7 @@
                 <form th:object="${properties}"
                       th:action="@{/bodi-generator/properties/store_properties_general}"
                       th:with="BotProperties=${T(com.xatkit.bot.library.BotProperties)},
-                               BodiGeneratorProperties=${T(bodi.generator.dataSchema.BodiGeneratorProperties)}"
+                               BodiGeneratorProperties=${T(bodi.generator.library.BodiGeneratorProperties)}"
                       method="POST">
                     <div class="grid-x">
                         <div class="cell small-6">

@@ -1,6 +1,6 @@
 package com.xatkit.bot.structuredQuery;
 
-import bodi.generator.dataSource.ResultSet;
+import com.xatkit.bot.library.ResultSet;
 import com.xatkit.bot.Bot;
 import com.xatkit.bot.library.ContextKeys;
 import com.xatkit.bot.library.Utils;

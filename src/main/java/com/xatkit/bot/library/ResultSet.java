@@ -1,4 +1,4 @@
-package bodi.generator.dataSource;
+package com.xatkit.bot.library;
 
 import com.xatkit.bot.Bot;
 
@@ -6,13 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
 /**
  * The tabular answer container.
  * <p>
- * Representation of a tabular data structure, that is, data organized as a table. Its structure and behaviour is
- * similar to {@link TabularDataSource}.
- * @see TabularDataSource
+ * Representation of a tabular data structure, that is, data organized as a table.
  * @see com.xatkit.bot.sql.SqlEngine#runSqlQuery(Bot, String)
  * @see com.xatkit.bot.nlp.NLPServerClient#runQuery(Bot, String)
  */
@@ -48,7 +45,7 @@ public class ResultSet {
      * @param table  the table
      */
     public ResultSet(List<String> header, List<Row> table) {
-        for (int i = 0; i < table.size() ; i++) {
+        for (int i = 0; i < table.size(); i++) {
             if (table.get(i).getValues().size() != header.size()) {
                 throw new IllegalArgumentException("The header size (" + header.size() + ") is not equal to size of "
                         + "row " + i + " (" + table.get(i).getValues().size() + ")");
@@ -60,6 +57,9 @@ public class ResultSet {
         numRows = table.size();
     }
 
+    /**
+     * Instantiates a new ResultSet.
+     */
     public ResultSet() {
         this.header = new ArrayList<>();
         this.table = new ArrayList<>();

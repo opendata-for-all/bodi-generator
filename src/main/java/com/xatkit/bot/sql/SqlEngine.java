@@ -1,6 +1,6 @@
 package com.xatkit.bot.sql;
 
-import bodi.generator.dataSource.Row;
+import com.xatkit.bot.library.Row;
 import com.xatkit.bot.Bot;
 import fr.inria.atlanmod.commons.log.Log;
 
@@ -59,12 +59,12 @@ public class SqlEngine {
      *
      * @param sqlQuery the sql query
      * @param bot      the chatbot
-     * @return if successful, the {@link bodi.generator.dataSource.ResultSet} containing the result of the SQL query,
+     * @return if successful, the {@link com.xatkit.bot.library.ResultSet} containing the result of the SQL query,
      * otherwise {@code null}.
      */
-    public bodi.generator.dataSource.ResultSet runSqlQuery(Bot bot, String sqlQuery) {
+    public com.xatkit.bot.library.ResultSet runSqlQuery(Bot bot, String sqlQuery) {
         if (isEmpty(sqlQuery)) {
-            return new bodi.generator.dataSource.ResultSet();
+            return new com.xatkit.bot.library.ResultSet();
         }
         Log.info("Trying to run the SQL query: {0}", sqlQuery);
         try {
@@ -95,7 +95,7 @@ public class SqlEngine {
                     }
                     table.add(new Row(values));
                 }
-                return new bodi.generator.dataSource.ResultSet(header, table);
+                return new com.xatkit.bot.library.ResultSet(header, table);
             } else {
                 Log.error("An error occurred while reconnecting to {0}, see the attached exception", url);
             }
@@ -103,6 +103,6 @@ public class SqlEngine {
             Log.error("An error occurred while running the SQL query {0}, see the attached exception", sqlQuery);
             Log.error(e.getMessage());
         }
-        return new bodi.generator.dataSource.ResultSet();
+        return new com.xatkit.bot.library.ResultSet();
     }
 }

@@ -1,11 +1,18 @@
 package bodi.generator.dataSchema;
 
 import bodi.generator.dataSource.TabularDataSource;
+import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
+import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 
@@ -44,6 +51,13 @@ public class SchemaType implements Serializable {
     private List<SchemaField> deletedSchemaFields;
 
     /**
+     * Collection of row names or aliases of the {@link SchemaType}, in different languages.
+     * <p>
+     * Row names are the different ways one could refer to the rows of a dataset.
+     */
+    private Map<String, Set<String>> rowNames;
+
+    /**
      * Instantiates a new {@link SchemaType} with a given name.
      *
      * @param name the name
@@ -53,6 +67,20 @@ public class SchemaType implements Serializable {
         this.schemaFields = new ArrayList<>();
         this.schemaFieldGroups = new ArrayList<>();
         this.deletedSchemaFields = new ArrayList<>();
+        this.rowNames = new HashMap<>();
+        String defaultRowNamesFile = "defaultRowNames.json";
+        InputStream rowNamesIS = Thread.currentThread().getContextClassLoader().getResourceAsStream(defaultRowNamesFile);
+        if (rowNamesIS == null) {
+            System.out.println("Cannot find the default row names file \"" + defaultRowNamesFile + "\"");
+        } else {
+            JSONObject defaultRowNamesJson = new JSONObject(new JSONTokener(rowNamesIS));
+            for (String language : DataSchema.languages) {
+                JSONArray defaultRowNamesLang = defaultRowNamesJson.getJSONObject("rowNameEntity").getJSONArray(language);
+                rowNames.put(language, new HashSet<>(defaultRowNamesLang.toList().stream()
+                        .map(object -> Objects.toString(object, null))
+                        .toList()));
+            }
+        }
     }
 
     /**
@@ -240,6 +268,15 @@ public class SchemaType implements Serializable {
     }
 
     /**
+     * Gets the row names of the {@link SchemaType}.
+     *
+     * @return the row names
+     */
+    public Map<String, Set<String>> getRowNames() {
+        return rowNames;
+    }
+
+    /**
      * Generates a JSON object containing all the fields of the SchemaType, classified by types.
      *
      * @return the json object containing all the fields of the SchemaType
@@ -274,4 +311,18 @@ public class SchemaType implements Serializable {
         return entities;
     }
 
+    /**
+     * Generates a JSON object containing all the row names.
+     *
+     * @return the json object containing the row names and the default row names, if any
+     */
+    public JSONObject generateRowNamesJson() {
+        JSONObject rowNamesJson = new JSONObject();
+        rowNamesJson.put("rowNameEntity", new JSONObject());
+        for (String language : DataSchema.languages) {
+            rowNamesJson.getJSONObject("rowNameEntity").put(language, new JSONArray());
+            rowNamesJson.getJSONObject("rowNameEntity").getJSONArray(language).putAll(rowNames.get(language));
+        }
+        return rowNamesJson;
+    }
 }

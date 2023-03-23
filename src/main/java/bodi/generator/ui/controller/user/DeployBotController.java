@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletResponse;
 
-import static bodi.generator.BodiGenerator.createBot;
+import static bodi.generator.library.BotGeneratorUI.createBot;
 
 /**
  * The controller for the {@code deploy_bot} functionalities of the bodi-generator UI.

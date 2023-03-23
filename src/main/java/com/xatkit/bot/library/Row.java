@@ -1,4 +1,5 @@
-package bodi.generator.dataSource;
+package com.xatkit.bot.library;
+
 
 import java.io.Serializable;
 import java.util.List;
@@ -9,11 +10,8 @@ import java.util.List;
  * It does not contain information about the name of the columns (i.e. the labels of its cells), so it should not be
  * used alone.
  * <p>
- * {@link TabularDataSource} and {@link ResultSet} are examples of classes that use {@link Row} to create a tabular
- * data structure.
- *
- * @see TabularDataSource
- * @see ResultSet
+ * bodi.generator.dataSchemaTabularDataSource and {@link ResultSet} are examples of classes that use {@link Row}
+ * to create a tabular data structure.
  */
 public class Row implements Serializable {
 
@@ -40,8 +38,6 @@ public class Row implements Serializable {
      *
      * @param i the
      * @return the string
-     *
-     * @see TabularDataSource#removeColumn(int)
      */
     public String removeValue(int i) {
         return this.values.remove(i);

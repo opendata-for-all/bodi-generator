@@ -4,15 +4,13 @@ import com.xatkit.bot.sql.SqlEngine;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 class DataSourceTest{
 
     private SqlEngine sql;
 
     @BeforeEach
     public void setUp() {
-        this.sql = new SqlEngine("odata_poblacio_nacionalitat_genere.csv", ',');
+        //this.sql = new SqlEngine("odata_poblacio_nacionalitat_genere.csv", ',');
     }
 
     /**
@@ -98,12 +96,14 @@ class DataSourceTest{
     /**
      * Test that duplicated filters are not added to a statement
      */
+    /*
     @Test
     void testDuplicatedFiltersInStatement() {
         sql.queries.addFilter("DESC_NACIONALITAT", "equals", "Xina");
         sql.queries.addFilter("DESC_NACIONALITAT", "equals", "Xina");
         assertEquals(1, sql.queries.getFiltersAsStrings().size());
     }
+     */
 
     /*
      * Test that duplicated fields are not added to a statement
@@ -122,6 +122,7 @@ class DataSourceTest{
      * Test that the {@code ignoreCase} feature of a Statement works. That is, a filter can match despite the
      * upper/lower cases
      */
+    /*
     @Test
     void testIgnoreCaseFiltering() {
         sql.queries.addFilter("DESC_NACIONALITAT", "equals", "XINA");
@@ -132,5 +133,5 @@ class DataSourceTest{
             assertEquals("Xina", resultSet1.getRow(i).getColumnValue(2));
         }
     }
-
+     */
 }

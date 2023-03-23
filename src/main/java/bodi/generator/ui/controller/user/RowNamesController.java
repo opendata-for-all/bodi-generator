@@ -49,7 +49,7 @@ public class RowNamesController {
     @GetMapping("")
     public String showRowNames(Model model) {
         if (objects.isDataImported()) {
-            model.addAttribute("rowNames", objects.getDs().getRowNames());
+            model.addAttribute("rowNames", objects.getSchemaType().getRowNames());
         }
         return dashboard.viewCustomization(CustomizationTab.ROW_NAMES, model);
     }
@@ -65,7 +65,7 @@ public class RowNamesController {
     public String storeRowName(@PathVariable String language,
                                @Valid @ModelAttribute("newRowName") String newRowName) {
         if (!isEmpty(newRowName)) {
-            objects.getDs().getRowNames().get(language).add(newRowName);
+            objects.getSchemaType().getRowNames().get(language).add(newRowName);
         }
         return dashboard.redirect(DashboardView.ROW_NAMES);
     }
@@ -81,7 +81,7 @@ public class RowNamesController {
     public String deleteRowName(@PathVariable String language,
                                 @PathVariable String name) {
         if (!isEmpty(name)) {
-            objects.getDs().getRowNames().get(language).remove(name);
+            objects.getSchemaType().getRowNames().get(language).remove(name);
         }
         return dashboard.redirect(DashboardView.ROW_NAMES);
     }

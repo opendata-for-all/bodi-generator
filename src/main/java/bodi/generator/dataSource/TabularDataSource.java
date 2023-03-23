@@ -1,9 +1,14 @@
 package bodi.generator.dataSource;
 
+import bodi.generator.dataSchema.DataSchema;
+import bodi.generator.dataSchema.DataType;
+import bodi.generator.dataSchema.SchemaField;
+import bodi.generator.dataSchema.SchemaType;
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvException;
+import com.xatkit.bot.library.Row;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -14,10 +19,19 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import static bodi.generator.dataSchema.DataType.DATETIME;
+import static bodi.generator.dataSchema.DataType.EMPTY;
+import static bodi.generator.dataSchema.DataType.NUMBER;
+import static bodi.generator.dataSchema.DataType.TEXT;
+import static bodi.generator.library.BodiGeneratorProperties.MAIN_SCHEMA_TYPE;
+import static com.xatkit.bot.library.Utils.isDatetime;
+import static com.xatkit.bot.library.Utils.isNumeric;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
@@ -172,7 +186,6 @@ public class TabularDataSource implements Serializable {
      * Gets a deep copy of {@link #table} (reminder that the {@link TabularDataSource} content is immutable).
      *
      * @return the table copy
-     * @see ResultSet
      */
     public List<Row> getTableCopy() {
         List<Row> tableCopy = new ArrayList<>();
@@ -301,5 +314,65 @@ public class TabularDataSource implements Serializable {
             out.println(firstLastQuotes + String.join("\"" + delimiter + "\"", values) + firstLastQuotes);
         }
         out.close();
+    }
+
+    /**
+     * Creates a Data Schema from the Tabular Data Source.
+     *
+     * @return the data schema
+     */
+    public DataSchema toDataSchema() {
+        int maxNumDifferentValues = 10;
+        DataSchema ds = new DataSchema();
+        SchemaType schemaType = new SchemaType(MAIN_SCHEMA_TYPE);
+        // TODO: Test dataType inference
+        for (String fieldName : this.header) {
+            Set<String> fieldValuesSet = new HashSet<>();
+            Map<DataType, Boolean> dataTypes = new HashMap<>();
+            dataTypes.put(NUMBER, true);
+            dataTypes.put(DATETIME, true);
+            dataTypes.put(TEXT, true);
+            dataTypes.put(EMPTY, true);
+            int columnIndex = this.header.indexOf(fieldName);
+            for (Row row : this.table) {
+                String value = row.getColumnValue(columnIndex);
+                fieldValuesSet.add(value);
+                if (dataTypes.get(NUMBER) && !isNumeric(value) && !isEmpty(value)) {
+                    dataTypes.put(NUMBER, false);
+                }
+                if (dataTypes.get(DATETIME) && !isDatetime(value) && !isEmpty(value)) {
+                    dataTypes.put(DATETIME, false);
+                }
+                if (dataTypes.get(EMPTY) && !isEmpty(value)) {
+                    dataTypes.put(EMPTY, false);
+                }
+            }
+            SchemaField schemaField = new SchemaField();
+            if (dataTypes.get(EMPTY)) {
+                // TODO: Consider empty (unknown) type?
+                schemaField.setType(TEXT);
+            } else if (dataTypes.get(DATETIME)) {
+                schemaField.setType(DATETIME);
+            } else if (dataTypes.get(NUMBER)) {
+                this.replaceNumericColumnComma(fieldName);
+                schemaField.setType(NUMBER);
+            } else {
+                schemaField.setType(TEXT);
+            }
+            schemaField.setOriginalName(fieldName);
+            schemaField.setNumDifferentValues(fieldValuesSet.size());
+            if (schemaField.getType().equals(TEXT) && schemaField.getNumDifferentValues() <= maxNumDifferentValues) {
+                schemaField.setCategorical(true);
+                schemaField.addMainValues(fieldValuesSet);
+            } else {
+                schemaField.setCategorical(false);
+            }
+            for (String language : DataSchema.languages) {
+                schemaField.setReadableName(language, fieldName);
+            }
+            schemaType.addSchemaField(schemaField);
+        }
+        ds.addSchemaType(schemaType);
+        return ds;
     }
 }

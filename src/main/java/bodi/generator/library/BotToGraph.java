@@ -1,4 +1,4 @@
-package bodi.generator.dataSchema;
+package bodi.generator.library;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
