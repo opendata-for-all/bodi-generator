@@ -16,6 +16,7 @@ import org.json.JSONTokener;
 import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -40,7 +41,7 @@ public class Entities {
     /**
      * The name of the file containing the chatbot field entities.
      */
-    private static String fieldsJsonFile = "fields.json";
+    private static String entitiesJsonFile = "entities.json";
 
     /**
      * The name of the file containing the chatbot operator entities.
@@ -48,19 +49,9 @@ public class Entities {
     private static String fieldOperatorsJsonFile = "fieldOperators.json";
 
     /**
-     * The name of the file containing the chatbot associated row names.
-     */
-    private static String rowNamesJsonFile = "rowNames.json";
-
-    /**
      * Contains the chatbot entities in a JSON format.
      */
     private static final JSONObject entitiesJson;
-
-    /**
-     * Contains the chatbot associated row names in a JSON format.
-     */
-    private static final JSONObject rowNamesJson;
 
     /**
      * The keys of this map are the entries of the entity {@link #fieldValueEntity} (i.e. the values of the fields),
@@ -98,17 +89,13 @@ public class Entities {
 
     // Merge the json files containing bot entities
     static {
-        InputStream is1 = Thread.currentThread().getContextClassLoader().getResourceAsStream(fieldsJsonFile);
+        InputStream is1 = Thread.currentThread().getContextClassLoader().getResourceAsStream(entitiesJsonFile);
         if (is1 == null) {
-            throw new NullPointerException("Cannot find the json file \"" + fieldsJsonFile + "\"");
+            throw new NullPointerException("Cannot find the json file \"" + entitiesJsonFile + "\"");
         }
         InputStream is2 = Thread.currentThread().getContextClassLoader().getResourceAsStream(fieldOperatorsJsonFile);
         if (is2 == null) {
             throw new NullPointerException("Cannot find the json file \"" + fieldOperatorsJsonFile + "\"");
-        }
-        InputStream is3 = Thread.currentThread().getContextClassLoader().getResourceAsStream(rowNamesJsonFile);
-        if (is3 == null) {
-            throw new NullPointerException("Cannot find the json file \"" + rowNamesJsonFile + "\"");
         }
         JSONObject fields = new JSONObject(new JSONTokener(is1));
         JSONObject fieldOperators = new JSONObject(new JSONTokener(is2));
@@ -119,7 +106,6 @@ public class Entities {
         for (String key : fieldOperators.keySet()) {
             entitiesJson.put(key, fieldOperators.getJSONObject(key));
         }
-        rowNamesJson = new JSONObject(new JSONTokener(is3));
     }
 
     /**
@@ -185,18 +171,18 @@ public class Entities {
         this.readableNames = new HashMap<>();
         this.fieldGroups = new HashMap<>();
 
-        numericFieldEntity = generateEntity("numericFieldEntity");
-        textualFieldEntity = generateEntity("textualFieldEntity");
-        datetimeFieldEntity = generateEntity("datetimeFieldEntity");
+        numericFieldEntity = generateFieldEntity("numericFieldEntity");
+        textualFieldEntity = generateFieldEntity("textualFieldEntity");
+        datetimeFieldEntity = generateFieldEntity("datetimeFieldEntity");
         readFieldGroups();
         fieldEntity = mergeEntities("fieldEntity", numericFieldEntity, textualFieldEntity, datetimeFieldEntity);
 
-        numericOperatorEntity = generateEntity("numericOperatorEntity");
-        textualOperatorEntity = generateEntity("textualOperatorEntity");
-        datetimeOperatorEntity = generateEntity("datetimeOperatorEntity");
+        numericOperatorEntity = generateFieldEntity("numericOperatorEntity");
+        textualOperatorEntity = generateFieldEntity("textualOperatorEntity");
+        datetimeOperatorEntity = generateFieldEntity("datetimeOperatorEntity");
 
-        numericFunctionOperatorEntity = generateEntity("numericFunctionOperatorEntity");
-        datetimeFunctionOperatorEntity = generateEntity("datetimeFunctionOperatorEntity");
+        numericFunctionOperatorEntity = generateFieldEntity("numericFunctionOperatorEntity");
+        datetimeFunctionOperatorEntity = generateFieldEntity("datetimeFunctionOperatorEntity");
         functionOperatorEntity = mergeEntities("functionOperator", numericFunctionOperatorEntity, datetimeFunctionOperatorEntity);
 
         fieldValueEntity = generateFieldValueEntity();
@@ -205,14 +191,14 @@ public class Entities {
     }
 
     /**
-     * Generates a chatbot entity.
+     * Generates a chatbot field entity.
      * <p>
      * It extracts the values and synonyms of the values of the entity from {@link #entitiesJson}
      *
      * @param entityName the name of the entity
      * @return the entity object
      */
-    private EntityDefinitionReferenceProvider generateEntity(String entityName) {
+    private EntityDefinitionReferenceProvider generateFieldEntity(String entityName) {
         JSONObject entityJson = entitiesJson.getJSONObject(entityName);
         MappingEntryStep entity = mapping(entityName);
         for (String entry : entityJson.keySet()) {
@@ -285,7 +271,8 @@ public class Entities {
     private EntityDefinitionReferenceProvider generateFieldValueEntity() {
         fieldValueMap = new HashMap<>();
         MappingEntryStep entity = mapping("fieldValueEntity");
-        for (String typeFieldEntityName : entitiesJson.keySet()) {
+        List<String> typeFieldEntityNames = Arrays.asList("numericFieldEntity", "textualFieldEntity", "datetimeFieldEntity");
+        for (String typeFieldEntityName : typeFieldEntityNames) {
             for (String fieldName : entitiesJson.getJSONObject(typeFieldEntityName).keySet()) {
                 JSONObject field = entitiesJson.getJSONObject(typeFieldEntityName).getJSONObject(fieldName);
                 if (field.has("values") && !field.getJSONObject("values").isEmpty()) {
@@ -306,7 +293,7 @@ public class Entities {
 
     private EntityDefinitionReferenceProvider generateRowNameEntity() {
         String entityName = "rowNameEntity";
-        JSONObject entityJson = rowNamesJson.getJSONObject(entityName);
+        JSONObject entityJson = entitiesJson.getJSONObject(entityName);
         MappingEntryStep entity = mapping(entityName);
         for (Object entry : entityJson.getJSONArray(language)) {
             entity.entry().value((String) entry);

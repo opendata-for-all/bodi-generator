@@ -26,8 +26,7 @@ public final class BotGeneratorCLI {
      * Required files:
      *
      *  - the csv file
-     *  - fields.json to be copied
-     *  - rowNames.json to be copeid
+     *  - entities.json to be copied
      *  - config.properties, config_en.properties...
      *
      * @param conf the bodi-generator configuration properties
@@ -55,7 +54,7 @@ public final class BotGeneratorCLI {
             Files.createDirectories(Paths.get(outputFolder + "/src/test/resources/"));
 
             // .csv
-            copyFile("src/main/resources/" + inputDocName, outputFolder + "/src/main/resources/" + inputDocName);
+            copyFile("src/main/resources/" + dataName + "/" + inputDocName, outputFolder + "/src/main/resources/" + inputDocName);
 
             // pom.xml
             writeFile(outputFolder + "/pom.xml", CodeGenerator.generatePomFile(botName, enableTesting).getBytes());
@@ -86,11 +85,8 @@ public final class BotGeneratorCLI {
             // fieldOperators.json
             copyFile("src/main/resources/fieldOperators.json", outputFolder + "/src/main/resources/fieldOperators.json");
 
-            // fields.json
-            copyFile("src/main/resources/fields.json", outputFolder + "/src/main/resources/fields.json");
-
-            // rowNames.json
-            copyFile("src/main/resources/rowNames.json", outputFolder + "/src/main/resources/rowNames.json");
+            // entities.json
+            copyFile("src/main/resources/" + dataName + "/entities.json", outputFolder + "/src/main/resources/entities.json");
 
             if (enableTesting) {
                 copyFile("src/test/resources/customQueryUtterances_en.csv", outputFolder + "/src/test/resources/customQueryUtterances_en.csv");

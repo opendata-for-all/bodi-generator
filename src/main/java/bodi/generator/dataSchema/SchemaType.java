@@ -277,16 +277,17 @@ public class SchemaType implements Serializable {
     }
 
     /**
-     * Generates a JSON object containing all the fields of the SchemaType, classified by types.
+     * Generates a JSON object containing all the bot entities created from the SchemaType.
      *
-     * @return the json object containing all the fields of the SchemaType
+     * @return the json object containing all the bot entities
      */
-    public JSONObject generateFieldsJson() {
+    public JSONObject generateEntitiesJson() {
         JSONObject entities = new JSONObject();
         entities.put("numericFieldEntity", new JSONObject());
         entities.put("datetimeFieldEntity", new JSONObject());
         entities.put("textualFieldEntity", new JSONObject());
         entities.put("fieldGroups", new JSONObject());
+        entities.put("rowNameEntity", new JSONObject());
         for (SchemaField schemaField : schemaFields) {
             JSONObject entity = schemaField.generateFieldJson();
             switch (schemaField.getType()) {
@@ -308,21 +309,11 @@ public class SchemaType implements Serializable {
                 entities.getJSONObject("fieldGroups").put(schemaFieldGroup.getName(), entity);
             }
         }
-        return entities;
-    }
 
-    /**
-     * Generates a JSON object containing all the row names.
-     *
-     * @return the json object containing the row names and the default row names, if any
-     */
-    public JSONObject generateRowNamesJson() {
-        JSONObject rowNamesJson = new JSONObject();
-        rowNamesJson.put("rowNameEntity", new JSONObject());
         for (String language : DataSchema.languages) {
-            rowNamesJson.getJSONObject("rowNameEntity").put(language, new JSONArray());
-            rowNamesJson.getJSONObject("rowNameEntity").getJSONArray(language).putAll(rowNames.get(language));
+            entities.getJSONObject("rowNameEntity").put(language, new JSONArray());
+            entities.getJSONObject("rowNameEntity").getJSONArray(language).putAll(rowNames.get(language));
         }
-        return rowNamesJson;
+        return entities;
     }
 }

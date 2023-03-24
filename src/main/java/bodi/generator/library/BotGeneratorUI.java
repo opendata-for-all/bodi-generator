@@ -91,11 +91,8 @@ public final class BotGeneratorUI {
             // fieldOperators.json
             copyFile("src/main/resources/fieldOperators.json", outputFolder + "/src/main/resources/fieldOperators.json");
 
-            // fields.json
-            writeFile(outputFolder + "/src/main/resources/fields.json", ds.getSchemaType(MAIN_SCHEMA_TYPE).generateFieldsJson().toString().getBytes());
-
-            // rowNames.json
-            writeFile(outputFolder + "/src/main/resources/rowNames.json", ds.getSchemaType(MAIN_SCHEMA_TYPE).generateRowNamesJson().toString().getBytes());
+            // entities.json
+            writeFile(outputFolder + "/src/main/resources/entities.json", ds.getSchemaType(MAIN_SCHEMA_TYPE).generateEntitiesJson().toString().getBytes());
 
         } catch (IOException e) {
             e.printStackTrace();
