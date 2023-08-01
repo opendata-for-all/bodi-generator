@@ -16,25 +16,14 @@ and [xatkit-bot-platform/xatkit-core-library-i18n](https://github.com/xatkit-bot
 
 3 - Clone this repository
 
-~~4 - Edit the [bodi-generator.properties](src/main/resources/bodi-generator.properties) file according to your 
-purposes(see [Bot Configuration](#bot-configuration))~~
 
-5 - Navigate to the root directory and build the project:
+4 - Navigate to the root directory and build the project:
 
 ```bash
 mvn clean compile
 ```
 
-6 - You can run the bot generator!
-
-CLI, needs the [bodi-generator.properties](src/main/resources/bodi-generator.properties) properly set, and 
-optionally the [fields.json](src/main/resources/fields.json).
-
-```bash
-mvn exec:java -Dexec.mainClass="bodi.generator.BodiGenerator"
-```
-
-UI (Recommended)
+5 - You can run the bot generator!
 
 ```bash
 mvn exec:java -Dexec.mainClass="mvn exec:java -Dexec.mainClass="bodi.generator.ui.Application""
@@ -42,12 +31,12 @@ mvn exec:java -Dexec.mainClass="mvn exec:java -Dexec.mainClass="bodi.generator.u
 
 Then, you can access the bodi-generator UI at [http://localhost:8080/bodi-generator/](http://localhost:8080/bodi-generator/)
 
-7 - If you want to empower your chatbot with NLP functionalities (to provide answers to questions not implemented in 
+6 - If you want to empower your chatbot with NLP functionalities (to provide answers to questions not implemented in 
 the chatbot), you have to deploy a server that runs language models to perform NLP tasks. This server can be found 
 at [opendata-for-all/bodi-nlp-server](https://github.com/opendata-for-all/bodi-nlp-server)
 (see [NLP Server Configuration](#nlp-server-configuration)).
 
-8 - Once the chatbot is generated, you can run it:
+7 - Once the chatbot is generated, you can run it:
 ```bash
 cd <bot-folder>
 mvn clean compile
@@ -62,7 +51,7 @@ mvn test
 To run the chatbot itself:
 
 ```bash
-mvn exec:java -Dexec.mainClass="com.xatkit.bot.Bot"
+mvn exec:java -Dexec.mainClass="com.xatkit.bot.App"
 ```
 
 > 📚 Check the Xatkit [Wiki](https://github.com/xatkit-bot-platform/xatkit/wiki) to learn more about Xatkit chatbots.
@@ -81,7 +70,7 @@ set in [bodi-generator.properties](src/main/resources/bodi-generator.properties)
 | `xls.importer.xls`       | The name of the tabular data file the chatbot will have access to, stored in the [resources](src/main/resources) folder (currently only `csv` files are supported)                                                                                                           |
 | `csv.delimiter`          | The delimiter or separator of the tabular data file cells (e.g. `,`, `\t` (tab))                                                                                                                                                                                             |
 | `enable_testing`         | `true` if you want to enable chatbot testing, `false` otherwise                                                                                                                                                                                                              |
-| `maxNumDifferentValues`  | the maximum number of different values that a field must have to add them to the generated `fields.json` file (e.g. 15)                                                                                                                                                      |
+| `maxNumDifferentValues`  | the maximum number of different values that a field must have to add them to the generated `entities.json` file (e.g. 15)                                                                                                                                                    |
 | `xatkit.intent.provider` | The intent provider the generated chatbot will use. The currently available intent providers are: Dialogflow (`com.xatkit.core.recognition.dialogflow.DialogFlowIntentRecognitionProvider`) and  NLP.js (`com.xatkit.core.recognition.nlpjs.NlpjsIntentRecognitionProvider`) |
 | `xatkit.logs.database`   | The database used to store the chatbot tracing: `com.xatkit.core.recognition.RecognitionMonitorPostgreSQL`. If there is no database, leave this property empty.                                                                                                              |
 
